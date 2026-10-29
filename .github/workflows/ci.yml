@@ -11,9 +11,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-      - run: npm install --package-lock-only --ignore-scripts
-      - run: npm ci
+      # Bootstrap until a reviewed package-lock.json is committed.
+      - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm test
       - run: npm run lint
       - run: npm run build
