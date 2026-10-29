@@ -1,0 +1,1 @@
+export default function Home() { return <main style={{ maxWidth: 720, margin: "10vh auto", padding: 24 }}><p style={{ color: "#64748b" }}>Qmenu · Smart Business OS</p><h1>منصة أعمال أذكى، من مكان واحد</h1><p>هذه نسخة تأسيسية قيد التطوير. لوحة التاجر والطلبات لا تزال غير متاحة للاستخدام التجاري.</p><p>G1 — Foundation / Staging pending</p></main>; }
