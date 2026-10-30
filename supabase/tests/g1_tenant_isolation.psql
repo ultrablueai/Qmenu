@@ -1,39 +1,73 @@
--- G1 staging-only negative RLS verification. NEVER run against production data.
--- Execute using psql with: -v owner_a=<auth.users uuid> -v owner_b=<auth.users uuid>
--- Existing Supabase Auth users must be separate and belong to no other G1 test tenants.
--- Script uses a transaction and ROLLBACK; all fixtures are temporary.
+-- G1 RLS integration test — isolated STAGING / local database ONLY.
+-- Prerequisites: apply G1 migrations 001, 002, 003 and 004.
+-- Provide two separate, confirmed staging auth.users IDs:
+--   psql "$STAGING_DATABASE_URL" -X -v ON_ERROR_STOP=1 \
+--     -v owner_a="UUID_A" -v owner_b="UUID_B" \
+--     -f supabase/tests/g1_tenant_isolation.psql
+-- This script rolls back all fixtures. DO NOT point it at production.
 \set ON_ERROR_STOP on
-begin;
-create temporary table g1_ids (label text primary key, id uuid);
-insert into public.businesses(name,country_code) values ('G1 Tenant A','TR')
- returning id \gset tenant_a_
-insert into public.businesses(name,country_code) values ('G1 Tenant B','SY')
- returning id \gset tenant_b_
-insert into public.memberships(business_id,user_id,role) values
- (:'tenant_a_id', :'owner_a'::uuid, 'owner'),
- (:'tenant_b_id', :'owner_b'::uuid, 'owner');
-insert into public.branches(business_id,name) values
- (:'tenant_a_id','A Branch'),(:'tenant_b_id','B Branch');
--- Simulate the same DB role used by authenticated clients.
-set local role authenticated;
-select set_config('request.jwt.claim.sub', :'owner_a',true);
-do $$
-declare n integer;
-begin
- select count(*) into n from public.businesses;
- if n <> 1 then raise exception 'RLS FAIL: user A can see % businesses (expected 1)',n; end if;
- select count(*) into n from public.branches;
- if n <> 1 then raise exception 'RLS FAIL: user A can see % branches (expected 1)',n; end if;
- select count(*) into n from public.memberships;
- if n <> 1 then raise exception 'RLS FAIL: user A can see % memberships (expected 1)',n; end if;
-end $$;
-select set_config('request.jwt.claim.sub', :'owner_b',true);
-do $$
-declare n integer;
-begin
- select count(*) into n from public.businesses;
- if n <> 1 then raise exception 'RLS FAIL: user B can see % businesses (expected 1)',n; end if;
- select count(*) into n from public.branches;
- if n <> 1 then raise exception 'RLS FAIL: user B can see % branches (expected 1)',n; end if;
-end $$;
-rollback;
+
+BEGIN;
+INSERT INTO public.businesses(name,country_code)
+  VALUES ('G1 Tenant A','TR') RETURNING id \gset tenant_a_
+INSERT INTO public.businesses(name,country_code)
+  VALUES ('G1 Tenant B','SY') RETURNING id \gset tenant_b_
+
+INSERT INTO public.memberships(business_id,user_id,role) VALUES
+  (:'tenant_a_id', :'owner_a'::uuid, 'owner'),
+  (:'tenant_b_id', :'owner_b'::uuid, 'owner');
+
+INSERT INTO public.branches(business_id,name) VALUES
+  (:'tenant_a_id','A Branch'),
+  (:'tenant_b_id','B Branch');
+
+-- A real client runs as authenticated; never use service_role in the assertions.
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub', :'owner_a', true);
+DO $$
+DECLARE n integer;
+BEGIN
+  SELECT count(*) INTO n FROM public.businesses;
+  IF n <> 1 THEN RAISE EXCEPTION 'A read: visible businesses = %, expected 1', n; END IF;
+  SELECT count(*) INTO n FROM public.branches;
+  IF n <> 1 THEN RAISE EXCEPTION 'A read: visible branches = %, expected 1', n; END IF;
+  SELECT count(*) INTO n FROM public.memberships;
+  IF n <> 1 THEN RAISE EXCEPTION 'A read: visible memberships = %, expected 1', n; END IF;
+  -- Must NOT edit the other tenant's branch, even though name is updatable.
+  UPDATE public.branches SET name = 'ILLEGAL CROSS TENANT UPDATE'
+    WHERE name = 'B Branch';
+  GET DIAGNOSTICS n = ROW_COUNT;
+  IF n <> 0 THEN RAISE EXCEPTION 'A write: updated % foreign branches', n; END IF;
+  UPDATE public.branches SET name = 'A Branch Renamed'
+    WHERE name = 'A Branch';
+  GET DIAGNOSTICS n = ROW_COUNT;
+  IF n <> 1 THEN RAISE EXCEPTION 'A write: own branch update = %, expected 1', n; END IF;
+END $$;
+
+SELECT set_config('request.jwt.claim.sub', :'owner_b', true);
+DO $$
+DECLARE n integer;
+BEGIN
+  SELECT count(*) INTO n FROM public.businesses;
+  IF n <> 1 THEN RAISE EXCEPTION 'B read: visible businesses = %, expected 1', n; END IF;
+  SELECT count(*) INTO n FROM public.branches;
+  IF n <> 1 THEN RAISE EXCEPTION 'B read: visible branches = %, expected 1', n; END IF;
+  SELECT count(*) INTO n FROM public.memberships;
+  IF n <> 1 THEN RAISE EXCEPTION 'B read: visible memberships = %, expected 1', n; END IF;
+  UPDATE public.branches SET name = 'ILLEGAL CROSS TENANT UPDATE'
+    WHERE name = 'A Branch Renamed';
+  GET DIAGNOSTICS n = ROW_COUNT;
+  IF n <> 0 THEN RAISE EXCEPTION 'B write: updated % foreign branches', n; END IF;
+END $$;
+
+-- Fail if authenticated could directly create memberships / assume owner role.
+DO $$
+BEGIN
+ IF has_table_privilege('authenticated','public.memberships','INSERT')
+    OR has_table_privilege('authenticated','public.memberships','UPDATE')
+    OR has_table_privilege('authenticated','public.memberships','DELETE')
+ THEN RAISE EXCEPTION 'Unsafe direct membership write privilege'; END IF;
+ IF has_table_privilege('anon','public.businesses','SELECT')
+ THEN RAISE EXCEPTION 'Unsafe anonymous business read privilege'; END IF;
+END $$;
+ROLLBACK;
