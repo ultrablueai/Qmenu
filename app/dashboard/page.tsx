@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { serverSupabase } from "../../lib/supabase/server";
 export const dynamic = "force-dynamic";
 export default async function Dashboard() {
@@ -12,7 +13,7 @@ export default async function Dashboard() {
     <p>أهلاً {user.email}</p>
     {membershipError ? <p role="alert">تعذر تحميل عضوياتك. قد تكون قاعدة البيانات غير مُهيأة.</p>
       : memberships?.length ? <ul>{memberships.map(m=><li key={m.business_id}>شركة: {m.business_id} — الدور: {m.role}</li>)}</ul>
-      : <p>لا توجد شركة مرتبطة بحسابك بعد. إنشاء الشركات متوقف حتى اعتماد مسار آمن.</p>}
+      : <p>لا توجد شركة مرتبطة بحسابك بعد. <Link href="/onboarding">إعداد نشاطك الأول</Link> (بعد تجهيز قاعدة Staging).</p>}
     <form action="/auth/signout" method="post"><button type="submit">تسجيل الخروج</button></form>
   </main>;
 }
