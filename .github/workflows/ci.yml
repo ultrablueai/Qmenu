@@ -1,4 +1,4 @@
-name: CI
+name: G1 validation
 on:
   pull_request:
   push:
@@ -6,27 +6,40 @@ on:
 permissions:
   contents: read
 jobs:
-  checks:
+  static-security:
+    name: Static security assertions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check schema and authorization invariants (dependency-free)
+        run: node --test tests/*.test.mjs
+  typecheck:
+    name: TypeScript validation
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install dependencies (temporary bootstrap, lockfile pending)
+      - name: Install packages (bootstrap until lockfile committed)
         run: npm install --ignore-scripts --no-audit --no-fund
-      - name: Run security and foundation tests
-        run: npm test
-      - name: Run TypeScript check
+      - name: Type-check
         run: npm run lint
-      - name: Build Next.js
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install packages (bootstrap until lockfile committed)
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Build
         run: npm run build
-      - name: Record diagnostic summary
-        if: always()
-        run: |
-          echo "## Qmenu G1 CI" >> "$GITHUB_STEP_SUMMARY"
-          echo "Commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
-          echo "This CI is not G1 staging certification: live auth/RLS E2E still required." >> "$GITHUB_STEP_SUMMARY"
