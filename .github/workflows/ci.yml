@@ -3,16 +3,30 @@ on:
   pull_request:
   push:
     branches: [main]
+permissions:
+  contents: read
 jobs:
   checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
-      # Bootstrap until a reviewed package-lock.json is committed.
-      - run: npm install --ignore-scripts --no-audit --no-fund
-      - run: npm test
-      - run: npm run lint
-      - run: npm run build
+      - name: Install dependencies (temporary bootstrap, lockfile pending)
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Run security and foundation tests
+        run: npm test
+      - name: Run TypeScript check
+        run: npm run lint
+      - name: Build Next.js
+        run: npm run build
+      - name: Record diagnostic summary
+        if: always()
+        run: |
+          echo "## Qmenu G1 CI" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "This CI is not G1 staging certification: live auth/RLS E2E still required." >> "$GITHUB_STEP_SUMMARY"
