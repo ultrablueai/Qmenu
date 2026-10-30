@@ -9,6 +9,8 @@
 - `anon` cannot execute `public.create_first_business`; authenticated users can.
 - Neither `anon` nor `authenticated` can execute `public.rls_auto_enable()`.
 - Successful transactional PostgreSQL integration scenario with two temporary test identities: owner onboarding for A and B, own-tenant SELECT only, denied cross-tenant branch UPDATE, duplicate owner onboarding denied. All test data rolled back.
+- Second independent SQL RLS verification on Staging: direct foreign-tenant branch INSERT blocked, cross-tenant branch UPDATE blocked, direct membership/owner privilege escalation blocked, and tenant read isolation confirmed. The reusable scenario is committed in `supabase/tests/g1_tenant_isolation.psql`, with static contract coverage.
+- After second test: 0 businesses, 0 branches, 0 memberships, 0 temporary test identities; anon cannot execute business onboarding.
 - Post-test: zero businesses, branches, memberships, audit rows, and temporary test identities.
 - Performance advisors: missing FK index warnings addressed. Unused-index notices are expected on empty staging and are not evidence to drop indexes.
 
