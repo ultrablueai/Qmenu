@@ -1,0 +1,20 @@
+from pathlib import Path
+import unittest
+
+SKILLS = ["project-audit","tenant-security","visual-qa","release-gate","incident-recovery","project-memory-governance"]
+ROOT = Path(__file__).resolve().parents[1]
+
+class SkillsTests(unittest.TestCase):
+    def test_manifests_and_safety(self):
+        for name in SKILLS:
+            with self.subTest(name=name):
+                text = (ROOT / name / 'SKILL.md').read_text(encoding='utf-8')
+                self.assertTrue(text.splitlines()[0] == '---')
+                self.assertIn(f'name: {name}', text)
+                self.assertIn('description:', text)
+                self.assertIn('PRODUCTION_WRITE is prohibited', text)
+                self.assertIn('## Acceptance tests', text)
+                self.assertTrue('## Project-specific operating context' in text or '## Preflight' in text)
+
+if __name__ == '__main__':
+    unittest.main()
