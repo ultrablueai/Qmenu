@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
       - name: Check schema and authorization invariants (dependency-free)
         run: node --test tests/*.test.mjs
   typecheck:
@@ -26,8 +27,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install packages (bootstrap until lockfile committed)
-        run: npm install --ignore-scripts --no-audit --no-fund
+          cache: 'npm'
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Type-check
         run: npm run lint
   build:
@@ -39,7 +41,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install packages (bootstrap until lockfile committed)
-        run: npm install --ignore-scripts --no-audit --no-fund
+          cache: 'npm'
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Build
         run: npm run build
