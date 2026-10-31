@@ -14,8 +14,7 @@ export default function ForgotPassword() {
     setBusy(true);
     setNotice("");
     try {
-      const callback = new URL("/auth/callback", window.location.origin);
-      callback.searchParams.set("next", "/reset-password");
+      const callback = new URL("/auth/recovery/callback", window.location.origin);
       const { error } = await browserSupabase().auth.resetPasswordForEmail(
         email.trim(),
         { redirectTo: callback.toString() }
