@@ -39,6 +39,7 @@ export default function LoginPage() {
       {error && <p role="alert">{error}</p>}
       <button disabled={busy} type="submit">{busy?"جارٍ التحقق...":"دخول"}</button>
     </form>
+    <p><Link href="/forgot-password">نسيت كلمة المرور؟ استعد حسابك الحالي</Link></p>
     <p>ليس لديك حساب؟ <Link href="/signup">إنشاء حساب جديد</Link></p>
   </main>;
 }
