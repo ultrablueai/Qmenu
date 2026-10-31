@@ -1,4 +1,4 @@
-# Qmenu G1 acceptance — 2026-10-31
+# Qmenu G1 acceptance — updated 2026-11-01
 
 **Decision: NO-GO.** All work stays on draft PR #1; no production changes.
 
@@ -21,13 +21,13 @@
 - Vercel preview of G1 commit `2407ed3` achieved READY with successful Next.js compile, TypeScript verification and route generation. Subsequent failed previews belong to unrelated skill-only branch `feat/codex-engineering-skills` (NEXT_NO_VERSION), not G1.
 - Vercel uses a branch-scoped build ignore rule and `npm test && npm run build`.
 - New `scripts/verify-staging.mjs` safety gate is invoked by `npm run build`; rejects Vercel production target, wrong branch, wrong Supabase project, or missing publishable key. Seven negative/positive tests added; newest Vercel Preview build logged **36/36 Node tests passing** and `Qmenu staging deployment gate: staging_preview_only`.
-- Latest Vercel build also warned about missing Next.js SWC entries in the generated lockfile; no reviewed project `package-lock.json` is committed yet. Do not claim reproducible `npm ci` certification.
+- Npm-generated `package-lock.json` was extracted from a verified Staging preview build, integrity-checked and committed at `c980d7b0`. Vercel was switched to `npm ci --ignore-scripts --no-audit --no-fund`, and build `32c1e9a` finished READY after a successful clean `npm ci`, 36 tests and Next.js compilation. Temporary extraction script deleted at `ff8e351` and that preview also achieved READY. **Known warning:** Next.js still reports optional SWC entries missing in the lockfile, requiring future review; this did not fail the build.
 
 ## Mandatory remaining gates
-- [ ] Lockfile committed and reproducible `npm ci`; real TypeScript and production build previously PASS on Vercel without lockfile. This is not reproducible CI yet.
+- [x] `package-lock.json` committed; Vercel `npm ci` followed by Node tests and Next.js compile/typecheck/build succeeded on branch G1. GitHub Actions independent CI remains blocked by billing; SWC optional-dependency warning remains to review.
 - [ ] Browser E2E auth: signup, confirmation, login, onboarding, logout; mobile checks.
 - [ ] Cross-tenant tests using two real Supabase Auth sessions and Data API rather than only SQL role simulation.
-- [x] Staging app built and published on Vercel (`2407ed3`, READY) with separate staging env keys; health and browser/API diagnostics are still pending.
+- [x] Staging app built and published on Vercel (multiple READY previews, including `ff8e351`) with isolated staging credentials; health and browser/API diagnostics are still pending.
 - [ ] Security review: `public.create_first_business` is an intentionally callable SECURITY DEFINER RPC restricted to authenticated users, but requires independent review/rate-limit considerations before production. Supabase advisory flags it.
 - [ ] Staging Auth leaked-password protection advisor reviewed/configured as supported.
 - [ ] Rollback and backup processes independently rehearsed before release.
@@ -36,5 +36,8 @@
 - Qmenu primary/production project `fstpxknegaxppjilbnke` was **not modified**.
 - Do not merge to main, promote to production, or treat successful SQL simulation as browser E2E certification.
 
-## Dependency reproducibility certification in progress
-- One-time preview-only export of npm-generated `package-lock.json` will be captured through the Vercel build log using `scripts/export-lock-preview.mjs`. This script reads ONLY the public lockfile; remove after commit. No npm-ci claim until a fresh clean build with `npm ci` succeeds.
+## Platform handoff and blockers
+- See `docs/CONNECTED-PLATFORMS.md` for the canonical GitHub/Vercel/Supabase mapping and no-production boundaries.
+- Real-browser Supabase confirmation + two-session API E2E: tracked in issue #3, still NOT VERIFIED.
+- SWC optional-dependency warning, security advisors, recovery and independent CI: tracked in issue #4, still NO-GO for commercial release.
+- The one-time lockfile export script has been removed after its generated artifact was committed. Never reintroduce a public lock export into normal CI.
