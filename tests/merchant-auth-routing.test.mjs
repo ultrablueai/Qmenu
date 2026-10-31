@@ -19,7 +19,7 @@ test("dashboard redirects anonymous users to login", () => {
 
 test("dashboard automatically redirects authenticated users without memberships to onboarding", () => {
   assert.match(dashboard, /if \(!membershipError && !memberships\?\.length\) redirect\("\/onboarding"\)/);
-  assert.match(dashboard, /if \(membershipError\)/);
+  assert.match(dashboard, /\{membershipError \?/);
 });
 
 test("onboarding rejects anonymous sessions and directs existing merchants to dashboard", () => {
