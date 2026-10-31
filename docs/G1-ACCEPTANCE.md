@@ -35,3 +35,6 @@
 ## Boundaries
 - Qmenu primary/production project `fstpxknegaxppjilbnke` was **not modified**.
 - Do not merge to main, promote to production, or treat successful SQL simulation as browser E2E certification.
+
+## Dependency reproducibility certification in progress
+- One-time preview-only export of npm-generated `package-lock.json` will be captured through the Vercel build log using `scripts/export-lock-preview.mjs`. This script reads ONLY the public lockfile; remove after commit. No npm-ci claim until a fresh clean build with `npm ci` succeeds.
