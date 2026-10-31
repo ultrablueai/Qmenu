@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 const sql=readFileSync("supabase/migrations/202610300002_g1_first_owner_onboarding.sql","utf8");
-const ui=readFileSync("app/onboarding/page.tsx","utf8");
+const ui=readFileSync("app/onboarding/onboarding-form.tsx","utf8");
 
 test("owner bootstrap validates authenticated identity and serializes creation",()=>{
  assert.match(sql,/auth\.uid\(\)/);
