@@ -19,7 +19,9 @@
 - Auth pages, membership-onboarding checks, migration files, static tests, and staging-only RLS probe committed.
 - GitHub Actions currently blocked by the GitHub account's billing lock; no CI success claim.
 - Vercel preview of G1 commit `2407ed3` achieved READY with successful Next.js compile, TypeScript verification and route generation. Subsequent failed previews belong to unrelated skill-only branch `feat/codex-engineering-skills` (NEXT_NO_VERSION), not G1.
-- Vercel project now has a branch-scoped build ignore rule and an explicit `npm test && npm run build` command; these new settings still require a fresh preview run for validation.
+- Vercel uses a branch-scoped build ignore rule and `npm test && npm run build`.
+- New `scripts/verify-staging.mjs` safety gate is invoked by `npm run build`; rejects Vercel production target, wrong branch, wrong Supabase project, or missing publishable key. Seven negative/positive tests added; newest Vercel Preview build logged **36/36 Node tests passing** and `Qmenu staging deployment gate: staging_preview_only`.
+- Latest Vercel build also warned about missing Next.js SWC entries in the generated lockfile; no reviewed project `package-lock.json` is committed yet. Do not claim reproducible `npm ci` certification.
 
 ## Mandatory remaining gates
 - [ ] Lockfile committed and reproducible `npm ci`; real TypeScript and production build previously PASS on Vercel without lockfile. This is not reproducible CI yet.
