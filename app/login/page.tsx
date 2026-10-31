@@ -1,5 +1,6 @@
 "use client";
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { browserSupabase } from "../../lib/supabase/browser";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,16 +12,25 @@ export default function LoginPage() {
     if (busy) return;
     setBusy(true); setError("");
     try {
-      const { error: authError } = await browserSupabase().auth.signInWithPassword({email, password});
-      if (authError) throw authError;
-      window.location.assign("/dashboard");
+      const { data, error: authError } = await browserSupabase().auth.signInWithPassword({email: email.trim(), password});
+      if (authError) {
+        setError(authError.message.toLowerCase().includes("email not confirmed")
+          ? "يرجى تأكيد بريدك الإلكتروني أولاً ثم إعادة المحاولة."
+          : "تعذّر تسجيل الدخول. تأكد من البريد وكلمة المرور ثم حاول مجدداً.");
+        return;
+      }
+      if (!data.session) throw new Error("No authenticated session");
+      // The dashboard verifies the session and membership server-side.
+      // New merchants are routed from there to /onboarding.
+      window.location.replace("/dashboard");
     } catch {
-      setError("تعذر تسجيل الدخول. تحقق من البيانات وحاول مجدداً.");
+      setError("حدث خطأ في الاتصال. حاول مرة أخرى.");
       setBusy(false);
-    }
+    } finally { setBusy(false); }
   }
   return <main style={{maxWidth:420, margin:"12vh auto", padding:24}}>
-    <h1>دخول التاجر</h1>
+    <h1>تسجيل الدخول إلى بيجر</h1>
+    <p>حسابك الإلكتروني يكفي للدخول. إذا لم تنشئ نشاطاً بعد، سننقلك إلى صفحة إعداده تلقائياً.</p>
     <form onSubmit={submit}>
       <label htmlFor="email">البريد الإلكتروني</label>
       <input id="email" type="email" required autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} style={{display:"block",width:"100%",padding:12,marginBottom:16,boxSizing:"border-box"}}/>
@@ -29,5 +39,6 @@ export default function LoginPage() {
       {error && <p role="alert">{error}</p>}
       <button disabled={busy} type="submit">{busy?"جارٍ التحقق...":"دخول"}</button>
     </form>
+    <p>ليس لديك حساب؟ <Link href="/signup">إنشاء حساب جديد</Link></p>
   </main>;
 }
