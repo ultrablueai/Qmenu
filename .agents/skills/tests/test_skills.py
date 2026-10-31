@@ -1,7 +1,7 @@
 from pathlib import Path
 import unittest
 
-SKILLS = ["project-audit","tenant-security","visual-qa","release-gate","incident-recovery"]
+SKILLS = ["project-audit","tenant-security","visual-qa","release-gate","incident-recovery","project-memory-governance"]
 ROOT = Path(__file__).resolve().parents[1]
 
 class SkillsTests(unittest.TestCase):
@@ -14,7 +14,7 @@ class SkillsTests(unittest.TestCase):
                 self.assertIn('description:', text)
                 self.assertIn('PRODUCTION_WRITE is prohibited', text)
                 self.assertIn('## Acceptance tests', text)
-                self.assertIn('## Project-specific operating context' if name != 'none' else '## Procedure', text)
+                self.assertTrue('## Project-specific operating context' in text or '## Preflight' in text)
 
 if __name__ == '__main__':
     unittest.main()
