@@ -20,7 +20,8 @@ test("recovery requests a reset email from Supabase, no privileged API key", () 
 
 test("callback accepts only fixed same-origin reset-password destination", () => {
   assert.match(callback, /next === "\/reset-password"/);
-  assert.match(callback, /new URL\(destination,request\.url\)/);
+  assert.match(callback, /new URL\("\/reset-password",request\.url\)/);
+  assert.match(callback, /new URL\("\/dashboard",request\.url\)/);
   assert.match(callback, /exchangeCodeForSession\(code\)/);
   assert.doesNotMatch(callback, /NextResponse\.redirect\(next\)/);
 });
