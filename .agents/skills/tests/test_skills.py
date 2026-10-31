@@ -9,8 +9,8 @@ class SkillsTests(unittest.TestCase):
         for name in SKILLS:
             with self.subTest(name=name):
                 text = (ROOT / name / 'SKILL.md').read_text(encoding='utf-8')
-                self.assertTrue(text.startswith('---\\n'))
-                self.assertIn(f'name: {name}\\n', text)
+                self.assertTrue(text.splitlines()[0] == '---')
+                self.assertIn(f'name: {name}', text)
                 self.assertIn('description:', text)
                 self.assertIn('PRODUCTION_WRITE is prohibited', text)
                 self.assertIn('## Acceptance tests', text)
