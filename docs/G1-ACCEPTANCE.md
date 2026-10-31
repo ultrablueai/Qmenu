@@ -18,12 +18,14 @@
 - Repo: `ultrablueai/Qmenu`; draft [PR #1](https://github.com/ultrablueai/Qmenu/pull/1).
 - Auth pages, membership-onboarding checks, migration files, static tests, and staging-only RLS probe committed.
 - GitHub Actions currently blocked by the GitHub account's billing lock; no CI success claim.
+- Vercel preview of G1 commit `2407ed3` achieved READY with successful Next.js compile, TypeScript verification and route generation. Subsequent failed previews belong to unrelated skill-only branch `feat/codex-engineering-skills` (NEXT_NO_VERSION), not G1.
+- Vercel project now has a branch-scoped build ignore rule and an explicit `npm test && npm run build` command; these new settings still require a fresh preview run for validation.
 
 ## Mandatory remaining gates
-- [ ] Lockfile committed and reproducible `npm ci`; real TypeScript and production build PASS.
+- [ ] Lockfile committed and reproducible `npm ci`; real TypeScript and production build previously PASS on Vercel without lockfile. This is not reproducible CI yet.
 - [ ] Browser E2E auth: signup, confirmation, login, onboarding, logout; mobile checks.
 - [ ] Cross-tenant tests using two real Supabase Auth sessions and Data API rather than only SQL role simulation.
-- [ ] Staging app deployment with verified environment variables; health and diagnostics.
+- [x] Staging app built and published on Vercel (`2407ed3`, READY) with separate staging env keys; health and browser/API diagnostics are still pending.
 - [ ] Security review: `public.create_first_business` is an intentionally callable SECURITY DEFINER RPC restricted to authenticated users, but requires independent review/rate-limit considerations before production. Supabase advisory flags it.
 - [ ] Staging Auth leaked-password protection advisor reviewed/configured as supported.
 - [ ] Rollback and backup processes independently rehearsed before release.
