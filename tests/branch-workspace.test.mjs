@@ -23,7 +23,7 @@ test("branch dashboard requires signed in user, privileged membership and scoped
 test("branch identity and QR status are not fabricated",()=>{
   assert.match(branch,/branch\.name/);
   assert.match(branch,/business\.name/);
-  assert.match(branch,/كل زبون لديه QR موحّد يعمل في كل فروع النشاط/);
+  assert.match(branch,/QR المتجر والطاولة/);
   assert.doesNotMatch(branch,/Math\.random|fakeCustomerCount|fakeOrders/);
 });
 test("branch workspace has navigation and mobile style",()=>{
