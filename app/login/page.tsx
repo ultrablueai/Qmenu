@@ -22,7 +22,9 @@ export default function LoginPage() {
       if (!data.session) throw new Error("No authenticated session");
       // The dashboard verifies the session and membership server-side.
       // New merchants are routed from there to /onboarding.
-      window.location.replace("/dashboard");
+      const target = new URLSearchParams(window.location.search).get("next");
+      // Only these two fixed internal destinations are allowed, never arbitrary URLs.
+      window.location.replace(target === "/admin" ? "/admin" : "/dashboard");
     } catch {
       setError("حدث خطأ في الاتصال. حاول مرة أخرى.");
       setBusy(false);
