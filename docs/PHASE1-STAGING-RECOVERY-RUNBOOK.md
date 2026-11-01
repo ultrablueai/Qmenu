@@ -55,3 +55,18 @@ These follow Supabase's documented logical backup approach. A Supabase CLI dump 
 - Real authenticated browser E2E for two independent accounts, /admin denial, cross-tenant and branch authorization, mobile RTL/LTR, session refresh/signout/recovery.
 - Review signed-in SECURITY DEFINER RPC exposure and enable/check leaked-password protection as supported; leave warning open until verified.
 - No production deploy or main merge before complete Phase 1 GO gate and explicit owner approval.
+
+## Verified isolated restore command reference (2026-11-01)
+Official Supabase guide: https://supabase.com/docs/guides/self-hosting/restore-from-platform .
+For a separately approved disposable self-hosted Supabase clone, the guide uses:
+```sh
+# Operator executes locally; no credentials in Git/chat. Read the official guide first.
+# Put actual dump files outside version control and encrypt the backup.
+psql --single-transaction --variable ON_ERROR_STOP=1 \
+  --file backups/roles.sql --file backups/schema.sql \
+  --command 'SET session_replication_role = replica' \
+  --file backups/data.sql --dbname "$ISOLATED_RESTORE_DATABASE_URL"
+```
+The clone must have compatible PostgreSQL/Supabase extensions and managed schemas. Platform PostgreSQL 17 can differ from a self-hosted version; resolve mismatches *only in the clone* and run the restore again. The exported DB does not automatically restore storage objects, Edge Functions, SMTP/OAuth configuration or other external services. Never use this command with the live Staging or primary project's database URL. `ISOLATED_RESTORE_DATABASE_URL` must refer to an approved disposable local database. Do not send it into chat.
+
+**Verification sequence after isolated restore:** 13 expected migration records where applicable; 12 public tables with RLS; two scoped businesses and branches and memberships (compare against backup date); audited privileged RPC grants; branch isolation and rejection of retired QR RPCs. Real session testing requires regenerated clone credentials and accounts; don't reuse live access tokens. If restoration is not performed, record it as NOT VERIFIED.
