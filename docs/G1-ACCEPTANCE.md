@@ -77,3 +77,8 @@ Current Supabase Staging has **12/12 public tables with RLS**, two independently
 - Saved exact repeatable, read-only SQL in `tests/sql/staging-phase1-account-integrity-readonly.sql`. This validates present data consistency, **not general role enforcement or real browser session sign-out**.
 - Android owner-provided screenshots show merchant role denial on /admin and owner dual-role navigation. **No proof yet of what happens after clicking merchant 'خروج'.** Do not mark signout/session expiry PASS until a logout -> direct protected route attempt shows redirect to login, with the same browser context.
 - Encrypted backup export, isolated restoration and verification remain NOT EXECUTED. Keep **G1 NO-GO**.
+
+## Owner-confirmed same-browser sign-out check — 2026-11-02
+- **PASS (owner-reported, actual Staging browser):** The merchant pressed the `خروج` action, then reopened the merchant `/dashboard` route in the same browser. The application required a new login instead of showing the previously authenticated dashboard.
+- This covers merchant logout and protected-route redirect under the sampled browser session; it does not prove all-device/token revocation, automatic expiry behavior, platform-admin logout, or unauthenticated cross-tenant branch URLs.
+- Combined with the earlier ordinary-merchant `/admin` denial and owner dual-role Android screenshots, these checks materially close real-browser G1 acceptance, but no backup/export/isolated restore rehearsal has yet been observed; **Phase 1 remains NO-GO until recovery gate and any remaining required security checks are actually demonstrated.**
