@@ -68,11 +68,42 @@ E. Paid customer memberships: proposed, after basic loyalty works. Business-defi
 - If subscription duration, cashback value, earning rule, personal-data processing purpose, paid price, country-specific tax/merchant payment provider or consent/legal policy is unspecified, mark OPEN DECISION and ask owner before enabling.
 
 ## OPEN DECISIONS (not permission to improvise)
-- Confirm whether Beger customer card should be a single hub with separate merchant wallets (recommended), or separate-only merchant cards. Prior conversation supports interest, but no explicit user selection was recorded.
+- **RESOLVED by owner 2026-11-01:** one Beger card hub and separate merchant-specific loyalty wallets, usable in any supported city/province; rewards are not globally pooled. Merchant business may share one program across its own participating branches.
 - Recovery method(s): no identity requested by default; explicit consent for phone/email if offered.
 - Reward trigger (paid vs fulfilled), abuse-control strategy, maximum redemption period.
 - Customer paid membership economics, refund, settlement, taxes by Türkiye/Syria, verified merchant payment provider.
 - Marketing permission text, retention, revocation and compliance for Turkey KVKK and applicable Syrian rules.
+
+
+## Confirmed cross-city, cross-business QR and loyalty behavior — owner approval 2026-11-01
+**Approved product requirement; NOT built/deployed.** This supersedes earlier uncertainty about separate-only merchant cards.
+
+### Identity and scope
+- A returning customer may enter any Beger participating shop in another city, province or eventually country and use a single optional Beger customer identity/card hub. No forced app install or account to view menu or place guest orders.
+- A newly encountered, unrelated merchant has a **separate loyalty wallet and consent boundary**. Scanning that merchant's shop QR opens its own public menu. If customer has an existing Beger identity on the device, it MAY offer to join the new merchant loyalty program, but must not automatically expose previous merchant records or silently enroll the user in marketing.
+- Same legal business, different branches/cities: a merchant can configure loyalty shared across **explicitly participating branches of that business**, preserving business-scoped accounting and per-branch redemption restrictions where configured.
+- Different legal businesses/merchants: points, stamps, rewards, discounts and paid subscriptions remain separate; no automatic cross-merchant transfer, redemption, joint wallet balance, or access to one merchant's customer history from another merchant.
+- The Beger hub aggregates the customer's own merchant cards as a navigation convenience. Each merchant sees only its own customer relationship and permitted actions, not the customer's entire Beger wallet. Location or city is NOT the tenant boundary; business_id is.
+
+### Two complementary QR paths (not a single magic code)
+1. Shop/table QR: merchant/public entry point, order online as guest, or optionally link to that merchant's loyalty card; first visit may optionally create/claim a card.
+2. Customer QR: customer presents their saved card **to authorized staff at POS** when ordering at counter; staff reads only the currently selected merchant's customer participation/eligible rewards. Scanning the customer QR alone must not credit points or consume rewards.
+3. Returning web customer can use shop QR OR saved link/card to access merchant; an order is associated with optional eligible customer identity after validated claim, never solely by exposing static QR.
+4. The permanent visible customer QR is an **identifier not an authorization token**. Reward/paid-membership redemption requires a server-authorized, time-bounded, replay-protected verification (for example, merchant-scoped one-time challenge/PIN). Staff must not view private data from other merchants by scanning a screenshot.
+5. New merchant relationship only if customer opts in. If device storage is lost, identity recovery requires pre-established verified contact or other secure recovery; a screenshot is not guaranteed ownership.
+
+### Verification scenarios required when phase 4 starts
+- Existing Beger card created with merchant A in Sakarya -> customer scans merchant B shop QR in Istanbul -> guest menu works -> optional join B -> A's stamp balance unchanged, B starts separately.
+- Customer visits a second branch of merchant A -> shared stamps only if both branches participate in same program and published rule; redemption matches policy.
+- Merchant B POS scanning customer card cannot view or spend A's rewards or list A's purchases.
+- Staff scan without confirmed purchase never credits a stamp; replayed redemption, screenshot reuse, cancellations, cross-branch and cross-merchant misuse must fail.
+- Cross-country operations keep merchant currency, terms, expiry, local-time rules and customer permissions separated; no implicit transfer or regulatory assumptions.
+- Wallet/pass updates and notifications are **optional later** and require supported platform, user permission and separately scoped messaging/marketing consent.
+
+### UX guidance
+- Mobile-first 'بطاقاتي' shows each joined merchant card, its stamps/progress, offers and subscription allowance, with merchant logo and one action 'عرض الرمز' or 'العودة للمتجر'.
+- Scanning a shop QR from a new merchant opens the shop content first; an optional unobtrusive loyalty join CTA follows. Never interrupt ordering with identity wall.
+- Staff's QR scanner shows current merchant context, eligible reward and verification status only. The merchant owner sees rules/results only for their own business. Beger owner sees aggregated platform operations, not cross-merchant identifiable purchase history.
 
 ## Handoff rules
 Read `docs/BEGER-CANONICAL-PLAN.md`, this document and `docs/BEGER-EXECUTION-BOARD.md` before editing. Record every phase with evidence, no unapproved Production, no mixing independent projects, no old QR reactivation. Separate facts/implemented from approved product scope and proposed design.
