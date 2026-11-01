@@ -23,6 +23,6 @@ SELECT
  NOT has_table_privilege('anon','public.dining_tables','SELECT') AS anon_raw_tables_denied,
  has_function_privilege('anon','public.public_branch_menu(uuid)','EXECUTE') AS anon_public_menu_allowed,
  has_function_privilege('anon','public.public_table_locator(uuid)','EXECUTE') AS anon_table_locator_allowed,
- (SELECT count(*) FROM public.public_branch_menu('00000000-0000-4000-8000-000000000000') AS menu) = 1 AS unknown_branch_returns_safe_array,
+ jsonb_array_length(public.public_branch_menu('00000000-0000-4000-8000-000000000000')) = 0 AS unknown_branch_returns_safe_array,
  counts.category_rows,counts.item_rows,counts.table_rows
 FROM relations CROSS JOIN policies CROSS JOIN counts;
