@@ -41,3 +41,20 @@
 - Real-browser Supabase confirmation + two-session API E2E: tracked in issue #3, still NOT VERIFIED.
 - SWC optional-dependency warning, security advisors, recovery and independent CI: tracked in issue #4, still NO-GO for commercial release.
 - The one-time lockfile export script has been removed after its generated artifact was committed. Never reintroduce a public lock export into normal CI.
+
+## Current acceptance snapshot — 2026-11-01 (supersedes historical counts above)
+**Decision: OPEN / NO-GO; this is Phase 1 Staging acceptance, NOT approval to ship Production.**
+
+Verified precise commit `39a2f4e09fbe86baf9db13a68f879ffdd6958821` was pushed to PR #1's feature branch. Windows local run (Node 24) passed clean `npm ci`, 101/101 Node tests, `tsc --noEmit`, Next.js build and staging safety guard. The exact same commit reached Vercel Preview `dpl_AYdmRSWuEBX32P4H2JDLrom16EvD` (READY), and deployment logs independently confirmed **101 pass / 0 fail**. GitHub Actions still cannot start its jobs because the owner's GitHub billing account is locked; GitHub CI cannot be marked PASS.
+
+Current Supabase Staging has **12/12 public tables with RLS**, two independently confirmed identities, two businesses, two branches and two memberships; owner confirms working account logins and dashboard navigation. Separate SQL session impersonation and read-only RLS structure checks passed, but actual browser negative access remains unverified.
+
+**Security advisor review (read-only live verification 2026-11-01):** 10 permitted authenticated `SECURITY DEFINER` functions were listed and their complete PostgreSQL definitions inspected. Every one has a pinned `search_path`, uses `auth.uid()` identity checking, and explicitly checks platform-admin authority or business membership as applicable. A live read-only catalog query returned **10/10 checks passing**, with no anomalous function. They remain callable intentionally by `authenticated`, so the Supabase advisory's 10 WARN findings are **reviewed, not cleared**; live negative client tests are mandatory before accepting the design. No privileged definer is executable by `anon`. The 3 RLS/no-policy INFO tables intentionally have no client grants and deny access; the leaked-password screening WARN remains a Supabase Free-tier limitation. This review alone is **not a dynamic authorization penetration test**.
+
+### Actual remaining GO evidence (no substitute by static tests)
+1. **Two real browser sessions (owner + independently registered merchant):** verify owner `/admin` allowed; merchant `/admin` denied (including direct URL); merchant `/dashboard` shows only own business, branch; direct URL of the owner's branch yields 404/denial; no cross-tenant sensitive data returned. Capture result with a timestamp and only sanitized screenshot / route and account role, never authentication cookies, passwords, raw tokens or private business data.
+2. **Session and mobile:** verify both dashboard sign-out buttons end the session and protected URLs redirect to login afterward; fresh sign-in, refresh, and expired session. Check mobile 320–390px Arabic RTL and Turkish navigation/layout without overflow. Owner has already verified login/navigation generally; do not request redoing those steps unless they cover a distinct negative case.
+3. **Isolated recovery:** obtain and encrypt a logical database backup, restore into an owner-approved disposable instance, validate migrations, RLS, role grants and data counts; record restore command output, checksum, verification and date. Runbook: `docs/PHASE1-STAGING-RECOVERY-RUNBOOK.md`. **No backup or restore has been executed through the connected tools.**
+4. **Security disposition:** operator/owner explicitly accept Staging Free-tier leaked-password-screening limitation, or upgrade/configure the capability before a commercial Production release. Recorded 10 RPC warnings are intentional *only if* the true-session negative cases pass.
+
+**Release rule:** Mark Phase 1 `GO` only when the actual browser/mobile negative assertions and isolated restore drill are evidenced and reviewed. No automatic `main` merge or Production changes.
