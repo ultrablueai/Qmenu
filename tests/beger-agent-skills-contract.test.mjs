@@ -10,7 +10,7 @@ const required=[
 test("all six Beger agent skills exist with frontmatter and safety gates",()=>{
  for(const id of required){
   const source=readFileSync(".agents/skills/"+id+"/SKILL.md","utf8");
-  assert.ok(source.startsWith("---\nname: "+id+"\n"),id+" frontmatter");
+  assert.ok(source.replace(/\r\n/g,"\n").startsWith("---\nname: "+id+"\n"),id+" frontmatter");
   assert.match(source,/description:/,id+" skill description");
   assert.match(source,/(Phase|phase|current-phase|gate)/,id+" phase contract");
   assert.ok(source.length>350,id+" substantive skill");
