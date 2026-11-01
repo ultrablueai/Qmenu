@@ -103,3 +103,8 @@ Current Supabase Staging has **12/12 public tables with RLS**, two independently
 - Operator's isolated local restoration query yielded `auth.users total=2, distinct_ids=2, email_confirmed=2`.
 - Independently queried live Staging read-only with the same aggregate query and confirmed exactly `2,2,2`.
 - Aggregate match is **PASS** but does not establish identity-level row equivalence, credential/session operation, or complete roles restore; G1 remains NO-GO until remaining acceptance gates.
+
+## Recovery relational-integrity verification — 2026-11-02
+- Operator reported the isolated local restore returned **zero** for all three checks: `orphan_memberships=0`, `orphan_branches=0`, `businesses_without_membership=0`.
+- Independently ran the same read-only checks against Staging and confirmed all three returned **zero**, with no changes to Staging.
+- PASS for these three relational checks only. This does not replace behavioral RLS verification, row identity equivalence, or repair/certification of the incomplete `roles.sql` restore. Keep G1 NO-GO until the remaining required checks pass.
