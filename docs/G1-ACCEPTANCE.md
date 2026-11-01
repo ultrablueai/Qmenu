@@ -108,3 +108,8 @@ Current Supabase Staging has **12/12 public tables with RLS**, two independently
 - Operator reported the isolated local restore returned **zero** for all three checks: `orphan_memberships=0`, `orphan_branches=0`, `businesses_without_membership=0`.
 - Independently ran the same read-only checks against Staging and confirmed all three returned **zero**, with no changes to Staging.
 - PASS for these three relational checks only. This does not replace behavioral RLS verification, row identity equivalence, or repair/certification of the incomplete `roles.sql` restore. Keep G1 NO-GO until the remaining required checks pass.
+
+## Recovered-database tenant isolation probe — operator PASS, 2026-11-02
+- Owner ran repository test `supabase/tests/g1_tenant_isolation.psql` **only** against local Docker recovery container `supabase_db_Beger-recovery-standard`, and reported terminal marker `BEGER_TENANT_ISOLATION_PASS`.
+- The test creates synthetic identities/tenants inside a transaction, checks each tenant's visibility, asserts denial of cross-tenant insert/update and membership escalation, then rolls back. It validates SQL role simulation against the restored database and does not persist test rows.
+- **PASS (operator-reported)** for this SQL tenant-isolation probe. It is **not** real-token, two-session PostgREST/API testing; role restore (`roles.sql`) is still unverified after a `log_min_messages` permissions error. Do not mark commercial GO or merge main.
