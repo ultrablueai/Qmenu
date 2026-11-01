@@ -19,4 +19,4 @@ export async function middleware(request: NextRequest) {
   await client.auth.getUser();
   return response;
 }
-export const config = { matcher: ["/dashboard/:path*", "/onboarding/:path*", "/auth/:path*"] };
+export const config = { matcher: ["/admin/:path*", "/dashboard/:path*", "/onboarding/:path*", "/auth/:path*"] };
