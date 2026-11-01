@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { serverSupabase } from "../../../../lib/supabase/server";
 import styles from "../../dashboard.module.css";
+import MenuManager from "./menu-manager";
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +83,7 @@ export default async function BranchDashboard({ params }: Props) {
           <Link href={`/b/${branch.id}`} target="_blank" rel="noopener noreferrer" className={styles.branchOpenLink}>معاينة صفحة الزبون العامة ←</Link>
         </section>
       </div>
+      {(role === "owner" || role === "manager") ? <MenuManager businessId={branch.business_id} branchId={branch.id} country={business.country_code}/> : null}
       <section className={styles.modules} aria-labelledby="branch-tools-heading">
         <h2 className={styles.panelTitle} id="branch-tools-heading">وحدات هذا الفرع</h2>
         <div className={styles.moduleGrid} style={{marginTop:15}}>
