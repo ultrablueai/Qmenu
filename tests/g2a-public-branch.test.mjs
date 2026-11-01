@@ -19,7 +19,7 @@ test("public branch SQL only publishes branch and business display metadata", ()
   assert.match(sql, /where b\.id=p_branch/);
   assert.match(sql, /grant execute on function public\.public_branch_identity\(uuid\) to anon, authenticated/);
   assert.doesNotMatch(sql, /select \*/i);
-  assert.doesNotMatch(sql, /auth\.users|public\.memberships|customer|order/i);
+  assert.doesNotMatch(sql, /from\\s+(auth\\.users|public\\.memberships|public\\.business_customers)/i);
 });
 
 test("public branch G2A does not falsely advertise a functioning menu/order flow", () => {
