@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { serverSupabase } from "../../../../lib/supabase/server";
 import styles from "../../dashboard.module.css";
+import BranchQrScanner from "./branch-qr-scanner";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,11 @@ export default async function BranchDashboard({ params }: Props) {
   if (businessError || !business) return <main className={styles.content}><p className={styles.error} role="alert">تعذّر التحقق من النشاط المرتبط بهذا الفرع.</p></main>;
 
   const role = memberships.find(m => m.business_id === branch.business_id)?.role;
+  const scanResult = await supabase.from("customer_qr_scans")
+    .select("id,scanned_at,customer_id")
+    .eq("business_id",branch.business_id)
+    .eq("branch_id",branch.id)
+    .order("scanned_at",{ascending:false}).limit(10);
   return <div className={styles.branchPage}>
     <header className={styles.branchPageHeader}>
       <Link href="/dashboard" className={styles.backLink}>← الرجوع إلى اللوحة الرئيسية للنشاط</Link>
@@ -70,10 +76,18 @@ export default async function BranchDashboard({ params }: Props) {
         </section>
         <section className={styles.panel}>
           <h2 className={styles.panelTitle}>رموز QR للعملاء</h2>
-          <p className={styles.panelSubtitle}>سيكون لكل عميل رمز غير قابل للتخمين، مرتبط بالنشاط والفرع وفق صلاحيات مستقلة.</p>
-          <div className={styles.empty} style={{marginTop:16}}>لم نفعّل إصدار رموز QR بعد؛ نثبت أولاً طريقة تعريف العميل وإعادة استخدام رمزه بين الفروع بشكل آمن.</div>
+          <p className={styles.panelSubtitle}>كل زبون لديه QR موحّد يعمل في كل فروع النشاط. يتم تسجيل الزيارة في هذا الفرع فقط.</p>
+          <div className={styles.empty} style={{marginTop:16}}>إصدار بطاقة الزبون يتم من لوحة النشاط الرئيسية؛ المسح والتسجيل يتمان من لوحة الفرع.</div>
         </section>
       </div>
+      <BranchQrScanner branchId={branch.id} branchName={branch.name} businessName={business.name}/>
+      <section className={styles.panel} style={{marginTop:20}} aria-label="أحدث مسوحات هذا الفرع">
+        <h2 className={styles.panelTitle}>آخر عمليات المسح في {branch.name}</h2>
+        {scanResult.error ? <p className={styles.error} role="alert">تعذّر تحميل سجل المسح.</p>
+        : scanResult.data?.length ? <ul style={{paddingRight:20,fontSize:12,lineHeight:2}}>
+          {scanResult.data.map(s=><li key={s.id}>زيارة مسجّلة <time dateTime={s.scanned_at}>{new Date(s.scanned_at).toLocaleString("ar", {dateStyle:"medium",timeStyle:"short"})}</time></li>)}
+        </ul> : <p className={styles.panelSubtitle}>لا توجد عمليات مسح في هذا الفرع بعد.</p>}
+      </section>
       <section className={styles.modules} aria-labelledby="branch-tools-heading">
         <h2 className={styles.panelTitle} id="branch-tools-heading">وحدات هذا الفرع</h2>
         <div className={styles.moduleGrid} style={{marginTop:15}}>
