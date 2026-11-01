@@ -27,7 +27,7 @@ const nextModules = [
 export default async function PlatformAdminDashboard() {
  const supabase = await serverSupabase();
  const { data: { user }, error: authError } = await supabase.auth.getUser();
- if (authError || !user) redirect("/login");
+ if (authError || !user) redirect("/login?next=/admin");
 
  const { data: account, error: permissionError } = await supabase.from("platform_admins")
   .select("user_id,role,enabled").eq("user_id",user.id).eq("enabled",true).maybeSingle();
