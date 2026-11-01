@@ -5,8 +5,8 @@ const page=readFileSync("app/b/[branchId]/page.tsx","utf8");
 const table=readFileSync("app/t/[token]/page.tsx","utf8");
 const lib=readFileSync("lib/g2-public.ts","utf8");
 const view=readFileSync("components/public-menu.tsx","utf8");
-const sql=readFileSync("supabase/migrations/202611020001_g2a_public_branch_identity.sql","utf8");
-const g2=readFileSync("supabase/migrations/202611020002_g2_branch_catalog_tables.sql","utf8");
+const sql=readFileSync("supabase/migrations/20261101232646_g2a_public_branch_identity.sql","utf8");
+const g2=readFileSync("supabase/migrations/20261101233523_g2_branch_catalog_tables.sql","utf8");
 const editor=readFileSync("app/dashboard/branches/[branchId]/menu-manager.tsx","utf8");
 
 test("guest pages use anonymous client without account tokens",()=>{
