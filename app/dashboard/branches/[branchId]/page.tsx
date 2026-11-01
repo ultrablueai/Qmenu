@@ -56,7 +56,7 @@ export default async function BranchDashboard({ params }: Props) {
       <span className={styles.previewBadge}><span className={styles.statusDot} aria-hidden="true" />فرع تجريبي</span>
     </header>
     <main className={styles.content}>
-      <p className={styles.eyebrow}>QMENU / BRANCH WORKSPACE</p>
+      <p className={styles.eyebrow}>BEGER / BRANCH WORKSPACE</p>
       <h1 className={styles.heading}>{branch.name}</h1>
       <p className={styles.subheading}>لوحة خاصة بفرع <strong>{branch.name}</strong> ضمن نشاط <strong>{business.name}</strong>.</p>
       <section className={styles.hero} style={{ marginTop:24 }}>
@@ -65,7 +65,7 @@ export default async function BranchDashboard({ params }: Props) {
           <h2 className={styles.heroTitle}>إدارة {branch.name}</h2>
           <p className={styles.heroText}>هذه مساحة الفرع المستقلة. خدمات QR المتجر والطلبات والانتظار ستُربط بهذا الفرع عند تفعيل وحداتها، ولا نعرض أرقام تشغيل غير موجودة.</p>
         </div>
-        <div className={styles.heroGraphic} aria-hidden="true"><div className={styles.heroGraphicInner}><span className={styles.heroGraphicText}>Q</span></div></div>
+        <div className={styles.heroGraphic} aria-hidden="true"><div className={styles.heroGraphicInner}><span className={styles.heroGraphicText}>B</span></div></div>
       </section>
       <div className={styles.twoCols}>
         <section className={styles.panel}>
