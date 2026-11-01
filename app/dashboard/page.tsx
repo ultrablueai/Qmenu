@@ -36,6 +36,12 @@ export default async function Dashboard() {
 
   if (!membershipError && !memberships?.length) redirect("/onboarding");
 
+  // Platform authority is checked independently of merchant memberships.
+  // A failed permission read never grants a platform navigation entry.
+  const { data: platformAccess, error: platformAccessError } = await supabase
+    .from("platform_admins").select("role").eq("user_id",user.id).eq("enabled",true).maybeSingle();
+  const canOpenPlatform = !platformAccessError && (platformAccess?.role === "platform_owner" || platformAccess?.role === "platform_operator");
+
   const ids = (memberships ?? []).map((m) => m.business_id);
   const businessResult = ids.length
     ? await supabase.from("businesses").select("id,name,country_code").in("id", ids)
@@ -71,6 +77,7 @@ export default async function Dashboard() {
           </div>
         </div>
         <nav aria-label="التنقل الرئيسي" className={styles.navGroup}>
+          {canOpenPlatform && <Link className={styles.navItem} href="/admin" aria-label="الانتقال إلى إدارة منصة بيجر"><span className={styles.navIcon} aria-hidden="true">◇</span> إدارة منصة بيجر</Link>}
           <div className={styles.navLabel}>مساحة العمل</div>
           <a className={`${styles.navItem} ${styles.navItemActive}`} href="/dashboard" aria-current="page">
             <span className={styles.navIcon} aria-hidden="true">▦</span> نظرة عامة
@@ -101,6 +108,7 @@ export default async function Dashboard() {
         <header className={styles.topbar}>
           <div className={styles.breadcrumb}><span>مساحة العمل</span><span aria-hidden="true">/</span><strong>نظرة عامة</strong></div>
           <div className={styles.topActions}>
+            {canOpenPlatform && <Link href="/admin" style={{textDecoration:"none",color:"#165d66",background:"#eaf4f3",padding:"9px 12px",borderRadius:10,fontSize:12,fontWeight:800,whiteSpace:"nowrap"}}>إدارة المنصة ↗</Link>}
             <span className={styles.previewBadge}><span className={styles.statusDot} aria-hidden="true" />بيئة تجريبية</span>
             <div className={styles.profile}>
               <div className={styles.profileIcon} aria-hidden="true">{initials(firstName)}</div>
