@@ -58,3 +58,8 @@ Current Supabase Staging has **12/12 public tables with RLS**, two independently
 4. **Security disposition:** operator/owner explicitly accept Staging Free-tier leaked-password-screening limitation, or upgrade/configure the capability before a commercial Production release. Recorded 10 RPC warnings are intentional *only if* the true-session negative cases pass.
 
 **Release rule:** Mark Phase 1 `GO` only when the actual browser/mobile negative assertions and isolated restore drill are evidenced and reviewed. No automatic `main` merge or Production changes.
+
+## Owner-confirmed live browser check — 2026-11-01
+- **PASS (user-reported):** Using the ordinary merchant account in the live Staging browser, direct navigation to `/admin` displayed the access-denied/insufficient-permission message rather than the platform owner control panel. This is direct browser evidence reported by the owner, not an automated trace; browser/device and exact screenshot not captured here.
+- Scope: ordinary merchant **platform-admin negative route** only. Does not establish tenant cross-access denial via a foreign branch URL, session sign-out success, expired session behavior, mobile layout, or backup/restore.
+- Remaining G1 blockers persist, and Phase 1 remains **NO-GO** until all required gates are evidenced. No main or Production changes.
