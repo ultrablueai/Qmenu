@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import styles from "./dashboard.module.css";
+import BranchManager from "./branch-manager";
 import { serverSupabase } from "../../lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -52,6 +53,7 @@ export default async function Dashboard() {
   const ownerCount = memberships?.length ?? 0;
   const country = primary?.country_code ?? null;
   const primaryBranches = branches.filter((b) => b.business_id === primary?.id);
+  const canManageBranches = currentRole === "owner" || currentRole === "manager";
 
   return (
     <div className={styles.shell}>
@@ -161,6 +163,7 @@ export default async function Dashboard() {
                     </div>
                   ))}
                 </div> : <div className={styles.empty}>لم يتم العثور على فروع لهذا النشاط.</div>}
+              {!loadError && primary && <BranchManager businessId={primary.id} branches={primaryBranches.map((b) => ({id:b.id, name:b.name}))} canManage={canManageBranches} />}
             </section>
             <section className={styles.panel} id="business-details" aria-labelledby="business-heading">
               <div className={styles.panelHead}>
