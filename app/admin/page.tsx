@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { serverSupabase } from "../../lib/supabase/server";
 import styles from "./admin.module.css";
+import PlanManager from "./plan-manager";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ type DirectoryEntry = {
 };
 
 const nextModules = [
- { icon: "▤", title: "الخطط والاشتراكات", text: "تعريف الباقات، حدود الفروع والوحدات، وتفعيل اشتراكات التجار. غير متاح بعد." },
+ { icon: "▤", title: "اشتراكات التجار", text: "ربط اشتراك مدفوع بتاجر وتحديد أسعاره وفواتيره. غير متاح بعد." },
  { icon: "♧", title: "الدعم وإدارة الصلاحيات", text: "إدارة مسؤولي المنصة والتعامل مع طلبات الدعم بموافقات وسجل تدقيق. غير متاح بعد." },
  { icon: "◷", title: "مراقبة الخدمات", text: "مراقبة أخطاء التشغيل والتنبيهات وسلامة النظام. لا يوجد ربط مباشر بعد." },
  { icon: "▥", title: "التحليلات والفوترة", text: "التقارير المالية والاشتراكات والتحصيل والتصدير. لا توجد إيرادات تجارية محتسبة بعد." },
@@ -42,15 +43,17 @@ export default async function PlatformAdminDashboard() {
   </main>;
  }
 
- const [summaryResult,directoryResult] = await Promise.all([
+ const [summaryResult,directoryResult,plansResult] = await Promise.all([
   supabase.rpc("platform_admin_overview"),
-  supabase.rpc("platform_admin_business_directory")
+  supabase.rpc("platform_admin_business_directory"),
+  supabase.from("plans").select("id,code,name,active").order("code",{ascending:true})
  ]);
  const summary = (summaryResult.data?.[0] ?? null) as
   {merchant_count: number | string;branch_count:number | string;account_memberships:number | string} | null;
  const directory = (directoryResult.data ?? []) as DirectoryEntry[];
  const failed = Boolean(summaryResult.error || directoryResult.error || !summary);
  const owner = account.role === "platform_owner";
+ const plans = (plansResult.data ?? []) as {id:string;code:string;name:string;active:boolean}[];
 
  return <div className={styles.shell} dir="rtl" lang="ar">
   <aside className={styles.sidebar} aria-label="القائمة الرئيسية لمالك المنصة">
@@ -62,9 +65,10 @@ export default async function PlatformAdminDashboard() {
     <span className={styles.navLabel}>إدارة المنصة</span>
     <a className={`${styles.navLink} ${styles.navActive}`} href="#overview" aria-current="page"><span className={styles.navGlyph} aria-hidden="true">▦</span>نظرة عامة</a>
     <a className={styles.navLink} href="#merchants"><span className={styles.navGlyph} aria-hidden="true">⌂</span>الأنشطة والتجار</a>
+    <a className={styles.navLink} href="#plans"><span className={styles.navGlyph} aria-hidden="true">▤</span>الباقات</a>
     <a className={styles.navLink} href="#operations"><span className={styles.navGlyph} aria-hidden="true">◈</span>جاهزية المنصة</a>
     <span className={styles.navLabel} style={{marginTop:18}}>الإدارة القادمة</span>
-    <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">▤</span>الباقات والاشتراكات<span className={styles.navTag}>قريباً</span></span>
+    <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">▤</span>تفعيل الاشتراكات<span className={styles.navTag}>قريباً</span></span>
     <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">♧</span>الدعم والصلاحيات<span className={styles.navTag}>قريباً</span></span>
    </nav>
    <div className={styles.sidebarFoot}>لوحة منفصلة لإدارة بيجر. لا تسمح بتقمص حساب التاجر أو الوصول إلى بيانات زبائنه الخاصة.</div>
@@ -77,7 +81,7 @@ export default async function PlatformAdminDashboard() {
    <main className={styles.content} id="overview">
     <div className={styles.titleRow}>
      <div><p className={styles.eyebrow}>SUPER ADMIN / CONTROL CENTER</p><h1 className={styles.title}>مركز إدارة بيجر</h1><p className={styles.subtitle}>معلومات تشغيل المنصة كلها من مصدر واحد، بعيداً عن لوحات التجار والفروع.</p></div>
-     <span className={styles.safe}>{owner ? "مالك المنصة" : "مشغّل المنصة"} · قراءة فقط</span>
+     <span className={styles.safe}>{owner ? "مالك المنصة" : "مشغّل المنصة"} · بيانات التجار قراءة فقط</span>
     </div>
     <section className={styles.hero} aria-label="حالة المرحلة الحالية">
      <div><h2 className={styles.heroStrong}>أساس الإدارة جاهز للتوسعة المنظمة</h2>
@@ -108,6 +112,7 @@ export default async function PlatformAdminDashboard() {
        </tr>)}</tbody>
       </table></div>}
     </section>
+    {plansResult.error ? <p className={styles.error} role="alert">تعذّر تحميل الباقات. لا يمكن إدارة الباقات في هذه الحالة.</p> : <PlanManager plans={plans} canManage={owner} />}
     <section id="operations" className={styles.panel} aria-labelledby="operations-heading">
      <div className={styles.panelHead}><div><h2 id="operations-heading" className={styles.panelTitle}>وحدات الإدارة القادمة</h2><p className={styles.panelDesc}>نثبت الصلاحيات والأساس أولاً؛ لم نفعّل تشغيل أو فوترة غير مكتملين.</p></div><span className={styles.panelCount}>قيد التطوير</span></div>
      <div className={styles.grid}>{nextModules.map(m=><div className={styles.module} key={m.title}>
@@ -118,7 +123,7 @@ export default async function PlatformAdminDashboard() {
    </main>
   </div>
   <nav className={styles.mobileNav} aria-label="تنقل كنترول بنل المالك على الهاتف">
-   <a href="#overview"><span aria-hidden="true">▦</span>الرئيسية</a><a href="#merchants"><span aria-hidden="true">⌂</span>التجار</a><a href="#operations"><span aria-hidden="true">◈</span>الوحدات</a>
+   <a href="#overview"><span aria-hidden="true">▦</span>الرئيسية</a><a href="#merchants"><span aria-hidden="true">⌂</span>التجار</a><a href="#plans"><span aria-hidden="true">▤</span>الباقات</a><a href="#operations"><span aria-hidden="true">◈</span>الوحدات</a>
   </nav>
  </div>;
 }
