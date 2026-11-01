@@ -38,7 +38,7 @@
 .statValue{margin:12px 0 4px;font-size:29px;font-weight:850}
 .statSub{font-size:11px;color:#96a2ad;margin:0;line-height:1.7}
 .panel{background:#fff;border:1px solid var(--stroke);border-radius:16px;padding:23px;margin-top:18px;min-width:0;scroll-margin-top:23px}
-.panelHead{display:flex;align-items:start;justify-content:space-between;gap:10px;margin-bottom:20px}
+.panelHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:20px}
 .panelTitle{margin:0;font-size:16px;font-weight:850}
 .panelDesc{font-size:11px;color:#8b9aa6;margin:7px 0 0;line-height:1.7}
 .panelCount{color:#287c71;background:#eaf7f3;padding:6px 10px;border-radius:9px;font-size:11px;font-weight:750;white-space:nowrap}
