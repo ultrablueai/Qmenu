@@ -13,7 +13,7 @@ $expectedBranch = 'feat/g1-foundation'
 if (-not (Test-Path -LiteralPath (Join-Path $Repo '.git'))) {
   throw "Repository not found: $Repo"
 }
-$gitCommand = Get-Command git.exe -ErrorAction Stop
+$gitCommand = @(Get-Command git.exe -CommandType Application -ErrorAction Stop)[0]
 $branch = (& $gitCommand.Source -C $Repo branch --show-current | Out-String).Trim()
 if ($LASTEXITCODE -ne 0 -or $branch -ne $expectedBranch) {
   throw "Wrong repository branch; expected $expectedBranch, got $branch"
@@ -22,9 +22,9 @@ $origin = (& $gitCommand.Source -C $Repo remote get-url origin | Out-String).Tri
 if ($LASTEXITCODE -ne 0 -or $origin -notmatch '(?i)(github\.com[:/])ultrablueai/Qmenu(\.git)?$') {
   throw "Repository origin is not the approved ultrablueai/Qmenu"
 }
-$cli = Get-Command supabase -CommandType Application -ErrorAction SilentlyContinue
+$cli = @(Get-Command supabase -CommandType Application -ErrorAction SilentlyContinue)[0]
 if (-not $cli) { throw 'Supabase CLI not installed. See https://supabase.com/docs/guides/local-development/cli/getting-started' }
-$docker = Get-Command docker -CommandType Application -ErrorAction SilentlyContinue
+$docker = @(Get-Command docker.exe -CommandType Application -ErrorAction SilentlyContinue)[0]
 if (-not $docker) { throw 'Docker CLI not installed. Install Docker Desktop first.' }
 & $docker.Source info --format '{{.ServerVersion}}' 1>$null 2>$null
 if ($LASTEXITCODE -ne 0) { throw 'Docker Desktop engine is not running.' }
