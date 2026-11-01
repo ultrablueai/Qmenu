@@ -160,7 +160,7 @@ export default async function Dashboard() {
                     <div key={branch.id} className={styles.branch}>
                       <span className={styles.branchIcon} aria-hidden="true">⌂</span>
                       <div><div className={styles.branchName}>{branch.name}</div><div className={styles.branchMeta}>فرع تابع لـ{displayName}</div></div>
-                      {canManageBranches ? <Link href={`/dashboard/branches/${branch.id}`} className={styles.branchOpenLink}>فتح لوحة الفرع ←</Link> : <span className={styles.branchBadge}>مسجّل</span>}
+                      <Link href={`/dashboard/branches/${branch.id}`} className={styles.branchOpenLink}>فتح لوحة الفرع ←</Link>
                     </div>
                   ))}
                 </div> : <div className={styles.empty}>لم يتم العثور على فروع لهذا النشاط.</div>}
