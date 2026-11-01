@@ -20,7 +20,8 @@ test("merchant dashboard cannot issue customer card",()=>{
 test("branch dashboard does not expose premature customer-card scanner",()=>{
  assert.doesNotMatch(branch,/BranchQrScanner|customer_qr_scans/);
  assert.match(branch,/QR المتجر والطاولة/);
- assert.match(branch,/ليست جاهزة للاستخدام بعد/);
+ assert.match(branch,/معاينة صفحة الزبون العامة/);
+ assert.doesNotMatch(branch,/issue_business_customer_qr|BranchQrScanner/);
 });
 test("staging closure revokes every premature customer QR RPC",()=>{
  for(const rpc of [
