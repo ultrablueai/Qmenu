@@ -77,3 +77,9 @@ Before implementing: read this document, inspect current code, migrations, test 
 - Both tests were run in transactions ending with ROLLBACK. Reproducible fixture: `tests/sql/staging-tenant-branch-isolation.sql`. No persistent test businesses or staff memberships were created.
 - Checked that authenticated role cannot execute the retired customer-QR issue/rotate/scan/deactivate RPCs.
 - Remaining Phase 1 acceptance: two independent authenticated real accounts and mobile/browser E2E, UI/accessibility regression and rollback readiness. Phase 1 remains **NO-GO** until this evidence is collected; no move to Phase 2 by implication.
+
+## Phase 1 operator security acceptance — 2026-11-01
+- Latest full Staging preview at prior commit `1478ce5` was Vercel READY and passed 90/90 automated checks.
+- Supabase Staging SQL verified an **existing approved platform owner temporarily downgraded to platform_operator inside a single transaction ending in ROLLBACK**: all four bounded read-only admin RPCs allowed; owner roster, creating plans, editing plan state and assigning trials all denied with SQLSTATE 42501. Original owner privilege retained after rollback. Reproducible script `tests/sql/staging-operator-privilege-matrix.sql`.
+- Independently inspected the public SECURITY DEFINER RPC inventory and login-exposed table grants. Retired customer QR RPCs continue to deny authenticated execution. No new auth users or fake subscriptions were introduced.
+- **Critical caveat:** these are database role simulations, not a second authenticated real-account browser test. Thus Phase 1 remains NO-GO pending browser/mobile and distinct-user acceptance, as explicitly required by canonical execution contract.
