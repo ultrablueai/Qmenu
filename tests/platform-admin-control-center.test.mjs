@@ -23,7 +23,7 @@ test("directory contains bounded general tenant data only",()=>{
 test("owner panel does not inherit merchant access",()=>{
  assert.match(page,/supabase\.auth\.getUser\(\)/);
  assert.match(page,/\.from\("platform_admins"\)/);
- assert.match(page,/if \(permissionError \|\| !account\)/);
+ assert.match(page,/if\s*\(permissionError \|\| !account\)/);
  assert.match(page,/\.rpc\("platform_admin_business_directory"\)/);
  assert.match(page,/\.rpc\("platform_admin_overview"\)/);
  assert.doesNotMatch(page,/service_role|SERVICE_ROLE|admin\.listUsers|impersonate/);
