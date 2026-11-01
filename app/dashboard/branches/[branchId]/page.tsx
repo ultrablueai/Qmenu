@@ -15,12 +15,11 @@ export default async function BranchDashboard({ params }: Props) {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) redirect("/login");
 
-  // Until branch-scoped assignments are implemented, do not grant staff
-  // access to a specific branch just because they work for the business.
+  // Owners and managers can access the business; staff only explicitly assigned branches.
   const { data: memberships, error: membershipError } = await supabase.from("memberships")
     .select("business_id,role")
     .eq("user_id", user.id)
-    .in("role", ["owner", "manager"]);
+    .in("role", ["owner", "manager", "staff"]);
 
   if (membershipError) return <main className={styles.content}><p className={styles.error} role="alert">تعذر التحقق من صلاحيات الفرع. حاول مرة أخرى.</p></main>;
   if (!memberships?.length) notFound();
@@ -42,6 +41,14 @@ export default async function BranchDashboard({ params }: Props) {
   if (businessError || !business) return <main className={styles.content}><p className={styles.error} role="alert">تعذّر التحقق من النشاط المرتبط بهذا الفرع.</p></main>;
 
   const role = memberships.find(m => m.business_id === branch.business_id)?.role;
+  let branchRole: string | null = null;
+  if (role === "staff") {
+    const {data:assignment,error:assignmentError} = await supabase.from("branch_assignments")
+      .select("branch_role").eq("business_id",branch.business_id)
+      .eq("branch_id",branch.id).eq("user_id",user.id).maybeSingle();
+    if (assignmentError || !assignment) notFound();
+    branchRole = assignment.branch_role;
+  }
   return <div className={styles.branchPage}>
     <header className={styles.branchPageHeader}>
       <Link href="/dashboard" className={styles.backLink}>← الرجوع إلى اللوحة الرئيسية للنشاط</Link>
@@ -65,7 +72,7 @@ export default async function BranchDashboard({ params }: Props) {
           <div className={styles.details}>
             <div className={styles.detail}><span className={styles.detailName}>اسم الفرع</span><strong className={styles.detailValue}>{branch.name}</strong></div>
             <div className={styles.detail}><span className={styles.detailName}>النشاط الرئيسي</span><strong className={styles.detailValue}>{business.name}</strong></div>
-            <div className={styles.detail}><span className={styles.detailName}>الصلاحية</span><span className={styles.role}>{role === "owner" ? "مالك النشاط" : "مدير النشاط"}</span></div>
+            <div className={styles.detail}><span className={styles.detailName}>الصلاحية</span><span className={styles.role}>{role === "owner" ? "مالك النشاط" : role === "manager" ? "مدير النشاط" : branchRole === "branch_manager" ? "مدير الفرع" : "موظف الفرع"}</span></div>
           </div>
         </section>
         <section className={styles.panel}>
