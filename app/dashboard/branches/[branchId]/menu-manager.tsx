@@ -82,7 +82,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
       </form>
       {cats.map(c=><div key={c.id} style={{...line,borderTop:"1px solid #eef1f2",marginTop:14,paddingTop:12}}>
         <span style={{flex:1}}><strong>{c.name_ar}</strong><small style={{display:"block"}}>{c.name_tr}</small></span>
-        <EditCategory value={c} busy={busy} save={async patch=>{await run(async()=>browserSupabase().from("menu_categories").update(patch).eq("id",c.id).eq("branch_id",branchId).select("id").single(),"تم تعديل التصنيف");}}/>
+        <EditCategory value={c} busy={busy} save={async patch=>{return await run(async()=>browserSupabase().from("menu_categories").update(patch).eq("id",c.id).eq("branch_id",branchId).select("id").single(),"تم تعديل التصنيف");}}/>
         <button disabled={busy} type="button" onClick={()=>run(async()=>browserSupabase().from("menu_categories").update({active:!c.active}).eq("id",c.id).eq("branch_id",branchId).select("id").single(),"تم تغيير حالة التصنيف")} style={{...btn,background:c.active?"#805d2c":"#167c5a"}}>{c.active?"إخفاء":"نشر"}</button>
       </div>)}
     </div>
@@ -106,7 +106,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
       </form>
       {items.map(i=><div key={i.id} style={{...line,borderTop:"1px solid #eef1f2",paddingTop:12,marginTop:12}}>
         <span style={{flex:1}}><strong>{i.name_ar}</strong><small style={{display:"block"}}>{i.name_tr} · {priceString(Number(i.price_minor),factor)} {unit}</small></span>
-        <EditProduct value={i} categories={cats} factor={factor} busy={busy} save={async patch=>{await run(async()=>browserSupabase().from("menu_items").update(patch).eq("id",i.id).eq("branch_id",branchId).select("id").single(),"تم تعديل المنتج");}}/>
+        <EditProduct value={i} categories={cats} factor={factor} busy={busy} save={async patch=>{return await run(async()=>browserSupabase().from("menu_items").update(patch).eq("id",i.id).eq("branch_id",branchId).select("id").single(),"تم تعديل المنتج");}}/>
         <button disabled={busy} type="button" style={{...btn,background:"#805d2c"}} onClick={()=>run(async()=>browserSupabase().from("menu_items").update({active:!i.active}).eq("id",i.id).eq("branch_id",branchId).select("id").single(),"تم تحديث النشر")}>{i.active?"إخفاء":"نشر"}</button>
         <button disabled={busy} type="button" style={{...btn,background:i.available?"#935624":"#167c5a"}} onClick={()=>run(async()=>browserSupabase().from("menu_items").update({available:!i.available}).eq("id",i.id).eq("branch_id",branchId).select("id").single(),"تم تحديث التوفر")}>{i.available?"نفد":"متاح"}</button>
       </div>)}
@@ -124,7 +124,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
           {t.active?<a href={url} target="_blank" rel="noopener noreferrer">فتح صفحة الطاولة</a>:null}
         </div>
         {t.active&&origin?<img src={qr(url)} width={125} height={125} loading="lazy" alt={`QR طاولة ${t.label}`}/>:null}
-        <EditTable value={t} busy={busy} save={async label=>{await run(async()=>browserSupabase().from("dining_tables").update({label}).eq("id",t.id).eq("branch_id",branchId).select("id").single(),"تم تعديل اسم الطاولة");}}/>
+        <EditTable value={t} busy={busy} save={async label=>{return await run(async()=>browserSupabase().from("dining_tables").update({label}).eq("id",t.id).eq("branch_id",branchId).select("id").single(),"تم تعديل اسم الطاولة");}}/>
         <button disabled={busy} type="button" style={btn} onClick={()=>run(async()=>browserSupabase().from("dining_tables").update({qr_token:crypto.randomUUID()}).eq("id",t.id).eq("branch_id",branchId).select("id").single(),"تم إلغاء الرمز القديم وإنشاء رمز جديد")}>تدوير QR</button>
         <button disabled={busy} type="button" style={{...btn,background:t.active?"#935624":"#167c5a"}} onClick={()=>run(async()=>browserSupabase().from("dining_tables").update({active:!t.active}).eq("id",t.id).eq("branch_id",branchId).select("id").single(),"تم تحديث حالة الطاولة")}>{t.active?"تعطيل":"تفعيل"}</button>
       </div>})}
