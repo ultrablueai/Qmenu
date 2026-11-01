@@ -1,16 +1,17 @@
 "use client";
-import {useEffect,useState,type FormEvent} from "react";
+import {useEffect,useState,type FormEvent,type CSSProperties} from "react";
+import {EditCategory,EditProduct,EditTable} from "./edit-row";
 import {browserSupabase} from "../../../../lib/supabase/browser";
 
 type Category={id:string;name_ar:string;name_tr:string;active:boolean;sort_order:number};
 type Product={id:string;category_id:string;name_ar:string;name_tr:string;description_ar:string;description_tr:string;price_minor:number;image_url:string|null;active:boolean;available:boolean};
 type Table={id:string;label:string;qr_token:string;active:boolean};
 
-const panel:React.CSSProperties={background:"#fff",border:"1px solid #dfe9eb",borderRadius:16,padding:20,marginTop:22};
-const field:React.CSSProperties={padding:10,border:"1px solid #cbd9dd",borderRadius:9,width:"100%",boxSizing:"border-box",font:"inherit"};
-const btn:React.CSSProperties={border:0,borderRadius:9,padding:"10px 15px",background:"#176d70",color:"#fff",fontWeight:700,cursor:"pointer"};
-const line:React.CSSProperties={display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",marginBottom:12};
-const label:React.CSSProperties={display:"grid",gap:5,flex:"1 1 160px",fontSize:13};
+const panel:CSSProperties={background:"#fff",border:"1px solid #dfe9eb",borderRadius:16,padding:20,marginTop:22};
+const field:CSSProperties={padding:10,border:"1px solid #cbd9dd",borderRadius:9,width:"100%",boxSizing:"border-box",font:"inherit"};
+const btn:CSSProperties={border:0,borderRadius:9,padding:"10px 15px",background:"#176d70",color:"#fff",fontWeight:700,cursor:"pointer"};
+const line:CSSProperties={display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",marginBottom:12};
+const label:CSSProperties={display:"grid",gap:5,flex:"1 1 160px",fontSize:13};
 function priceString(minor:number,factor:number){return (minor/factor).toFixed(factor===100?2:0);}
 export default function MenuManager({businessId,branchId,country}: {businessId:string;branchId:string;country:string}) {
   const [cats,setCats]=useState<Category[]>([]),[items,setItems]=useState<Product[]>([]),[tables,setTables]=useState<Table[]>([]);
@@ -80,6 +81,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
       </form>
       {cats.map(c=><div key={c.id} style={{...line,borderTop:"1px solid #eef1f2",marginTop:14,paddingTop:12}}>
         <span style={{flex:1}}><strong>{c.name_ar}</strong><small style={{display:"block"}}>{c.name_tr}</small></span>
+        <EditCategory value={c} busy={busy} save={async patch=>{await run(async()=>browserSupabase().from("menu_categories").update(patch).eq("id",c.id).eq("branch_id",branchId),"تم تعديل التصنيف");}}/>
         <button disabled={busy} type="button" onClick={()=>run(async()=>browserSupabase().from("menu_categories").update({active:!c.active}).eq("id",c.id).eq("branch_id",branchId),"تم تغيير حالة التصنيف")} style={{...btn,background:c.active?"#805d2c":"#167c5a"}}>{c.active?"إخفاء":"نشر"}</button>
       </div>)}
     </div>
@@ -103,6 +105,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
       </form>
       {items.map(i=><div key={i.id} style={{...line,borderTop:"1px solid #eef1f2",paddingTop:12,marginTop:12}}>
         <span style={{flex:1}}><strong>{i.name_ar}</strong><small style={{display:"block"}}>{i.name_tr} · {priceString(Number(i.price_minor),factor)} {unit}</small></span>
+        <EditProduct value={i} categories={cats} factor={factor} busy={busy} save={async patch=>{await run(async()=>browserSupabase().from("menu_items").update(patch).eq("id",i.id).eq("branch_id",branchId),"تم تعديل المنتج");}}/>
         <button disabled={busy} type="button" style={{...btn,background:"#805d2c"}} onClick={()=>run(async()=>browserSupabase().from("menu_items").update({active:!i.active}).eq("id",i.id).eq("branch_id",branchId),"تم تحديث النشر")}>{i.active?"إخفاء":"نشر"}</button>
         <button disabled={busy} type="button" style={{...btn,background:i.available?"#935624":"#167c5a"}} onClick={()=>run(async()=>browserSupabase().from("menu_items").update({available:!i.available}).eq("id",i.id).eq("branch_id",branchId),"تم تحديث التوفر")}>{i.available?"نفد":"متاح"}</button>
       </div>)}
@@ -120,6 +123,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
           {t.active?<a href={url} target="_blank" rel="noopener noreferrer">فتح صفحة الطاولة</a>:null}
         </div>
         {t.active?<img src={qr(url)} width={125} height={125} loading="lazy" alt={`QR طاولة ${t.label}`}/>:null}
+        <EditTable value={t} busy={busy} save={async label=>{await run(async()=>browserSupabase().from("dining_tables").update({label}).eq("id",t.id).eq("branch_id",branchId),"تم تعديل اسم الطاولة");}}/>
         <button disabled={busy} type="button" style={btn} onClick={()=>run(async()=>browserSupabase().from("dining_tables").update({qr_token:crypto.randomUUID()}).eq("id",t.id).eq("branch_id",branchId),"تم إلغاء الرمز القديم وإنشاء رمز جديد")}>تدوير QR</button>
         <button disabled={busy} type="button" style={{...btn,background:t.active?"#935624":"#167c5a"}} onClick={()=>run(async()=>browserSupabase().from("dining_tables").update({active:!t.active}).eq("id",t.id).eq("branch_id",branchId),"تم تحديث حالة الطاولة")}>{t.active?"تعطيل":"تفعيل"}</button>
       </div>})}
