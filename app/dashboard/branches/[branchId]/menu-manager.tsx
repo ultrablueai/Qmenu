@@ -129,5 +129,28 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
         <button disabled={busy} type="button" style={{...btn,background:t.active?"#935624":"#167c5a"}} onClick={()=>run(async()=>browserSupabase().from("dining_tables").update({active:!t.active}).eq("id",t.id).eq("branch_id",branchId).select("id").single(),"تم تحديث حالة الطاولة")}>{t.active?"تعطيل":"تفعيل"}</button>
       </div>})}
     </div>
+    <div style={panel}>
+      <h3>طباعة رموز QR</h3>
+      <p style={{fontSize:13}}>جهّز ورقة A4 لرمز الفرع وكل الطاولات المفعّلة، واحفظها PDF من نافذة الطباعة عند الحاجة.</p>
+      <button type="button" disabled={!origin} style={btn} onClick={()=>window.print()}>طباعة / حفظ PDF للرموز</button>
+    </div>
+    <style>{`@media print {
+      @page { size: A4; margin: 12mm; }
+      body * { visibility: hidden !important; }
+      #beger-print-sheet, #beger-print-sheet * { visibility: visible !important; }
+      #beger-print-sheet { display: block !important; position: absolute; top: 0; left: 0; width: 100%; background: #fff; color: #111; }
+      #beger-print-sheet .beger-qr-grid { display: grid !important; grid-template-columns: 1fr 1fr; gap: 15mm; }
+      #beger-print-sheet .beger-qr-tile { break-inside: avoid; text-align:center; border:1px solid #ddd; padding:12mm; }
+    }`}</style>
+    <section id="beger-print-sheet" style={{display:"none"}} aria-label="بطاقات QR للطباعة">
+      <h1 style={{textAlign:"center",fontSize:26}}>Beger · QR</h1>
+      <div className="beger-qr-grid">
+        {origin?<div className="beger-qr-tile"><h2>رمز الفرع</h2><img src={qr(branchUrl)} alt="رمز الفرع" width={190} height={190}/><p>قائمة الفرع</p></div>:null}
+        {origin&&tables.filter(t=>t.active).map(t=><div key={t.id} className="beger-qr-tile">
+          <h2>طاولة {t.label}</h2><img src={qr(origin+`/t/${t.qr_token}`)} alt={`QR طاولة ${t.label}`} width={190} height={190}/>
+          <p>امسح الرمز لعرض القائمة</p>
+        </div>)}
+      </div>
+    </section>
   </section>;
 }
