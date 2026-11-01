@@ -14,9 +14,9 @@ ONE phase at a time. Do not treat documentation, mocks, test counts, build or RE
 ## Phase scoreboard
 | Phase | State | GO gate |
 | --- | --- | --- |
-| 1. Auth, platform owner, tenant/branch isolation | **OPEN — NO-GO** | Two real independent accounts and browser/device E2E, final role/RLS negative security, audit, mobile UX, release/rollback evidence |
-| 2. Shop/table QR + public menu | **BLOCKED by 1** | Android/iOS QR-to-real-branch menu without account, inventory/availability, tenant separation |
-| 3. Order + kitchen + live pager | **BLOCKED by 2** | Guest order -> real branch -> ready -> pager -> pickup; idempotency and negative paths |
+| 1. Auth, platform owner, tenant/branch isolation | **DEVELOPMENT BASELINE ACCEPTED; COMMERCIAL GATE OPEN** | Two real independent accounts and browser/device E2E, final role/RLS negative security, audit, mobile UX, release/rollback evidence |
+| 2. Shop/table QR + public menu | **IMPLEMENTED IN SOURCE/STAGING; HOSTED NO-GO** | Android/iOS QR-to-real-branch menu without account, inventory/availability, tenant separation |
+| 3. Order + kitchen + live pager | **BLOCKED by G2 hosted GO** | Guest order -> real branch -> ready -> pager -> pickup; idempotency and negative paths |
 | 4. Loyalty, offers, notifications, customer membership | **BLOCKED by 3** | Optional customer card, correct reward ledger/reversal, consent, redemption, supported push/wallet, payments only by approval |
 | 5. Pilot and commercial launch | **BLOCKED by 1–4** | Separate verifiable GO checklist and explicit owner release approval |
 
@@ -160,3 +160,10 @@ Never edit historical PASS to imply later tests passed.
 - Committed public `/b/[branchId]` SSR route using an explicitly anonymous publishable Supabase client (no user cookies), displaying genuine branch identity and a clear **menu under construction** state. Added link from permitted merchant branch workspace to public page, plus contract tests `tests/g2a-public-branch.test.mjs`.
 - Initial route-containing Vercel Preview commit `17f3ea1` reached READY; commits for newer automated tests/link were still being built/queued at observation time. **Do not claim latest slice deploy/test PASS until exact latest SHA READY, complete Node suite and actual public route are checked**.
 - Next G2A closure: verified anonymous HTTP request to actual `/b/<branch>` and missing-branch 404 on latest READY deploy; mobile Arabic/Turkish accessibility and secure branch QR generation. G2B per-table QR and G2C real catalog remain unimplemented. No Production / main changes.
+
+## 2026-11-02 — G2 implementation handoff and immutable evidence
+- Owner explicitly authorized the Phase 2 build while keeping Phase 1 commercial security caveats open. This is an **engineering development transition**, not a release or Production authorization.
+- Implemented G2 branch catalog, Arabic/Turkish guest menu, shop and revocable table QR, per-branch merchant controls, QR printing, and Staging database migrations. Detailed evidence/negative tests/known limitations: docs/G2-ACCEPTANCE.md.
+- Live Staging repeatable gate PASS: 3/3 new RLS tables, 12 policies, no anon raw table SELECT and correct public function EXECUTE. Temporary cross-tenant, category-FK and QR revoke/rotate tests were transactional and rolled back; 0 catalog/table fixture rows remained.
+- Latest source **NOT hosted certified**. First Preview combined test run failed 1 stale expectation (104/105 pass); corrected in source, but Vercel then rejected a new Preview deployment with 402 api-deployments-free-per-day (>100/day). **Never claim latest READY** or G2 GO without fresh full build and real guest/mobile scanner testing. Preview SSO may block unauthenticated visitors at platform layer.
+- Existing main and Production untouched. Keep Phase 3 off until G2 hosted acceptance and Phase 4 off until Phase 3.
