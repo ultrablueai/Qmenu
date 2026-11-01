@@ -78,7 +78,8 @@ export default async function BranchDashboard({ params }: Props) {
         <section className={styles.panel}>
           <h2 className={styles.panelTitle}>QR المتجر والطاولة</h2>
           <p className={styles.panelSubtitle}>سيأخذ الرمز الزبون إلى منيو هذا الفرع مباشرةً، دون إجباره على إنشاء حساب.</p>
-          <div className={styles.empty} style={{marginTop:16}}>هذه الوظيفة قيد البناء في المرحلة الثانية، وليست جاهزة للاستخدام بعد.</div>
+          <div className={styles.empty} style={{marginTop:16}}>صفحة الزبون العامة قيد التجربة. عرض المنتجات وإنشاء QR للطاولات سيأتيان لاحقاً في G2.</div>
+          <Link href={`/b/${branch.id}`} target="_blank" rel="noopener noreferrer" className={styles.branchOpenLink}>معاينة صفحة الزبون العامة ←</Link>
         </section>
       </div>
       <section className={styles.modules} aria-labelledby="branch-tools-heading">
