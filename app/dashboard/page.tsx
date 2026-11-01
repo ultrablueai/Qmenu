@@ -66,8 +66,8 @@ export default async function Dashboard() {
     <div className={styles.shell}>
       <aside className={styles.sidebar} aria-label="القائمة الجانبية">
         <div className={styles.brand}>
-          <div className={styles.mark} aria-hidden="true">Q</div>
-          <div><div className={styles.brandTitle}>Qmenu</div><div className={styles.brandSubtitle}>SMART BUSINESS OS</div></div>
+          <div className={styles.mark} aria-hidden="true">B</div>
+          <div><div className={styles.brandTitle}>Beger</div><div className={styles.brandSubtitle}>SMART BUSINESS OS</div></div>
         </div>
         <div className={styles.businessChip}>
           <div className={styles.businessAvatar} aria-hidden="true">{initials(displayName)}</div>
@@ -135,7 +135,7 @@ export default async function Dashboard() {
               <h2 className={styles.heroTitle}>أهلاً بك في {displayName}</h2>
               <p className={styles.heroText}>مساحتك لإدارة النشاط والفروع. الخطوة التالية هي QR المتجر والمنيو الذي يفتح للزبون مباشرةً دون إلزامه بتسجيل حساب.</p>
             </div>
-            <div className={styles.heroGraphic} aria-hidden="true"><div className={styles.heroGraphicInner}><span className={styles.heroGraphicText}>Q</span></div></div>
+            <div className={styles.heroGraphic} aria-hidden="true"><div className={styles.heroGraphicInner}><span className={styles.heroGraphicText}>B</span></div></div>
           </section>
 
           <section className={styles.stats} aria-label="ملخص نشاطك">
