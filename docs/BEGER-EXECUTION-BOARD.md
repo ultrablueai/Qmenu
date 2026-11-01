@@ -56,3 +56,9 @@ On each phase closure add to this file:
 - Browser/device E2E evidence;
 - Open blockers and explicit GO/NO-GO.
 Never edit historical PASS to imply later tests passed.
+
+## Owner session refresh correction — 2026-11-01
+- Found and corrected a concrete auth boundary omission: `middleware.ts` refreshed sessions for merchant routes but lacked `/admin/:path*`. It now covers `/admin` while `app/admin/page.tsx` continues verifying identity and separate platform role server-side.
+- Owner /admin anonymous redirect now targets `/login?next=/admin`. Login return URL uses a strict two-path allowlist (`/admin`, otherwise `/dashboard`), never an arbitrary untrusted redirect. The normal merchant route remains unchanged.
+- Updated old merchant auth expectation to match the safe return logic; added `tests/platform-owner-login-return.test.mjs`. One intermediate build failed exactly due to an outdated literal redirect assertion; it was corrected, **not suppressed**.
+- Confirmed Vercel Staging deployment `a93f7cd` **READY**, full Node suite **93/93 pass**, Next compile and type checks succeeded. Real phone/browser refresh behavior remains unverified, and second independent account remains missing; Phase 1 **NO-GO**.
