@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import styles from "./dashboard.module.css";
 import BranchManager from "./branch-manager";
+import CustomerCards from "./customer-cards";
 import { serverSupabase } from "../../lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +56,10 @@ export default async function Dashboard() {
   const country = primary?.country_code ?? null;
   const primaryBranches = branches.filter((b) => b.business_id === primary?.id);
   const canManageBranches = currentRole === "owner" || currentRole === "manager";
+  const customerResult = primary && canManageBranches && !loadError
+    ? await supabase.from("business_customers").select("id,display_name,active")
+      .eq("business_id",primary.id).order("created_at",{ascending:false}).limit(50)
+    : {data:[],error:null};
 
   return (
     <div className={styles.shell}>
@@ -194,6 +199,8 @@ export default async function Dashboard() {
               ))}
             </div>
           </section>
+          {canManageBranches && primary && !loadError && !customerResult.error && <CustomerCards businessId={primary.id} businessName={displayName} customers={customerResult.data ?? []} canManage={canManageBranches} />}
+          {customerResult.error && <p className={styles.error} role="alert">تعذر تحميل بطاقات الزبائن. حاول مجدداً.</p>}
           <footer className={styles.footer}>Qmenu · Smart Business OS · نسخة Staging للاختبار فقط</footer>
         </main>
       </div>
