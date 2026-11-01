@@ -57,9 +57,9 @@ Each phase must document scope, acceptance evidence, tests, security checks, hum
 ## Current audit facts (2026-11-01)
 - Auth/onboarding and basic merchant/branch dashboards exist on staging, but require stronger real-browser/security checks.
 - Merchant-assisted customer QR issuance and staff scan code were implemented **out of priority and in conflict with the approved guest-order journey**; they are not an approved sign-up flow or substitute for shop/table QR.
-- The file `supabase/migrations/202611010002_customer_self_registration.sql` exists on the staging code branch but **was not applied to Supabase Staging**, creating a potential code/schema mismatch if prematurely used.
-- Supabase Staging currently has businesses, branches, memberships and customer QR tables, but no catalog/order/KDS/pager database tables. Platform Super Admin is not implemented.
-- Work must start by fixing this drift safely, not by inventing another QR mechanism.
+- The premature `202611010002_customer_self_registration.sql` draft was retired as an explicit no-op; merchant-assisted customer QR RPCs were disabled on Staging. Optional loyalty identity is deferred to Phase 4.
+- Supabase Staging has businesses, branches and memberships, but no catalog/order/KDS/pager database tables. The separate platform owner panel now exists with overview, read-only directory, audited plan catalog, manual trial assignment, administrator roster and limited audit overview. This is not a production/commercial release.
+- The QR drift has been contained without dropping legacy data; remaining Phase 1 work includes real browser/device acceptance and release-gate evidence. No invented QR mechanism is allowed.
 
 ## Safety and project separation
 - STAGING only until explicit owner approval for Production. No production schema changes, deploys, secrets, irreversible operations or PR merge by default.
@@ -70,3 +70,10 @@ Each phase must document scope, acceptance evidence, tests, security checks, hum
 
 ## Execution discipline
 Before implementing: read this document, inspect current code, migrations, test evidence, staging deployment and source master plans. Identify *one* smallest missing vertical slice. Build, test, independently verify, and report true remaining blockers. Stop and ask when scope/consent/product semantics are unclear. No speculative features, no unrelated projects, no unsupported READY claims.
+
+## Phase 1 isolation verification — 2026-11-01
+- SQL editor on Supabase **Staging**: two temporary businesses (one owned by test actor, one unrelated) confirmed RLS hides the unrelated business, branch and membership.
+- Additional temporary **staff membership** with two branches (one assigned, one unassigned) and a separate unrelated tenant: authenticated staff could read only the assigned branch. This is DB-level RLS verification, **not** a complete browser E2E or a second real login.
+- Both tests were run in transactions ending with ROLLBACK. Reproducible fixture: `tests/sql/staging-tenant-branch-isolation.sql`. No persistent test businesses or staff memberships were created.
+- Checked that authenticated role cannot execute the retired customer-QR issue/rotate/scan/deactivate RPCs.
+- Remaining Phase 1 acceptance: two independent authenticated real accounts and mobile/browser E2E, UI/accessibility regression and rollback readiness. Phase 1 remains **NO-GO** until this evidence is collected; no move to Phase 2 by implication.
