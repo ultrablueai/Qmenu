@@ -11,7 +11,7 @@
 - Public shop page /b/[branchId] and revocable table page /t/[token], without merchant login. Arabic RTL and Turkish LTR with real merchant name and branch.
 - Branch-owned categories and products; bilingual names, descriptions, optional HTTPS image, currency-aware integer pricing, active and available flags; merchant creation and editing from authorized branch dashboard.
 - Table creation, rename, disable/enable, token rotation, QR image display and A4 printable QR sheet.
-- Schema migration 202611020002_g2_branch_catalog_tables.sql applied to Staging, plus previous G2A public identity migration. Tables menu_categories, menu_items, dining_tables.
+- Schema migration 20261101233523_g2_branch_catalog_tables.sql applied to Staging, plus previous G2A public identity migration. Tables menu_categories, menu_items, dining_tables.
 - Public display-only functions public_branch_identity, public_branch_menu and public_table_locator. No ordering/loyalty invented.
 
 ## Verified on live Staging (transactional fixtures all rolled back)
