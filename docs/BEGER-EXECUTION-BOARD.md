@@ -82,3 +82,10 @@ Never edit historical PASS to imply later tests passed.
 - New merchant B must not see merchant A records even if both use Beger card hub. Device-only saved card may not survive reset; verified recovery is optional. Cross-city does not create pooled wallets.
 - Source-of-truth `docs/BEGER-LOYALTY-CARD-NOTIFICATIONS-SPEC.md` includes precise cross-city acceptance scenarios and privacy/security requirements. **Phase 4 planning only**; Phase 1, 2 and 3 gates remain unchanged.
 - Phase 1 pending: actual owner and merchant browser journeys, mobile responsive/RTL checks, signout/session behavior; user has two genuinely confirmed accounts. Do not claim actual browser E2E from SQL role impersonation alone.
+
+## Approved table QR and anti-queue-theft flow — 2026-11-01
+- Owner specifies **one distinct QR for every table**, scoped to business + branch + table. Guests scan and see a server-resolved table without typing or modifying a table number. A forged table field or QR from another branch cannot route an order to someone else's table.
+- Static table QR is a public locator **not physical-presence proof**; future implementation must provide revocation/rotation, validated table session and configurable staff confirmation against photographed/offsite misuse.
+- Order reference, pager sequence, customer loyalty card and table QR are **four separate identifiers**. Display numbers do not grant pickup/queue privileges. Use scoped tracking, one-time pickup proof/staff verification and idempotent transitions.
+- Phase 2 acceptance now explicitly includes distinct tables with same display number across different branches, compromised QR rotation and no customer-editable table selection. Phase 3 acceptance includes concurrent orders on one table, queue integrity, no stolen pickup or replay.
+- Canonical rationale and E2E scenarios in `docs/BEGER-CANONICAL-PLAN.md`. Product decision only; no live tables/order system created and **Phase 1 still OPEN/NO-GO**.
