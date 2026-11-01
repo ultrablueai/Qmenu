@@ -44,6 +44,11 @@ export default async function PlatformAdminDashboard() {
   </main>;
  }
 
+ // Keep tenant membership independent of platform access. No membership means no business switch.
+ const {data: merchantMembership, error: merchantMembershipError} = await supabase.from("memberships")
+  .select("business_id").eq("user_id",user.id).limit(1);
+ const canOpenBusiness = !merchantMembershipError && Boolean(merchantMembership?.length);
+
  const [summaryResult,directoryResult,plansResult,trialsResult,auditResult,rosterResult] = await Promise.all([
   supabase.rpc("platform_admin_overview"),
   supabase.rpc("platform_admin_business_directory"),
@@ -69,6 +74,7 @@ export default async function PlatformAdminDashboard() {
     <div><div className={styles.brandName}>Beger</div><div className={styles.brandCaption}>PLATFORM CONTROL</div></div>
    </div>
    <nav className={styles.nav} aria-label="أقسام كنترول بنل المنصة">
+    {canOpenBusiness && <Link className={styles.navLink} href="/dashboard" aria-label="الانتقال إلى نشاطي التجاري"><span className={styles.navGlyph} aria-hidden="true">⌂</span> نشاطي التجاري</Link>}
     <span className={styles.navLabel}>إدارة المنصة</span>
     <a className={`${styles.navLink} ${styles.navActive}`} href="#overview" aria-current="page"><span className={styles.navGlyph} aria-hidden="true">▦</span>نظرة عامة</a>
     <a className={styles.navLink} href="#merchants"><span className={styles.navGlyph} aria-hidden="true">⌂</span>الأنشطة والتجار</a>
@@ -85,7 +91,7 @@ export default async function PlatformAdminDashboard() {
   <div className={styles.main}>
    <header className={styles.topbar}>
     <div className={styles.breadcrumb}>بيجر <span aria-hidden="true">/</span> <strong>إدارة المنصة</strong></div>
-    <div className={styles.topActions}><span className={styles.pill}><span className={styles.dot} aria-hidden="true"/> Staging</span><div className={styles.avatar} aria-label="حساب مسؤول المنصة">{user.email?.slice(0,1).toUpperCase() ?? "B"}</div></div>
+    <div className={styles.topActions}>{canOpenBusiness && <Link href="/dashboard" style={{textDecoration:"none",color:"#17646b",background:"#eaf7f3",padding:"9px 12px",borderRadius:10,fontSize:12,fontWeight:800,whiteSpace:"nowrap"}}>نشاطي التجاري ↗</Link>}<span className={styles.pill}><span className={styles.dot} aria-hidden="true"/> Staging</span><div className={styles.avatar} aria-label="حساب مسؤول المنصة">{user.email?.slice(0,1).toUpperCase() ?? "B"}</div></div>
    </header>
    <main className={styles.content} id="overview">
     <div className={styles.titleRow}>
