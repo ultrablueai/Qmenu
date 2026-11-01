@@ -71,3 +71,9 @@ Current Supabase Staging has **12/12 public tables with RLS**, two independently
 - Previously supplied Android screenshot of ordinary merchant `/admin` displayed explicit access denied, confirming that separate merchant role does not get owner privileges.
 - **NOT EVIDENCED by these screenshots:** tapping sign-out, subsequent unauthenticated `/dashboard` redirect, stale-session denial, direct foreign-tenant branch URL, Turkish/LTR layout, a cross-browser authenticated API negative test, or any isolated restore.
 - These screenshots indicate mobile navigation and role separation on the sampled Android device; they do not establish comprehensive responsive QA for all viewport widths. Phase 1 remains **NO-GO** until the remaining gates are proved.
+
+## Read-only relational integrity scan — 2026-11-01
+- Live Staging verified: **2 owner memberships** and **zero** users with multiple business memberships, duplicate business owners, branch assignments without an appropriate business membership, assignments targeting a branch from a different business, orphan branches, or enabled platform admins with unconfirmed email. The result was observed directly from Supabase via a read-only SQL query.
+- Saved exact repeatable, read-only SQL in `tests/sql/staging-phase1-account-integrity-readonly.sql`. This validates present data consistency, **not general role enforcement or real browser session sign-out**.
+- Android owner-provided screenshots show merchant role denial on /admin and owner dual-role navigation. **No proof yet of what happens after clicking merchant 'خروج'.** Do not mark signout/session expiry PASS until a logout -> direct protected route attempt shows redirect to login, with the same browser context.
+- Encrypted backup export, isolated restoration and verification remain NOT EXECUTED. Keep **G1 NO-GO**.
