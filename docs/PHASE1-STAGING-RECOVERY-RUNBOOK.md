@@ -70,3 +70,15 @@ psql --single-transaction --variable ON_ERROR_STOP=1 \
 The clone must have compatible PostgreSQL/Supabase extensions and managed schemas. Platform PostgreSQL 17 can differ from a self-hosted version; resolve mismatches *only in the clone* and run the restore again. The exported DB does not automatically restore storage objects, Edge Functions, SMTP/OAuth configuration or other external services. Never use this command with the live Staging or primary project's database URL. `ISOLATED_RESTORE_DATABASE_URL` must refer to an approved disposable local database. Do not send it into chat.
 
 **Verification sequence after isolated restore:** 13 expected migration records where applicable; 12 public tables with RLS; two scoped businesses and branches and memberships (compare against backup date); audited privileged RPC grants; branch isolation and rejection of retired QR RPCs. Real session testing requires regenerated clone credentials and accounts; don't reuse live access tokens. If restoration is not performed, record it as NOT VERIFIED.
+
+## Windows operator backup utility — 2026-11-02
+The checked-in script `scripts/g1-staging-backup.ps1` is a **Staging-only export utility**, not evidence that a backup or restore exists. It rejects the wrong Git checkout, origin and branch, requires a running local Docker Desktop engine and the Supabase CLI, links only to project `qandxrcuetwzenlqspez`, and exports `roles.sql`, `schema.sql`, `data.sql` with per-file SHA256 values in a manifest outside the Git working tree. It does not invoke any restoration, edit Production, or push database files. The operator runs it locally with their authorized Supabase login and database password; no passwords must be posted in conversation, scripts, Git or logs. The output is **plaintext sensitive data** until separately encrypted. Immediately encrypt it with a locally trusted tool and do not sync plaintext through cloud drives, chat or source control.
+
+From a verified checkout of `feat/g1-foundation` on the operator's Windows computer:
+```powershell
+git.exe -C "D:\Users\abc\Documents\ChatGPT\Beger\Qmenu" pull --ff-only origin feat/g1-foundation
+powershell -ExecutionPolicy Bypass -File "D:\Users\abc\Documents\ChatGPT\Beger\Qmenu\scripts\g1-staging-backup.ps1"
+```
+The first command must exit 0. This script requires installed `supabase` and `docker`, and a running Docker Desktop engine. It will prompt for authorization locally as needed. Success means `BACKUP_EXPORT_COMPLETE` **only**, not `G1 GO`. The operator should share *only* successful completion and scrubbed manifest metadata, never exported SQL or access tokens.
+
+An isolated restore remains a **separate mandatory task** against a disposable local self-hosted Supabase instance, with non-production credentials and outgoing email/notifications disabled. Follow the official Supabase platform-to-self-hosted guide and compatibility checks documented above. This repo script deliberately does not take a restore URL or offer destructive shortcuts. **RESTORE NOT VERIFIED** unless a separate restore, RLS verification and count comparison are performed and recorded.
