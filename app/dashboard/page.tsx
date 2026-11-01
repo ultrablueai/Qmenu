@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import styles from "./dashboard.module.css";
 import BranchManager from "./branch-manager";
-import CustomerCards from "./customer-cards";
 import { serverSupabase } from "../../lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -56,10 +55,6 @@ export default async function Dashboard() {
   const country = primary?.country_code ?? null;
   const primaryBranches = branches.filter((b) => b.business_id === primary?.id);
   const canManageBranches = currentRole === "owner" || currentRole === "manager";
-  const customerResult = primary && canManageBranches && !loadError
-    ? await supabase.from("business_customers").select("id,display_name,active")
-      .eq("business_id",primary.id).order("created_at",{ascending:false}).limit(50)
-    : {data:[],error:null};
 
   return (
     <div className={styles.shell}>
@@ -130,7 +125,7 @@ export default async function Dashboard() {
             <div className={styles.heroCopy}>
               <span className={styles.heroBadge}>✦ بداية مساحة عملك</span>
               <h2 className={styles.heroTitle}>أهلاً بك في {displayName}</h2>
-              <p className={styles.heroText}>مساحتك لإدارة النشاط والفروع. نحن نجهّز أدوات المنيو والحجوزات والعملاء لتصبح متاحة لك تدريجياً، مع الحفاظ على بيانات كل نشاط منفصلة وآمنة.</p>
+              <p className={styles.heroText}>مساحتك لإدارة النشاط والفروع. الخطوة التالية هي QR المتجر والمنيو الذي يفتح للزبون مباشرةً دون إلزامه بتسجيل حساب.</p>
             </div>
             <div className={styles.heroGraphic} aria-hidden="true"><div className={styles.heroGraphicInner}><span className={styles.heroGraphicText}>Q</span></div></div>
           </section>
@@ -199,8 +194,6 @@ export default async function Dashboard() {
               ))}
             </div>
           </section>
-          {canManageBranches && primary && !loadError && !customerResult.error && <CustomerCards businessId={primary.id} businessName={displayName} customers={customerResult.data ?? []} canManage={canManageBranches} />}
-          {customerResult.error && <p className={styles.error} role="alert">تعذر تحميل بطاقات الزبائن. حاول مجدداً.</p>}
           <footer className={styles.footer}>Qmenu · Smart Business OS · نسخة Staging للاختبار فقط</footer>
         </main>
       </div>
