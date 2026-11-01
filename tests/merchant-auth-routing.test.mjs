@@ -10,7 +10,7 @@ const onboardingLayout = readFileSync("app/onboarding/layout.tsx", "utf8");
 test("login validates Supabase session before using server-side dashboard membership gate", () => {
   assert.match(login, /auth\.signInWithPassword/);
   assert.match(login, /if \(!data\.session\)/);
-  assert.match(login, /window\.location\.replace\("\/dashboard"\)/);
+  assert.match(login, /window\.location\.replace\(target === "\/admin" \? "\/admin" : "\/dashboard"\)/);
 });
 
 test("dashboard redirects anonymous users to login", () => {
