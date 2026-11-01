@@ -63,3 +63,11 @@ Current Supabase Staging has **12/12 public tables with RLS**, two independently
 - **PASS (user-reported):** Using the ordinary merchant account in the live Staging browser, direct navigation to `/admin` displayed the access-denied/insufficient-permission message rather than the platform owner control panel. This is direct browser evidence reported by the owner, not an automated trace; browser/device and exact screenshot not captured here.
 - Scope: ordinary merchant **platform-admin negative route** only. Does not establish tenant cross-access denial via a foreign branch URL, session sign-out success, expired session behavior, mobile layout, or backup/restore.
 - Remaining G1 blockers persist, and Phase 1 remains **NO-GO** until all required gates are evidenced. No main or Production changes.
+
+## Owner-supplied Android screenshots — 2026-11-01
+- **PASS (visual / owner-supplied):** screenshot of ordinary merchant `ultraspeedweb` dashboard on phone, one linked business and one branch; platform administration navigation is not shown.
+- **PASS (visual / owner-supplied):** separate `yastym5` merchant dashboard on phone, with `إدارة المنصة` navigation shown, one linked business and one branch.
+- **PASS (visual / owner-supplied):** same platform-authorized owner's `/admin` dashboard on phone, showing platform summary of two merchants, two branches and two memberships, and a switch back to merchant dashboard.
+- Previously supplied Android screenshot of ordinary merchant `/admin` displayed explicit access denied, confirming that separate merchant role does not get owner privileges.
+- **NOT EVIDENCED by these screenshots:** tapping sign-out, subsequent unauthenticated `/dashboard` redirect, stale-session denial, direct foreign-tenant branch URL, Turkish/LTR layout, a cross-browser authenticated API negative test, or any isolated restore.
+- These screenshots indicate mobile navigation and role separation on the sampled Android device; they do not establish comprehensive responsive QA for all viewport widths. Phase 1 remains **NO-GO** until the remaining gates are proved.
