@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { serverSupabase } from "../../lib/supabase/server";
 import styles from "./admin.module.css";
 import PlanManager from "./plan-manager";
+import TrialManager from "./trial-manager";
 
 export const dynamic = "force-dynamic";
 
@@ -43,10 +44,11 @@ export default async function PlatformAdminDashboard() {
   </main>;
  }
 
- const [summaryResult,directoryResult,plansResult] = await Promise.all([
+ const [summaryResult,directoryResult,plansResult,trialsResult] = await Promise.all([
   supabase.rpc("platform_admin_overview"),
   supabase.rpc("platform_admin_business_directory"),
-  supabase.from("plans").select("id,code,name,active").order("code",{ascending:true})
+  supabase.from("plans").select("id,code,name,active").order("code",{ascending:true}),
+  supabase.rpc("platform_admin_trial_overview")
  ]);
  const summary = (summaryResult.data?.[0] ?? null) as
   {merchant_count: number | string;branch_count:number | string;account_memberships:number | string} | null;
@@ -54,6 +56,7 @@ export default async function PlatformAdminDashboard() {
  const failed = Boolean(summaryResult.error || directoryResult.error || !summary);
  const owner = account.role === "platform_owner";
  const plans = (plansResult.data ?? []) as {id:string;code:string;name:string;active:boolean}[];
+ const trials = (trialsResult.data ?? []) as {business_id:string;plan_code:string;starts_at:string;ends_at:string|null;effective_status:string}[];
 
  return <div className={styles.shell} dir="rtl" lang="ar">
   <aside className={styles.sidebar} aria-label="القائمة الرئيسية لمالك المنصة">
@@ -66,9 +69,10 @@ export default async function PlatformAdminDashboard() {
     <a className={`${styles.navLink} ${styles.navActive}`} href="#overview" aria-current="page"><span className={styles.navGlyph} aria-hidden="true">▦</span>نظرة عامة</a>
     <a className={styles.navLink} href="#merchants"><span className={styles.navGlyph} aria-hidden="true">⌂</span>الأنشطة والتجار</a>
     <a className={styles.navLink} href="#plans"><span className={styles.navGlyph} aria-hidden="true">▤</span>الباقات</a>
+    <a className={styles.navLink} href="#trials"><span className={styles.navGlyph} aria-hidden="true">◷</span>التجارب</a>
     <a className={styles.navLink} href="#operations"><span className={styles.navGlyph} aria-hidden="true">◈</span>جاهزية المنصة</a>
     <span className={styles.navLabel} style={{marginTop:18}}>الإدارة القادمة</span>
-    <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">▤</span>تفعيل الاشتراكات<span className={styles.navTag}>قريباً</span></span>
+    <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">▤</span>الفوترة المدفوعة<span className={styles.navTag}>قريباً</span></span>
     <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">♧</span>الدعم والصلاحيات<span className={styles.navTag}>قريباً</span></span>
    </nav>
    <div className={styles.sidebarFoot}>لوحة منفصلة لإدارة بيجر. لا تسمح بتقمص حساب التاجر أو الوصول إلى بيانات زبائنه الخاصة.</div>
@@ -113,6 +117,7 @@ export default async function PlatformAdminDashboard() {
       </table></div>}
     </section>
     {plansResult.error ? <p className={styles.error} role="alert">تعذّر تحميل الباقات. لا يمكن إدارة الباقات في هذه الحالة.</p> : <PlanManager plans={plans} canManage={owner} />}
+    {(plansResult.error || directoryResult.error || trialsResult.error) ? <p role="alert" className={styles.error}>لا يمكن إدارة التجارب حتى يتم تحميل الأنشطة والباقات والاشتراكات بشكل موثوق.</p> : <TrialManager businesses={directory} plans={plans} trials={trials} canManage={owner} />}
     <section id="operations" className={styles.panel} aria-labelledby="operations-heading">
      <div className={styles.panelHead}><div><h2 id="operations-heading" className={styles.panelTitle}>وحدات الإدارة القادمة</h2><p className={styles.panelDesc}>نثبت الصلاحيات والأساس أولاً؛ لم نفعّل تشغيل أو فوترة غير مكتملين.</p></div><span className={styles.panelCount}>قيد التطوير</span></div>
      <div className={styles.grid}>{nextModules.map(m=><div className={styles.module} key={m.title}>
@@ -123,7 +128,7 @@ export default async function PlatformAdminDashboard() {
    </main>
   </div>
   <nav className={styles.mobileNav} aria-label="تنقل كنترول بنل المالك على الهاتف">
-   <a href="#overview"><span aria-hidden="true">▦</span>الرئيسية</a><a href="#merchants"><span aria-hidden="true">⌂</span>التجار</a><a href="#plans"><span aria-hidden="true">▤</span>الباقات</a><a href="#operations"><span aria-hidden="true">◈</span>الوحدات</a>
+   <a href="#overview"><span aria-hidden="true">▦</span>الرئيسية</a><a href="#merchants"><span aria-hidden="true">⌂</span>التجار</a><a href="#plans"><span aria-hidden="true">▤</span>الباقات</a><a href="#trials"><span aria-hidden="true">◷</span>التجارب</a>
   </nav>
  </div>;
 }
