@@ -91,7 +91,7 @@ export default async function PlatformAdminDashboard() {
   <div className={styles.main}>
    <header className={styles.topbar}>
     <div className={styles.breadcrumb}>بيجر <span aria-hidden="true">/</span> <strong>إدارة المنصة</strong></div>
-    <div className={styles.topActions}>{canOpenBusiness && <Link href="/dashboard" style={{textDecoration:"none",color:"#17646b",background:"#eaf7f3",padding:"9px 12px",borderRadius:10,fontSize:12,fontWeight:800,whiteSpace:"nowrap"}}>نشاطي التجاري ↗</Link>}<span className={styles.pill}><span className={styles.dot} aria-hidden="true"/> Staging</span><div className={styles.avatar} aria-label="حساب مسؤول المنصة">{user.email?.slice(0,1).toUpperCase() ?? "B"}</div></div>
+    <div className={styles.topActions}>{canOpenBusiness && <Link href="/dashboard" style={{textDecoration:"none",color:"#17646b",background:"#eaf7f3",padding:"9px 12px",borderRadius:10,fontSize:12,fontWeight:800,whiteSpace:"nowrap"}}>نشاطي التجاري ↗</Link>}<span className={styles.pill}><span className={styles.dot} aria-hidden="true"/> Staging</span><form action="/auth/signout" method="post" style={{display:"inline-flex"}}><button type="submit" aria-label="تسجيل الخروج من إدارة بيجر" style={{font:"inherit",fontSize:12,fontWeight:700,color:"#17646b",background:"#fff",border:"1px solid #cadcde",borderRadius:10,padding:"9px 12px",cursor:"pointer"}}>تسجيل الخروج</button></form><div className={styles.avatar} aria-label="حساب مسؤول المنصة">{user.email?.slice(0,1).toUpperCase() ?? "B"}</div></div>
    </header>
    <main className={styles.content} id="overview">
     <div className={styles.titleRow}>
