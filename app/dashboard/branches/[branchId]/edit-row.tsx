@@ -6,9 +6,9 @@ const button:CSSProperties={border:"1px solid #bdd4d4",borderRadius:8,padding:"8
 type Category={id:string;name_ar:string;name_tr:string;sort_order:number};
 type Product={id:string;category_id:string;name_ar:string;name_tr:string;description_ar:string;description_tr:string;price_minor:number;image_url:string|null};
 type Table={id:string;label:string};
-export function EditCategory({value,busy,save}:{value:Category;busy:boolean;save:(data:Record<string,string|number>)=>Promise<void>}){
+export function EditCategory({value,busy,save}:{value:Category;busy:boolean;save:(data:Record<string,string|number>)=>Promise<boolean>}){
  const [open,setOpen]=useState(false),[ar,setAr]=useState(value.name_ar),[tr,setTr]=useState(value.name_tr),[order,setOrder]=useState(String(value.sort_order));
- async function submit(e:FormEvent){e.preventDefault();await save({name_ar:ar.trim(),name_tr:tr.trim(),sort_order:Number(order)});setOpen(false);}
+ async function submit(e:FormEvent){e.preventDefault();if(await save({name_ar:ar.trim(),name_tr:tr.trim(),sort_order:Number(order)}))setOpen(false);}
  return <div>{!open?<button type="button" style={button} onClick={()=>setOpen(true)}>تعديل</button>:
  <form onSubmit={submit} style={group}>
   <label>عربي<input style={input} required maxLength={100} value={ar} onChange={e=>setAr(e.target.value)}/></label>
@@ -17,7 +17,7 @@ export function EditCategory({value,busy,save}:{value:Category;busy:boolean;save
   <button disabled={busy} style={button}>حفظ</button><button type="button" style={button} onClick={()=>setOpen(false)}>إلغاء</button>
  </form>}</div>;
 }
-export function EditProduct({value,categories,factor,busy,save}:{value:Product;categories:Category[];factor:number;busy:boolean;save:(data:Record<string,string|number|null>)=>Promise<void>}){
+export function EditProduct({value,categories,factor,busy,save}:{value:Product;categories:Category[];factor:number;busy:boolean;save:(data:Record<string,string|number|null>)=>Promise<boolean>}){
  const [open,setOpen]=useState(false),[ar,setAr]=useState(value.name_ar),[tr,setTr]=useState(value.name_tr),
  [descAr,setDescAr]=useState(value.description_ar),[descTr,setDescTr]=useState(value.description_tr),
  [photo,setPhoto]=useState(value.image_url??""),[price,setPrice]=useState(String(Number(value.price_minor)/factor)),[category,setCategory]=useState(value.category_id),
@@ -27,9 +27,9 @@ export function EditProduct({value,categories,factor,busy,save}:{value:Product;c
   if(!Number.isFinite(n)||n<0||!Number.isSafeInteger(minor)||minor>100000000000){setValidation("السعر غير صالح");return;}
   if(photo.trim()&&!/^https:\/\/[^\s]+$/.test(photo.trim())){setValidation("رابط الصورة يجب أن يبدأ https://");return;}
   if(!categories.some(c=>c.id===category)){setValidation("التصنيف غير صالح");return;}
-  await save({name_ar:ar.trim(),name_tr:tr.trim(),description_ar:descAr.trim(),description_tr:descTr.trim(),
+  const didSave=await save({name_ar:ar.trim(),name_tr:tr.trim(),description_ar:descAr.trim(),description_tr:descTr.trim(),
    category_id:category,price_minor:minor,image_url:photo.trim()||null});
-  setOpen(false);
+  if(didSave)setOpen(false);
  }
  return <div>{!open?<button type="button" style={button} onClick={()=>setOpen(true)}>تعديل التفاصيل والسعر</button>:
  <form onSubmit={submit} style={{...group,flexBasis:"100%"}}>
@@ -44,9 +44,9 @@ export function EditProduct({value,categories,factor,busy,save}:{value:Product;c
   <button disabled={busy} style={button}>حفظ التعديلات</button><button type="button" style={button} onClick={()=>setOpen(false)}>إلغاء</button>
  </form>}</div>;
 }
-export function EditTable({value,busy,save}:{value:Table;busy:boolean;save:(label:string)=>Promise<void>}){
+export function EditTable({value,busy,save}:{value:Table;busy:boolean;save:(label:string)=>Promise<boolean>}){
  const [open,setOpen]=useState(false),[label,setLabel]=useState(value.label);
- async function submit(e:FormEvent){e.preventDefault();await save(label.trim());setOpen(false);}
+ async function submit(e:FormEvent){e.preventDefault();if(await save(label.trim()))setOpen(false);}
  return <div>{!open?<button type="button" style={button} onClick={()=>setOpen(true)}>تغيير الاسم</button>:
  <form onSubmit={submit} style={{display:"flex",gap:8}}><input style={input} required maxLength={50} value={label} onChange={e=>setLabel(e.target.value)}/><button disabled={busy} style={button}>حفظ</button><button type="button" style={button} onClick={()=>setOpen(false)}>إلغاء</button></form>}</div>;
 }
