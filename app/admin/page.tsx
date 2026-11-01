@@ -30,7 +30,7 @@ export default async function PlatformAdminDashboard() {
  const { data: account, error: permissionError } = await supabase.from("platform_admins")
   .select("user_id,role,enabled").eq("user_id",user.id).eq("enabled",true).maybeSingle();
 
- if (permissionError || !account) {
+ if(permissionError || !account) {
   return <main dir="rtl" lang="ar" style={{minHeight:"100dvh",display:"grid",placeItems:"center",background:"#f5f7fa",fontFamily:"system-ui",padding:20}}>
    <section style={{width:"100%",maxWidth:480,background:"#fff",border:"1px solid #e5edf1",borderRadius:19,padding:28,boxSizing:"border-box"}}>
     <p style={{color:"#1b7773",fontSize:12,fontWeight:800}}>BEGER · PLATFORM ACCESS</p>
