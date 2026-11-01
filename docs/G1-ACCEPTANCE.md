@@ -98,3 +98,8 @@ Current Supabase Staging has **12/12 public tables with RLS**, two independently
 ## Local recovery vs Staging row-count comparison — 2026-11-02
 - Live, read-only Staging SQL counts matched operator's isolated local restore for **all 12 public tables**: `audit_logs=2`, `branch_assignments=0`, `branches=2`, `business_customers=0`, `businesses=2`, `customer_qr_scan_attempts=0`, `customer_qr_scans=0`, `memberships=2`, `plans=0`, `platform_admins=1`, `platform_audit_events=0`, `subscriptions=0`.
 - This certifies **row counts only**, not row-by-row identity, auth continuity, or effective RLS permissions. The restores of `roles.sql` and vector storage tables were intentionally not completed; see previously documented limitations. Continue to keep G1 NO-GO pending required remaining gates.
+
+## Auth aggregate comparison — 2026-11-02
+- Operator's isolated local restoration query yielded `auth.users total=2, distinct_ids=2, email_confirmed=2`.
+- Independently queried live Staging read-only with the same aggregate query and confirmed exactly `2,2,2`.
+- Aggregate match is **PASS** but does not establish identity-level row equivalence, credential/session operation, or complete roles restore; G1 remains NO-GO until remaining acceptance gates.
