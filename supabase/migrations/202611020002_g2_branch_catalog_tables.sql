@@ -1,5 +1,6 @@
 -- Beger G2: branch-scoped catalog and revocable public table locators.
 -- Staging only. No changes to auth/users/production. No fixtures.
+create unique index if not exists g2_branch_business_id_unique on public.branches(id,business_id);
 create table if not exists public.menu_categories (
   id uuid primary key default gen_random_uuid(),
   business_id uuid not null references public.businesses(id) on delete cascade,
@@ -41,7 +42,6 @@ create table if not exists public.dining_tables (
   unique (branch_id,label),
   foreign key (branch_id,business_id) references public.branches(id,business_id) on delete cascade
 );
-create unique index if not exists g2_branch_business_id_unique on public.branches(id,business_id);
 create index if not exists g2_menu_categories_by_branch on public.menu_categories(branch_id,active,sort_order);
 create index if not exists g2_menu_items_by_branch on public.menu_items(branch_id,category_id,active,available,sort_order);
 create index if not exists g2_tables_by_branch on public.dining_tables(branch_id,active);
