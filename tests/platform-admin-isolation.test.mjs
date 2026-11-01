@@ -22,11 +22,11 @@ test("platform aggregate RPC fails closed before accessing tenant metrics",()=>{
 test("platform console checks real session and independent role",()=>{
  assert.match(page,/supabase\.auth\.getUser\(\)/);
  assert.match(page,/\.from\("platform_admins"\)/);
- assert.match(page,/if\(permissionError \|\| !account\)/);
+ assert.match(page,/if\s*\(permissionError \|\| !account\)/);
  assert.match(page,/supabase\.rpc\("platform_admin_overview"\)/);
 });
 test("platform console does not impersonate merchant or claim future features ready",()=>{
- assert.match(page,/لم تُفعّل بعد/);
+ assert.match(page,/غير متاح بعد/);
  assert.doesNotMatch(page,/service_role|admin\.getUserById|update.*businesses/);
  assert.match(canonical,/Super Admin/);
 });
