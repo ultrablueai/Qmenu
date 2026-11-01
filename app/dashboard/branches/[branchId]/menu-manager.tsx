@@ -19,6 +19,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
   const [itemAr,setItemAr]=useState(""),[itemTr,setItemTr]=useState(""),[descriptionAr,setDescriptionAr]=useState(""),[descriptionTr,setDescriptionTr]=useState("");
   const [categoryId,setCategoryId]=useState(""),[price,setPrice]=useState(""),[photo,setPhoto]=useState(""),[tableLabel,setTableLabel]=useState("");
   const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
+  const [origin,setOrigin]=useState("");
   const factor=country==="TR"?100:1,unit=country==="TR"?"TRY":"SYP";
   async function refresh(){
     const db=browserSupabase();
@@ -30,6 +31,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
     if(a.error||b.error||c.error)throw new Error("تعذّر تحميل بيانات G2. تأكد من صلاحياتك وأعد المحاولة.");
     setCats(a.data??[]);setItems(b.data??[]);setTables(c.data??[]);
   }
+  useEffect(()=>{setOrigin(window.location.origin);},[]);
   useEffect(()=>{let alive=true;setLoading(true);refresh().catch(e=>{if(alive)setError(e.message)}).finally(()=>{if(alive)setLoading(false)});return()=>{alive=false};},[branchId]);
   async function run(action:()=>Promise<{error: {message:string}|null}>,message:string){
     if(busy)return;setBusy(true);setError("");setNotice("");
@@ -55,7 +57,6 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
     setTableLabel("");
   }
   function qr(link:string){return "https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data="+encodeURIComponent(link);}
-  const origin=typeof window!=="undefined"?window.location.origin:"";
   const branchUrl=origin+`/b/${branchId}`;
   if(loading)return <section style={panel} aria-live="polite">جارٍ تحميل إعدادات المنيو والطاولات...</section>;
   return <section dir="rtl" lang="ar" aria-label="إدارة المنيو والطاولات" style={{marginTop:24}}>
@@ -66,7 +67,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
     <div style={panel}>
       <h3>رمز QR الفرع</h3>
       <p style={{fontSize:13}}>هذا رمز عام للقائمة ولا يمنح صلاحية إدارة. يمكن للزبون مسحه مباشرة.</p>
-      <img src={qr(branchUrl)} alt="QR رابط قائمة الفرع" width={180} height={180} loading="lazy"/>
+      {origin?<img src={qr(branchUrl)} alt="QR رابط قائمة الفرع" width={180} height={180} loading="lazy"/>:<p>جارٍ تجهيز رمز QR...</p>}
       <p><a href={branchUrl} target="_blank" rel="noopener noreferrer">معاينة قائمة الفرع</a></p>
       <small style={{color:"#698087"}}>يُولّد الرسم عبر خدمة QR خارجية باستخدام الرابط العام فقط؛ لا تُرسل بيانات حسابك.</small>
     </div>
@@ -122,7 +123,7 @@ export default function MenuManager({businessId,branchId,country}: {businessId:s
           <strong>طاولة {t.label}</strong><p style={{fontSize:12}}>{t.active?"مفعّلة":"معطّلة"}</p>
           {t.active?<a href={url} target="_blank" rel="noopener noreferrer">فتح صفحة الطاولة</a>:null}
         </div>
-        {t.active?<img src={qr(url)} width={125} height={125} loading="lazy" alt={`QR طاولة ${t.label}`}/>:null}
+        {t.active&&origin?<img src={qr(url)} width={125} height={125} loading="lazy" alt={`QR طاولة ${t.label}`}/>:null}
         <EditTable value={t} busy={busy} save={async label=>{await run(async()=>browserSupabase().from("dining_tables").update({label}).eq("id",t.id).eq("branch_id",branchId),"تم تعديل اسم الطاولة");}}/>
         <button disabled={busy} type="button" style={btn} onClick={()=>run(async()=>browserSupabase().from("dining_tables").update({qr_token:crypto.randomUUID()}).eq("id",t.id).eq("branch_id",branchId),"تم إلغاء الرمز القديم وإنشاء رمز جديد")}>تدوير QR</button>
         <button disabled={busy} type="button" style={{...btn,background:t.active?"#935624":"#167c5a"}} onClick={()=>run(async()=>browserSupabase().from("dining_tables").update({active:!t.active}).eq("id",t.id).eq("branch_id",branchId),"تم تحديث حالة الطاولة")}>{t.active?"تعطيل":"تفعيل"}</button>
