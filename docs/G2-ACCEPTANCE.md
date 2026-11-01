@@ -33,3 +33,9 @@
 6. Previous G1 commercial blockers remain separately tracked: real bearer-token API negative assertions, complete role restore, password protection policy.
 
 **Decision: G2 code/backend substantially built; G2 release NO-GO until exact SHA READY, true user/guest browser tests and relevant security/privacy gates.** No main or Production changes. Consolidate the next Preview deploy instead of one build per file.
+
+## Final schema/version and security hygiene
+- Aligned both G2 migration filenames with the actual applied Staging migration history, not arbitrary source timestamps: 20261101232646_g2a_public_branch_identity.sql and 20261101233523_g2_branch_catalog_tables.sql. Removed duplicate later-version files. **No migration was re-applied** to the database.
+- Supabase security advisors after G2: three intentionally anon-callable SECURITY DEFINER WARNs (public branch identity/menu/table locator), 13 authenticated-callable privileged function WARNs in total (10 prior + 3 public G2), three RLS-without-policy informational tables and one Free-tier leaked-password-screening WARN. All three public G2 functions verified STABLE, SECURITY DEFINER, search_path pinned to empty, with restricted output schemas and explicit anon/authenticated execute grants. These advisor notices are **reviewed, not eliminated**.
+- To control future Vercel preview usage, updated only Staging project build-ignore command to require a deliberate [beger-deploy] marker in the git commit message on the approved feature branch. Normal code/docs commits should skip building. This setting is applied but has **not yet been exercised by a successful marker build** because of account quota; do not assume new revisions went live.
+- Vercel branch alias still points to an older READY deployment, despite latest deployment metadata reflecting an earlier ERROR build. Fresh hosted proof remains mandatory.
