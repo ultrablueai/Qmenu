@@ -19,7 +19,7 @@ type DirectoryEntry = {
 
 const nextModules = [
  { icon: "▤", title: "اشتراكات التجار", text: "ربط اشتراك مدفوع بتاجر وتحديد أسعاره وفواتيره. غير متاح بعد." },
- { icon: "♧", title: "الدعم وإدارة الصلاحيات", text: "إدارة مسؤولي المنصة والتعامل مع طلبات الدعم بموافقات وسجل تدقيق. غير متاح بعد." },
+ { icon: "♧", title: "الدعم وتغيير الصلاحيات", text: "تغيير صلاحيات المسؤولين ومتابعة طلبات الدعم ما زالا بحاجة إجراءات موافقة وتحقق منفصلة. غير متاح بعد." },
  { icon: "◷", title: "مراقبة الخدمات", text: "مراقبة أخطاء التشغيل والتنبيهات وسلامة النظام. لا يوجد ربط مباشر بعد." },
  { icon: "▥", title: "التحليلات والفوترة", text: "التقارير المالية والاشتراكات والتحصيل والتصدير. لا توجد إيرادات تجارية محتسبة بعد." },
 ];
@@ -44,11 +44,13 @@ export default async function PlatformAdminDashboard() {
   </main>;
  }
 
- const [summaryResult,directoryResult,plansResult,trialsResult] = await Promise.all([
+ const [summaryResult,directoryResult,plansResult,trialsResult,auditResult,rosterResult] = await Promise.all([
   supabase.rpc("platform_admin_overview"),
   supabase.rpc("platform_admin_business_directory"),
   supabase.from("plans").select("id,code,name,active").order("code",{ascending:true}),
-  supabase.rpc("platform_admin_trial_overview")
+  supabase.rpc("platform_admin_trial_overview"),
+  supabase.rpc("platform_admin_audit_overview"),
+  account.role==="platform_owner" ? supabase.rpc("platform_owner_access_roster") : Promise.resolve({data:[],error:null})
  ]);
  const summary = (summaryResult.data?.[0] ?? null) as
   {merchant_count: number | string;branch_count:number | string;account_memberships:number | string} | null;
@@ -57,6 +59,8 @@ export default async function PlatformAdminDashboard() {
  const owner = account.role === "platform_owner";
  const plans = (plansResult.data ?? []) as {id:string;code:string;name:string;active:boolean}[];
  const trials = (trialsResult.data ?? []) as {business_id:string;plan_code:string;starts_at:string;ends_at:string|null;effective_status:string}[];
+ const auditEvents = (auditResult.data ?? []) as {event_id:number;event_action:string;target_kind:string;event_at:string}[];
+ const roster = (rosterResult.data ?? []) as {account_email:string;role_name:string;is_enabled:boolean;granted_at:string}[];
 
  return <div className={styles.shell} dir="rtl" lang="ar">
   <aside className={styles.sidebar} aria-label="القائمة الرئيسية لمالك المنصة">
@@ -70,10 +74,11 @@ export default async function PlatformAdminDashboard() {
     <a className={styles.navLink} href="#merchants"><span className={styles.navGlyph} aria-hidden="true">⌂</span>الأنشطة والتجار</a>
     <a className={styles.navLink} href="#plans"><span className={styles.navGlyph} aria-hidden="true">▤</span>الباقات</a>
     <a className={styles.navLink} href="#trials"><span className={styles.navGlyph} aria-hidden="true">◷</span>التجارب</a>
+    <a className={styles.navLink} href="#security"><span className={styles.navGlyph} aria-hidden="true">♧</span>الصلاحيات والتدقيق</a>
     <a className={styles.navLink} href="#operations"><span className={styles.navGlyph} aria-hidden="true">◈</span>جاهزية المنصة</a>
     <span className={styles.navLabel} style={{marginTop:18}}>الإدارة القادمة</span>
     <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">▤</span>الفوترة المدفوعة<span className={styles.navTag}>قريباً</span></span>
-    <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">♧</span>الدعم والصلاحيات<span className={styles.navTag}>قريباً</span></span>
+    <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">♧</span>تغيير الأدوار والدعم<span className={styles.navTag}>قريباً</span></span>
    </nav>
    <div className={styles.sidebarFoot}>لوحة منفصلة لإدارة بيجر. لا تسمح بتقمص حساب التاجر أو الوصول إلى بيانات زبائنه الخاصة.</div>
   </aside>
@@ -118,6 +123,39 @@ export default async function PlatformAdminDashboard() {
     </section>
     {plansResult.error ? <p className={styles.error} role="alert">تعذّر تحميل الباقات. لا يمكن إدارة الباقات في هذه الحالة.</p> : <PlanManager plans={plans} canManage={owner} />}
     {(plansResult.error || directoryResult.error || trialsResult.error) ? <p role="alert" className={styles.error}>لا يمكن إدارة التجارب حتى يتم تحميل الأنشطة والباقات والاشتراكات بشكل موثوق.</p> : <TrialManager businesses={directory} plans={plans} trials={trials} canManage={owner} />}
+    <section id="security" className={styles.panel} aria-labelledby="security-heading">
+     <div className={styles.panelHead}>
+      <div><h2 id="security-heading" className={styles.panelTitle}>صلاحيات المنصة وسجل التدقيق</h2>
+       <p className={styles.panelDesc}>إظهار حسابات الإدارة للمالك فقط وآخر 50 عملية إدارية، دون بيانات العملاء أو محتوى السجلات الحساسة.</p></div>
+      <span className={styles.panelCount}>متابعة آمنة · قراءة فقط</span>
+     </div>
+     {owner && (rosterResult.error ? <p role="alert" className={styles.error}>تعذر تحميل حسابات الإدارة.</p> :
+      <div style={{marginBottom:22}}>
+       <h3 style={{fontSize:14,marginBottom:10}}>المسؤولون المخوّلون</h3>
+       {roster.length===0?<div className={styles.empty}>لا توجد حسابات إدارة مخولة.</div>:
+        <div className={styles.tableWrap}><table className={styles.table}>
+         <thead><tr><th scope="col">الحساب</th><th scope="col">الدور</th><th scope="col">الحالة</th><th scope="col">تاريخ الاعتماد</th></tr></thead>
+         <tbody>{roster.map(a=><tr key={a.account_email}>
+          <td><span className={styles.businessName} dir="ltr">{a.account_email}</span></td>
+          <td>{a.role_name==="platform_owner"?"مالك المنصة":"مشغّل المنصة"}</td>
+          <td>{a.is_enabled?<span className={styles.status}>مفعّل</span>:<span className={styles.noPlan}>موقوف</span>}</td>
+          <td>{new Date(a.granted_at).toLocaleDateString("ar")}</td>
+         </tr>)}</tbody>
+        </table></div>}
+       <p className={styles.panelDesc}>إضافة مسؤول أو تغيير صلاحياته ليست متاحة من الواجهة حتى يتم اعتماد مسار أمني مستقل.</p>
+      </div>)}
+     <h3 style={{fontSize:14,marginBottom:10}}>آخر العمليات الإدارية</h3>
+     {auditResult.error?<p role="alert" className={styles.error}>تعذر تحميل سجل التدقيق؛ لا نعرض عمليات غير مؤكدة.</p>:
+      auditEvents.length===0?<div className={styles.empty}>لا توجد عمليات إدارة مسجلة حتى الآن. هذا لا يعني عدم وجود نشاط سابق خارج سجل المنصة.</div>:
+      <div className={styles.tableWrap}><table className={styles.table}>
+       <thead><tr><th scope="col">العملية</th><th scope="col">المجال</th><th scope="col">الوقت</th></tr></thead>
+       <tbody>{auditEvents.map(e=><tr key={e.event_id}>
+        <td><span className={styles.businessName}>{e.event_action==="plan_created"?"إنشاء باقة":e.event_action==="plan_status_changed"?"تعديل حالة باقة":e.event_action==="merchant_trial_started"?"تفعيل تجربة تاجر":e.event_action}</span></td>
+        <td>{e.target_kind==="plan"?"الباقات":e.target_kind==="subscription"?"الاشتراكات":e.target_kind}</td>
+        <td>{new Date(e.event_at).toLocaleString("ar",{dateStyle:"medium",timeStyle:"short"})}</td>
+       </tr>)}</tbody>
+      </table></div>}
+    </section>
     <section id="operations" className={styles.panel} aria-labelledby="operations-heading">
      <div className={styles.panelHead}><div><h2 id="operations-heading" className={styles.panelTitle}>وحدات الإدارة القادمة</h2><p className={styles.panelDesc}>نثبت الصلاحيات والأساس أولاً؛ لم نفعّل تشغيل أو فوترة غير مكتملين.</p></div><span className={styles.panelCount}>قيد التطوير</span></div>
      <div className={styles.grid}>{nextModules.map(m=><div className={styles.module} key={m.title}>
@@ -128,7 +166,7 @@ export default async function PlatformAdminDashboard() {
    </main>
   </div>
   <nav className={styles.mobileNav} aria-label="تنقل كنترول بنل المالك على الهاتف">
-   <a href="#overview"><span aria-hidden="true">▦</span>الرئيسية</a><a href="#merchants"><span aria-hidden="true">⌂</span>التجار</a><a href="#plans"><span aria-hidden="true">▤</span>الباقات</a><a href="#trials"><span aria-hidden="true">◷</span>التجارب</a>
+   <a href="#overview"><span aria-hidden="true">▦</span>الرئيسية</a><a href="#merchants"><span aria-hidden="true">⌂</span>التجار</a><a href="#plans"><span aria-hidden="true">▤</span>الباقات</a><a href="#trials"><span aria-hidden="true">◷</span>التجارب</a><a href="#security"><span aria-hidden="true">♧</span>الأمان</a>
   </nav>
  </div>;
 }
