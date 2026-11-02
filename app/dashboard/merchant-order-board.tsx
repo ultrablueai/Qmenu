@@ -7,6 +7,7 @@ type Item={name:string;quantity:number;selections:{options?:{name_ar?:string}[];
 type Order={id:string;table:string;status:Status;totalMinor:number;currency:string;createdAt:string;items:Item[]};
 const titles:Record<Status,string>={pending:"بانتظار الموافقة",accepted:"تم قبول الطلب",preparing:"قيد التحضير",ready:"جاهز للتسليم",fulfilled:"تم التسليم",rejected:"مرفوض"};
 function formatOrderTotal(minor:number,currency:string){const factor=currency==="TRY"?100:1;return new Intl.NumberFormat("ar",{minimumFractionDigits:currency==="TRY"?2:0,maximumFractionDigits:currency==="TRY"?2:0}).format(minor/factor)+" "+currency;}
+function orderReference(id:string){return id.replace(/-/g,"").slice(0,8).toUpperCase();}
 const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"accepted",label:"قبول الطلب"},accepted:{value:"preparing",label:"إرسال للمطبخ"},preparing:{value:"ready",label:"جاهز للتسليم"},ready:{value:"fulfilled",label:"تأكيد التسليم"}};
 export default function MerchantOrderBoard({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
  const [enabled,setEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
@@ -32,7 +33,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
  async function transition(order:Order,status:Status){
   if(busy)return;
   setBusy(true);setError("");setNotice("");
-  try{const {data,error}=await browserSupabase().rpc("g3_transition_order",{p_order:order.id,p_next:status});if(error||data?.status!==status)throw error??Error("Update not confirmed");await refresh();setNotice("تم تحديث حالة طلب "+order.table+" إلى "+titles[status])}catch{setError("تعذّر تحديث الطلب. لم تتغير حالته.")}finally{setBusy(false)}
+  try{const {data,error}=await browserSupabase().rpc("g3_transition_order",{p_order:order.id,p_next:status});if(error||data?.status!==status)throw error??Error("Update not confirmed");await refresh();setNotice("تم تحديث طلب #"+orderReference(order.id)+" من "+order.table+" إلى "+titles[status])}catch{setError("تعذّر تحديث الطلب. لم تتغير حالته.")}finally{setBusy(false)}
  }
  return <section id="beger-merchant-orders" className="beger-order-board" dir="rtl" aria-label="إدارة طلبات الطاولات">
   <header className="beger-order-board-header"><div><span>BEGER · G3 PILOT</span><h2>طلبات الطاولات والمطبخ</h2><p>{branchName} · استقبال الطلب ← موافقة المطعم ← التحضير ← الجاهزية</p></div><div><span className={enabled?"beger-order-enabled":"beger-order-disabled"}>{enabled?"● استقبال الطلبات مفعّل":"○ استقبال الطلبات متوقف"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void toggle()}>{enabled?"إيقاف استقبال الطلبات":"تفعيل استقبال الطلبات"}</button></div></header>
@@ -43,7 +44,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   <div className="beger-order-board-columns">{(["pending","accepted","preparing","ready"] as const).map(stage=><section key={stage} className="beger-order-board-column" aria-label={titles[stage]}>
     <h3>{titles[stage]} <span>{orders.filter(o=>o.status===stage).length}</span></h3>
     {orders.filter(o=>o.status===stage).map(o=><article className="beger-order-ticket" key={o.id}>
-      <div className="beger-order-ticket-head"><strong>⌗ {o.table}</strong><time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</time></div>
+      <div className="beger-order-ticket-head"><strong>⌗ {o.table}</strong><span className="beger-order-reference" aria-label={"رقم الطلب "+orderReference(o.id)}>طلب #{orderReference(o.id)}</span><time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</time></div>
       <ul>{o.items.map((item,index)=><li key={index}><strong>{item.quantity}× {item.name}</strong><small>{(item.selections?.options??[]).map(opt=>opt.name_ar).filter(Boolean).join(" · ")}{(item.selections?.removedIngredients??[]).length?" · بدون "+(item.selections?.removedIngredients??[]).join("، "):""}</small></li>)}</ul>
       <div className="beger-order-ticket-price">{formatOrderTotal(o.totalMinor,o.currency)}</div>
       {next[o.status]?<button disabled={busy} type="button" onClick={()=>void transition(o,next[o.status]!.value)}>{next[o.status]!.label}</button>:null}
