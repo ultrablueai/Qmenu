@@ -2,7 +2,7 @@
 import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNode} from "react";
 import {formatPrice,type GuestLang} from "../lib/g2-public";
 
-type CartItem={key:string;name:string;unitMinor:number;quantity:number;selections:string[]};
+type CartItem={key:string;name:string;unitMinor:number;baseMinor?:number;extraMinor?:number;imageUrl?:string;quantity:number;selections:string[]};
 type CartContextValue={add:(item:Omit<CartItem,"quantity">)=>void;count:number;open:()=>void};
 const CartContext=createContext<CartContextValue|null>(null);
 export function useGuestCart(){return useContext(CartContext);}
@@ -21,12 +21,16 @@ export default function GuestCart({children,country,lang,accent}:{children:React
  },[open]);
  const count=items.reduce((n,i)=>n+i.quantity,0);
  const total=items.reduce((n,i)=>n+i.quantity*i.unitMinor,0);
+ const subtotal=items.reduce((n,i)=>n+i.quantity*(i.baseMinor??i.unitMinor),0);
+ const additions=items.reduce((n,i)=>n+i.quantity*(i.extraMinor??0),0);
  const tr=lang==="tr",en=lang==="en";
  const labels={
-  cart:en?"My preview basket":tr?"Önizleme sepetim":"سلتي التجريبية",
+  cart:en?"Your Order":tr?"Siparişin":"طلبك",
   empty:en?"Your basket is empty":tr?"Sepetiniz boş":"السلة فارغة",
   notice:en?"Preview only. No order has been placed or sent. Final prices will be verified by the business when ordering is enabled.":tr?"Bu sadece önizlemedir. Sipariş gönderilmedi. Sipariş özelliği açıldığında fiyatlar yeniden doğrulanacaktır.":"هذه سلة للمعاينة فقط؛ لم يتم إرسال أي طلب. ستُتحقق الأسعار عند تفعيل الطلب الفعلي.",
   total:en?"Estimated total":tr?"Tahmini toplam":"المجموع التقديري",
+  subtotal:en?"Subtotal":tr?"Ara Toplam":"المجموع الفرعي",
+  additions:en?"Add-ons":tr?"Ekstralar":"الإضافات",
   close:en?"Close":tr?"Kapat":"إغلاق",
   clear:en?"Clear basket":tr?"Sepeti temizle":"تفريغ السلة",
   quantity:en?"Quantity":tr?"Adet":"الكمية",
@@ -44,14 +48,16 @@ export default function GuestCart({children,country,lang,accent}:{children:React
     🛍 {labels.cart} <span style={{background:"#ffffff2b",borderRadius:20,padding:"4px 9px",marginInlineStart:8}}>{count}</span>
   </button>
   {open?<div className="beger-basket-overlay" style={{position:"fixed",inset:0,zIndex:60,background:"#1a241e9c",display:"flex",justifyContent:"flex-end"}} onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false);}}>
-   <section className="beger-basket-sheet" role="dialog" aria-modal="true" aria-label={labels.cart} style={{width:"min(100%,470px)",height:"100%",background:"#FFFCF7",color:"#352E23",padding:24,overflowY:"auto",boxShadow:"0 20px 50px #11271e33",boxSizing:"border-box",display:"flex",flexDirection:"column",gap:15}}>
+   <section className="beger-basket-sheet beger-reference-order" role="dialog" aria-modal="true" aria-label={labels.cart} style={{width:"min(100%,470px)",height:"100%",background:"#FFFCF7",color:"#352E23",padding:24,overflowY:"auto",boxShadow:"0 20px 50px #11271e33",boxSizing:"border-box",display:"flex",flexDirection:"column",gap:15}}>
     <div style={{display:"flex",justifyContent:"space-between",gap:15,alignItems:"center"}}>
      <div><span style={{color:"#937047",fontSize:11,fontWeight:800,letterSpacing:".05em"}}>{labels.preview}</span><h2 style={{fontSize:24,margin:"5px 0 0"}}>{labels.cart}</h2></div>
      <button ref={closeRef} type="button" onClick={()=>setOpen(false)} style={{padding:"8px 13px",background:"#edf3ef",border:0,borderRadius:11,cursor:"pointer"}}>{labels.close} ✕</button>
     </div>
     <p style={{color:"#637b6c",fontSize:13,lineHeight:1.8,margin:0}}>{labels.notice}</p>
     {items.length>0?<strong style={{fontSize:13,color:"#6F7658"}}>{labels.items} · {count}</strong>:null}
-    {items.length===0?<p style={{padding:35,textAlign:"center",color:"#73887d",background:"#F3F0E7",borderRadius:17}}>{labels.empty}</p>:items.map(item=><article key={item.key} style={{border:"1px solid #E9E1D5",background:"#fff",borderRadius:18,padding:16,minWidth:0}}>
+    {items.length===0?<p style={{padding:35,textAlign:"center",color:"#73887d",background:"#F3F0E7",borderRadius:17}}>{labels.empty}</p>:items.map(item=><article className="beger-order-item" key={item.key} style={{border:"1px solid #E9E1D5",background:"#fff",borderRadius:18,padding:16,minWidth:0}}>
+     {item.imageUrl?<img className="beger-order-item-photo" src={item.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer"/>:null}
+     <div className="beger-order-item-content">
      <div style={{display:"flex",justifyContent:"space-between",gap:9,alignItems:"center"}}><strong style={{display:"block",marginBottom:6,overflowWrap:"anywhere"}}>{item.name}</strong><button type="button" aria-label={labels.remove+" "+item.name} onClick={()=>setItems(prev=>prev.filter(x=>x.key!==item.key))} style={{border:"1px solid #EFE4D6",background:"#FBF6EE",borderRadius:10,padding:"6px 9px",color:"#956443",cursor:"pointer"}}>✕</button></div>
      {item.selections.length?<p style={{fontSize:12,color:"#728579",margin:"0 0 12px"}}>{item.selections.join(" · ")}</p>:null}
      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12}}>
@@ -62,8 +68,11 @@ export default function GuestCart({children,country,lang,accent}:{children:React
        <button type="button" aria-label={labels.quantity+" + "+item.name} onClick={()=>setItems(prev=>prev.map(x=>x.key===item.key?{...x,quantity:Math.min(99,x.quantity+1)}:x))} style={{border:"1px solid #dce8df",background:"#f4faf6",borderRadius:9,padding:"6px 12px",cursor:"pointer"}}>+</button>
       </div>
      </div>
+     </div>
     </article>)}
-    <div style={{marginTop:"auto",borderTop:"1px solid #E6DED0",paddingTop:18}}>
+    <div className="beger-order-totals" style={{marginTop:"auto",borderTop:"1px solid #E6DED0",paddingTop:18}}>
+     <div className="beger-order-total-line"><span>{labels.subtotal}</span><strong>{formatPrice(subtotal,country,lang)}</strong></div>
+     <div className="beger-order-total-line"><span>{labels.additions}</span><strong>{formatPrice(additions,country,lang)}</strong></div>
      <div style={{display:"flex",justifyContent:"space-between",gap:15,fontSize:19,marginBottom:13}}><strong>{labels.total}</strong><strong>{formatPrice(total,country,lang)}</strong></div>
      {items.length>0?<button type="button" onClick={()=>setItems([])} style={{width:"100%",padding:12,border:"1px solid #dce6dd",color:"#5d6e62",background:"#fff",borderRadius:12,cursor:"pointer"}}>{labels.clear}</button>:null}
     </div>
