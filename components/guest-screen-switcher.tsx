@@ -9,8 +9,8 @@ type Stage="welcome"|"menu"|"rewards";
 type Journey={stage:Stage;go:(next:Stage)=>void};
 const ScreenContext=createContext<Journey|null>(null);
 
-export default function GuestScreenSwitcher({lang,children}:{lang:GuestLang;children:ReactNode}){
- const [stage,setStage]=useState<Stage>("welcome");
+export default function GuestScreenSwitcher({lang,children,initialStage="welcome"}:{lang:GuestLang;children:ReactNode;initialStage?:Stage}){
+ const [stage,setStage]=useState<Stage>(initialStage);
  useEffect(()=>{const params=new URLSearchParams(window.location.search);if(params.has("product")||params.get("view")==="menu")setStage("menu");else if(params.get("view")==="rewards")setStage("rewards")},[]);
  function go(next:Stage){setStage(next);window.scrollTo({top:0,behavior:"auto"});}
  return <ScreenContext.Provider value={{stage,go}}>
