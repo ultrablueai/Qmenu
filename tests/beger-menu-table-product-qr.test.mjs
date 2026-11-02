@@ -107,3 +107,22 @@ test("QR URL validation accepts only Beger deployment hostnames with literal dot
  assert.doesNotMatch(scanner,/ultrablueais-projects\\\\.vercel\\\\.app/);
  assert.match(scanner,/validRoute\.test\(url\.pathname\)/);
 });
+
+test("guest table identity remains visibly attached to menu after welcome",()=>{
+ const guestMenu=read("components/public-menu.tsx");
+ const css=read("components/public-menu.css");
+ assert.match(guestMenu,/className="beger-table-confirmation"/);
+ assert.match(guestMenu,/\{tableLabel\?<div/);
+ assert.match(guestMenu,/Table identified/);
+ assert.match(css,/\.beger-screen-switcher\[data-stage="welcome"\] \.beger-table-confirmation\{display:none\}/);
+ assert.match(css,/\.beger-table-confirmation\{display:flex/);
+ const page=read("app/t/[token]/page.tsx");
+ assert.match(page,/tableLabel=\{t\.table_label\}/);
+});
+test("shop and table QR stickers print human-readable branch and table labels",()=>{
+ const exporter=read("components/qr-export.tsx");
+ assert.match(exporter,/stickerTitle\?:string/);
+ assert.match(exporter,/text\.textContent=stickerTitle/);
+ assert.match(tables,/stickerTitle=\{branchName\+" · "\+t\.label\}/);
+ assert.match(merchant,/stickerTitle=\{branches\.find/);
+});
