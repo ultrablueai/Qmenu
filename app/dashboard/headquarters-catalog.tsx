@@ -4,6 +4,7 @@ import MenuManager from "./branches/[branchId]/menu-manager";
 import CentralCatalog from "./central-catalog";
 import MerchantAppearance from "./merchant-appearance";
 import QrSvg from "../../lib/qr/qr-svg";
+import QrExport from "../../components/qr-export";
 import MerchantTableQr from "./merchant-table-qr";
 import "../qr-experience.css";
 
@@ -38,14 +39,14 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
       <h3 style={{margin:"0 0 8px",fontSize:20,color:"#193d32"}}>رمز QR للمنيو — جاهز للزبائن</h3>
       <p style={{fontSize:13,color:"#64776c",margin:"0 0 17px",lineHeight:1.8}}>رمز الفرع المحدد يفتح القائمة مباشرةً من دون تسجيل دخول. لا تحتاج إلى إنشاء طاولة للحصول على رمز الفرع العام.</p>
       <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:18}}>
-        <div style={{background:"#fff",border:"1px solid #e4ece8",padding:12,borderRadius:15,minWidth:198,minHeight:198}}>
+        <div id={"beger-shop-code-"+activeId} style={{background:"#fff",border:"1px solid #e4ece8",padding:12,borderRadius:15,minWidth:198,minHeight:198}}>
           {origin?<QrSvg value={origin+guestPath} size={174} label="QR منيو الزبون للفرع المحدد"/>:<p>جارٍ تجهيز الرابط...</p>}
         </div>
         <div style={{display:"grid",gap:10,flex:"1 1 230px"}}>
           <strong style={{overflowWrap:"anywhere",fontSize:13}}>{origin?origin+guestPath:guestPath}</strong>
           <a href={guestPath} target="_blank" rel="noopener noreferrer" style={{background:"#177657",color:"white",borderRadius:10,padding:"12px 16px",textAlign:"center",fontWeight:750,textDecoration:"none"}}>فتح منيو الزبون ↗</a>
           <button type="button" disabled={!origin} onClick={async()=>{try{await navigator.clipboard.writeText(origin+guestPath);setCopyNotice("تم نسخ رابط المنيو");}catch{setCopyNotice("تعذّر النسخ تلقائياً؛ انسخ الرابط المعروض أعلاه");}}} style={{background:"#eef7f1",color:"#176248",border:"1px solid #d6e8dc",borderRadius:10,padding:"12px 16px",fontWeight:750,cursor:"pointer"}}>نسخ رابط المنيو</button>
-          <button type="button" disabled={!origin} onClick={()=>window.print()} style={{textAlign:"center",color:"#597039",fontSize:13,fontWeight:700,border:0,background:"transparent",cursor:"pointer"}}>طباعة رمز المتجر ↗</button>
+          {origin?<QrExport targetId={"beger-shop-code-"+activeId} fileName={"beger-shop-"+activeId} label="حفظ رمز المتجر للطباعة (SVG)"/>:null}
           {copyNotice?<span role="status" style={{fontSize:12,color:"#176248"}}>{copyNotice}</span>:null}
           
         </div>
