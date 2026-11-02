@@ -1,5 +1,5 @@
 "use client";
-import {useState,type CSSProperties} from "react";
+import {useEffect,useRef,useState,type CSSProperties} from "react";
 import {createClient} from "@supabase/supabase-js";
 import {formatPrice,type GuestLang} from "../lib/g2-public";
 import {useGuestCart} from "./guest-cart";
@@ -8,7 +8,7 @@ type Ingredient={name_ar:string;name_tr:string;name_en?:string;is_optional:boole
 type Option={id:string;name_ar:string;name_tr:string;name_en?:string;price_delta_minor:number};
 type Group={id:string;name_ar:string;name_tr:string;name_en?:string;min_select:number;max_select:number;options:Option[]};
 type Details={id:string;name_ar:string;name_tr:string;name_en?:string;description_ar:string;description_tr:string;description_en?:string;price_minor:number;ingredients:Ingredient[];groups:Group[]};
-type Props={branchId:string;productId:string;country:string;lang:GuestLang;accent?:string;dark?:boolean};
+type Props={branchId:string;productId:string;country:string;lang:GuestLang;accent?:string;dark?:boolean;imageUrl?:string|null};
 const panel:CSSProperties={padding:18,marginTop:12,border:"1px solid #DCE9E1",borderRadius:20,background:"#FAFCFA",boxShadow:"0 9px 28px rgba(29,65,44,.045)"};
 const sectionCard:CSSProperties={border:"1px solid #E1EBE3",borderRadius:16,margin:"14px 0",padding:14,background:"#FFFFFF",minWidth:0};
 function publicClient(){
@@ -16,13 +16,22 @@ function publicClient(){
  if(!url||!key)throw Error("Public configuration unavailable");
  return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 }
-export default function ProductDetails({branchId,productId,country,lang,accent="#086c66",dark=false}:Props){
+export default function ProductDetails({branchId,productId,country,lang,accent="#086c66",dark=false,imageUrl}:Props){
  const [open,setOpen]=useState(false),[loading,setLoading]=useState(false),[error,setError]=useState(""),[details,setDetails]=useState<Details|null>(null);
  const [selection,setSelection]=useState<Record<string,string[]>>({});
  const [removed,setRemoved]=useState<string[]>([]);
  const tr=lang==="tr",en=lang==="en";
  const cart=useGuestCart();
  const [added,setAdded]=useState("");
+ const closeRef=useRef<HTMLButtonElement>(null);
+ useEffect(()=>{if(!open)return;
+  const previousOverflow=document.body.style.overflow;
+  document.body.style.overflow="hidden";
+  closeRef.current?.focus();
+  const onEscape=(event:KeyboardEvent)=>{if(event.key==="Escape")setOpen(false);};
+  document.addEventListener("keydown",onEscape);
+  return()=>{document.body.style.overflow=previousOverflow;document.removeEventListener("keydown",onEscape);};
+ },[open]);
  const title=(v:{name_ar:string;name_tr:string;name_en?:string})=>(en?v.name_en:tr?v.name_tr:v.name_ar)||v.name_ar;
  async function toggleDetails(){
   if(open){setOpen(false);return;}
@@ -54,12 +63,19 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
   const key=JSON.stringify([productId,selectedIds,removed.slice().sort()]);
   cart.add({key,name:title(details),unitMinor:Number(details.price_minor)+extra,selections:[...choices,...omissions]});
   setAdded(en?"Added to preview basket":tr?"Önizleme sepetine eklendi":"أضيف إلى السلة التجريبية");
+  setOpen(false);
  }
  return <div style={{marginTop:13}}>
   <button type="button" aria-expanded={open} onClick={toggleDetails} style={{display:"inline-flex",alignItems:"center",gap:9,padding:"11px 15px",minHeight:42,color:dark?"#20170f":"#17694E",border:"1px solid #CFE5D6",borderRadius:13,background:dark?accent:"#ECF7F0",cursor:"pointer",font:"inherit",fontSize:13,fontWeight:800}}>
    <span aria-hidden="true">✦</span> {en?"Ingredients & extras":tr?"İçindekiler ve seçenekler":"المكونات والإضافات"} <span aria-hidden="true">{open?"⌃":"⌄"}</span>
   </button>
-  {open?<div style={{...panel,color:"#21383b"}} aria-live="polite">
+  {open?<div className="beger-product-popup-overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false);}}>
+    <section className="beger-product-popup" role="dialog" aria-modal="true" aria-label={en?"Customize product":tr?"Ürünü kişiselleştir":"تخصيص المنتج"}>
+     <div className="beger-product-popup-hero">
+      {imageUrl?<img src={imageUrl} alt="" loading="eager" referrerPolicy="no-referrer"/>:<span aria-hidden="true" style={{fontSize:66,display:"grid",placeItems:"center",height:"100%"}}>☕</span>}
+      <button ref={closeRef} type="button" className="beger-product-popup-close" onClick={()=>setOpen(false)} aria-label={en?"Close":tr?"Kapat":"إغلاق"}>×</button>
+     </div>
+     <div className="beger-product-popup-body"><div style={{...panel,color:"#21383b",border:0,boxShadow:"none",background:"transparent",marginTop:0,padding:"16px 0 0"}} aria-live="polite">
    {loading?<p role="status" style={{color:"#658074",fontSize:13}}>{en?"Loading…":tr?"Yükleniyor…":"جارٍ تحميل التفاصيل…"}</p>:null}
    {error?<p role="status" style={{color:"#885d36",background:"#FFF7EA",padding:12,borderRadius:10,fontSize:13}}>{error}</p>:null}
    {details?<div>
@@ -126,6 +142,7 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
     {!valid?<p role="status" style={{fontSize:12,color:"#99651c"}}>{en?"Please complete required selections.":tr?"Lütfen zorunlu seçenekleri seçin.":"يرجى إكمال الاختيارات المطلوبة."}</p>:null}
     <p style={{fontSize:11,color:"#75887B",lineHeight:1.8,marginBottom:0}}>{en?"Preview only. Ordering and payment are not active yet. Prices will be verified on the server.":tr?"Bu sadece bir önizlemedir. Sipariş ve ödeme henüz etkin değil.":"هذه معاينة فقط. الطلب والدفع غير مفعّلين بعد، والسعر يُعاد احتسابه على الخادم عند تفعيل الطلبات."}</p>
    </div>:null}
-  </div>:null}
+    </div></div>
+   </section></div>:null}
  </div>;
 }
