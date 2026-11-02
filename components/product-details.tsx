@@ -2,6 +2,7 @@
 import {useState,type CSSProperties} from "react";
 import {createClient} from "@supabase/supabase-js";
 import {formatPrice,type GuestLang} from "../lib/g2-public";
+import {useGuestCart} from "./guest-cart";
 
 type Ingredient={name_ar:string;name_tr:string;name_en?:string;is_optional:boolean};
 type Option={id:string;name_ar:string;name_tr:string;name_en?:string;price_delta_minor:number};
@@ -19,6 +20,8 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
  const [selection,setSelection]=useState<Record<string,string[]>>({});
  const [removed,setRemoved]=useState<string[]>([]);
  const tr=lang==="tr",en=lang==="en";
+ const cart=useGuestCart();
+ const [added,setAdded]=useState("");
  const title=(v:{name_ar:string;name_tr:string;name_en?:string})=>(en?v.name_en:tr?v.name_tr:v.name_ar)||v.name_ar;
  async function toggleDetails(){
   if(open){setOpen(false);return;}
@@ -39,7 +42,16 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
  }
  function toggleRemoval(name:string){setRemoved(prev=>prev.includes(name)?prev.filter(x=>x!==name):[...prev,name]);}
  const extra=details?.groups.reduce((sum,g)=>sum+g.options.filter(o=>(selection[g.id]??[]).includes(o.id)).reduce((sub,o)=>sub+Number(o.price_delta_minor),0),0)??0;
- const valid=details?.groups.every(g=>(selection[g.id]??[]).length>=g.min_select)??false;
+ const valid=details?.groups.every(g=>(selection[g.id]??[]).length>=g.min_select&&(selection[g.id]??[]).length<=g.max_select)??false;
+ function addToBasket(){
+  if(!details||!valid||!cart)return;
+  const choices=details.groups.flatMap(g=>g.options.filter(o=>(selection[g.id]??[]).includes(o.id)).map(o=>title(g)+": "+title(o)));
+  const omissions=details.ingredients.filter(i=>i.is_optional&&removed.includes(i.name_ar)).map(i=>(en?"Without ":tr?"Olmadan ":"بدون ")+title(i));
+  const selectedIds=details.groups.flatMap(g=>(selection[g.id]??[]).slice().sort());
+  const key=JSON.stringify([productId,selectedIds,removed.slice().sort()]);
+  cart.add({key,name:title(details),unitMinor:Number(details.price_minor)+extra,selections:[...choices,...omissions]});
+  setAdded(en?"Added to preview basket":tr?"Önizleme sepetine eklendi":"أضيف إلى السلة التجريبية");
+ }
  return <div style={{marginTop:10}}>
   <button type="button" aria-expanded={open} onClick={toggleDetails} style={{padding:"8px 12px",color:dark?"#20170f": "#075a54",border:"1px solid #badad6",borderRadius:10,background:dark?accent:"#f2faf8",cursor:"pointer"}}>
    {en?"Ingredients & extras":tr?"İçindekiler ve seçenekler":"المكونات والإضافات"} {open?"−":"+"}
@@ -74,6 +86,10 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
       <strong>{en?"Estimated total":tr?"Önizleme toplamı":"المجموع التقديري"}</strong>
       <strong>{formatPrice(Number(details.price_minor)+extra,country,lang)}</strong>
     </div>
+    {cart?<button type="button" disabled={!valid} onClick={addToBasket} style={{width:"100%",padding:"13px 16px",borderRadius:13,border:0,background:valid?accent:"#adbcb5",color:dark?"#20170f":"white",fontSize:14,fontWeight:800,cursor:valid?"pointer":"not-allowed",marginTop:13}}>
+     {en?"Add to preview basket":tr?"Önizleme sepetine ekle":"أضف إلى السلة التجريبية"} · {formatPrice(Number(details.price_minor)+extra,country,lang)}
+    </button>:null}
+    {added?<p role="status" style={{fontSize:12,color:"#176d4c",margin:"7px 0"}}>{added}</p>:null}
     {!valid?<p style={{fontSize:12,color:"#99651c"}}>{en?"Please complete required selections.":tr?"Lütfen zorunlu seçenekleri seçin.":"يرجى إكمال الاختيارات المطلوبة."}</p>:null}
     <p style={{fontSize:12,color:"#667d80",marginBottom:0}}>{en?"Preview only. Ordering and payment are not active yet. Prices will be verified on the server.":tr?"Bu sadece bir önizlemedir. Sipariş ve ödeme henüz etkin değil.":"هذه معاينة فقط. الطلب والدفع غير مفعّلين بعد، والسعر يُعاد احتسابه على الخادم عند تفعيل الطلبات."}</p>
    </div>:null}
