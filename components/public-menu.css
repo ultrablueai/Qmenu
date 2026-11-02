@@ -250,3 +250,21 @@
 .beger-category-results{min-width:0}
 .beger-catalog-browser .beger-menu-section{margin:0 0 18px!important}
 @media(max-width:650px){.beger-category-filter{flex-basis:100px;min-width:100px;min-height:90px}.beger-category-filter strong{font-size:11px}}
+
+/* G3 pilot customer checkout and digital pager status. */
+.beger-guest-order-submit{margin:14px 0;padding:14px;border:1px solid #e6d9c6;border-radius:15px;background:#fffcf6}
+.beger-order-table-label{font-size:13px;color:#657b43;background:#edf2e2;border-radius:11px;padding:10px 12px;margin:0 0 11px}.beger-order-table-label strong{font-size:15px}
+.beger-order-send-note{font-size:12px;line-height:1.65;color:#85715f;margin:0 0 12px}
+.beger-order-send-button{width:100%;min-height:48px;border-radius:12px;border:0;background:#647c40;color:#fff;font-size:14px;font-weight:850;cursor:pointer}
+.beger-order-send-button:disabled{opacity:.5;cursor:progress}
+.beger-order-send-error{font-size:12px;color:#ad4937;background:#fff0eb;padding:10px;border-radius:9px}
+.beger-guest-order-tracking{text-align:center;display:flex;flex-direction:column;gap:8px}
+.beger-guest-order-tracking h3{font:800 22px Georgia,"Times New Roman",serif;margin:0;color:#526f39}
+.beger-guest-order-tracking>strong{font-size:13px;color:#866a51}.beger-guest-order-tracking p{font-size:11px;color:#887766;margin:0}
+.beger-guest-order-tracking button{min-height:38px;border:1px solid #d5e0c1;color:#597640;background:#f1f5e8;padding:7px 13px;border-radius:10px;cursor:pointer}
+.beger-order-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;list-style:none;padding:0;margin:12px 0}
+.beger-order-steps li{display:flex;flex-direction:column;gap:6px;align-items:center;color:#a3998a;font-size:10px;line-height:1.4;overflow-wrap:break-word}
+.beger-order-steps li::before{content:"";display:block;border-radius:100%;width:19px;height:19px;border:2px solid #d9d2c5;background:#fff}
+.beger-order-steps li.is-current{color:#607b3e;font-weight:800}
+.beger-order-steps li.is-current::before{background:#708744;border-color:#708744}
+@media(max-width:420px){.beger-order-steps li{font-size:9px}.beger-guest-order-submit{padding:11px}}
