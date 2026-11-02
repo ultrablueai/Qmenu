@@ -61,3 +61,7 @@ test("basket survives language switching without leaking between branches and ta
  assert.match(cart,/sessionStorage\.setItem\(storageKey,JSON\.stringify\(items\)\)/);
  assert.match(cart,/if\(!hydrated\)return/);
 });
+
+test("Supabase capability queries normalize PostgREST PromiseLike before catch/finally",()=>{
+ assert.match(guest,/Promise\.resolve\(client\(\)\.rpc\("g3_table_order_enabled"/);
+});
