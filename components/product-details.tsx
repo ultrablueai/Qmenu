@@ -9,7 +9,7 @@ type Ingredient={name_ar:string;name_tr:string;name_en?:string;is_optional:boole
 type Option={id:string;name_ar:string;name_tr:string;name_en?:string;price_delta_minor:number};
 type Group={id:string;name_ar:string;name_tr:string;name_en?:string;min_select:number;max_select:number;options:Option[]};
 type Details={id:string;name_ar:string;name_tr:string;name_en?:string;description_ar:string;description_tr:string;description_en?:string;price_minor:number;ingredients:Ingredient[];groups:Group[]};
-type Props={branchId:string;productId:string;country:string;lang:GuestLang;accent?:string;dark?:boolean;imageUrl?:string|null};
+type Props={branchId:string;productId:string;country:string;lang:GuestLang;accent?:string;dark?:boolean;imageUrl?:string|null;tableOrdering?:boolean};
 const panel:CSSProperties={padding:18,marginTop:12,border:"1px solid #DCE9E1",borderRadius:20,background:"#FAFCFA",boxShadow:"0 9px 28px rgba(29,65,44,.045)"};
 const sectionCard:CSSProperties={border:"1px solid #E1EBE3",borderRadius:16,margin:"14px 0",padding:14,background:"#FFFFFF",minWidth:0};
 function publicClient(){
@@ -17,7 +17,7 @@ function publicClient(){
  if(!url||!key)throw Error("Public configuration unavailable");
  return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 }
-export default function ProductDetails({branchId,productId,country,lang,accent="#086c66",dark=false,imageUrl}:Props){
+export default function ProductDetails({branchId,productId,country,lang,accent="#086c66",dark=false,imageUrl,tableOrdering=false}:Props){
  const [open,setOpen]=useState(false),[loading,setLoading]=useState(false),[error,setError]=useState(""),[details,setDetails]=useState<Details|null>(null);
  const [selection,setSelection]=useState<Record<string,string[]>>({});
  const [removed,setRemoved]=useState<string[]>([]);
@@ -70,7 +70,7 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
   const selectedIds=details.groups.flatMap(g=>(selection[g.id]??[]).slice().sort());
   const key=JSON.stringify([productId,selectedIds,removed.slice().sort()]);
   cart.add({key,productId,optionIds:selectedIds,removedIngredients:removed, name:title(details),unitMinor:Number(details.price_minor)+extra,baseMinor:Number(details.price_minor),extraMinor:extra,imageUrl:imageUrl??undefined,quantity,selections:[...choices,...omissions]});
-  setAdded(en?"Added to preview basket":tr?"Önizleme sepetine eklendi":"أضيف إلى السلة التجريبية");
+  setAdded(en?"Added to basket":tr?"Sepete eklendi":"أضيف إلى السلة");
   setQuantity(1);setSelection({});setRemoved([]);
   setOpen(false);
  }
@@ -150,11 +150,11 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
       <div><button type="button" aria-label={en?"Decrease quantity":tr?"Adedi azalt":"تقليل الكمية"} disabled={quantity<=1} onClick={()=>setQuantity(q=>Math.max(1,q-1))}>−</button><strong aria-live="polite">{quantity}</strong><button type="button" aria-label={en?"Increase quantity":tr?"Adedi artır":"زيادة الكمية"} disabled={quantity>=20} onClick={()=>setQuantity(q=>Math.min(20,q+1))}>+</button></div>
     </div>
     {cart?<button className="beger-product-add-button" type="button" disabled={!valid} onClick={addToBasket} style={{width:"100%",minHeight:50,padding:"13px 16px",borderRadius:14,border:0,background:valid?accent:"#adbcb5",color:dark?"#20170f":"white",fontSize:14,fontWeight:800,cursor:valid?"pointer":"not-allowed",marginTop:13}}>
-     {en?"Add to preview basket":tr?"Önizleme sepetine ekle":"أضف إلى السلة التجريبية"} · {formatPrice((Number(details.price_minor)+extra)*quantity,country,lang)}
+     {en?"Add to basket":tr?"Sepete ekle":"أضف إلى السلة"} · {formatPrice((Number(details.price_minor)+extra)*quantity,country,lang)}
     </button>:null}
     {added?<p role="status" style={{fontSize:12,color:"#176d4c",margin:"9px 0"}}>{added}</p>:null}
     {!valid?<p role="status" style={{fontSize:12,color:"#99651c"}}>{en?"Please complete required selections.":tr?"Lütfen zorunlu seçenekleri seçin.":"يرجى إكمال الاختيارات المطلوبة."}</p>:null}
-    <p style={{fontSize:11,color:"#75887B",lineHeight:1.8,marginBottom:0}}>{en?"Preview only. Ordering and payment are not active yet. Prices will be verified on the server.":tr?"Bu sadece bir önizlemedir. Sipariş ve ödeme henüz etkin değil.":"هذه معاينة فقط. الطلب والدفع غير مفعّلين بعد، والسعر يُعاد احتسابه على الخادم عند تفعيل الطلبات."}</p>
+    <p style={{fontSize:11,color:"#75887B",lineHeight:1.8,marginBottom:0}}>{tableOrdering?(en?"Add your choices to the basket, then submit from the basket if table ordering is enabled. Final prices are verified by the server.":tr?"Seçimlerinizi sepete ekleyin. Masa siparişleri açıksa sepetten gönderin; fiyatlar sunucuda doğrulanır.":"أضف اختياراتك إلى السلة ثم أرسل الطلب منها إذا كان استقبال طلبات الطاولة مفعّلاً. يتحقق الخادم من السعر النهائي."):(en?"This is a shop menu preview. Scan your table QR to submit an order; no payment is active.":tr?"Bu mağaza menüsüdür. Sipariş göndermek için masa QR kodunuzu tarayın; ödeme henüz aktif değildir.":"هذه قائمة المتجر للتصفح. لإرسال طلب امسح QR الطاولة؛ الدفع الإلكتروني غير مفعّل حالياً.")}</p>
     <GuestRatingPreview lang={lang}/>
    </div>:null}
     </div></div>
