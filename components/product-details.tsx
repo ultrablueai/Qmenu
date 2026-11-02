@@ -61,7 +61,7 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
   const omissions=details.ingredients.filter(i=>i.is_optional&&removed.includes(i.name_ar)).map(i=>(en?"Without ":tr?"Olmadan ":"بدون ")+title(i));
   const selectedIds=details.groups.flatMap(g=>(selection[g.id]??[]).slice().sort());
   const key=JSON.stringify([productId,selectedIds,removed.slice().sort()]);
-  cart.add({key,name:title(details),unitMinor:Number(details.price_minor)+extra,selections:[...choices,...omissions]});
+  cart.add({key,name:title(details),unitMinor:Number(details.price_minor)+extra,baseMinor:Number(details.price_minor),extraMinor:extra,imageUrl:imageUrl??undefined,selections:[...choices,...omissions]});
   setAdded(en?"Added to preview basket":tr?"Önizleme sepetine eklendi":"أضيف إلى السلة التجريبية");
   setOpen(false);
  }
@@ -115,11 +115,11 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
         </div>
         <span style={{padding:"6px 10px",borderRadius:999,fontWeight:800,fontSize:11,background:g.min_select>0?"#FFF1D8":"#EDF5EF",color:g.min_select>0?"#8B5B12":"#47775B"}}>{g.min_select>0?(en?" · Required":tr?" · Zorunlu":" · مطلوب"):(en?"Optional":tr?"İsteğe bağlı":"اختياري")}</span>
        </div>
-       <div style={{display:"grid",gap:9}}>
+       <div className={g.max_select===1&&g.options.length<=4?"beger-choice-pills":"beger-choice-list"} style={{display:"grid",gap:9}}>
        {g.options.map(o=>{
         const checked=picked.includes(o.id);
         const disabled=!checked&&g.max_select!==1&&maxed;
-        return <label key={o.id} style={{display:"flex",gap:10,alignItems:"center",padding:"12px 13px",minHeight:48,boxSizing:"border-box",borderRadius:13,border:"1px solid "+(checked?"#7EBE98":"#E2EAE4"),background:checked?"#EFF9F1":"#FFF",opacity:disabled?0.55:1,cursor:disabled?"not-allowed":"pointer",transition:"border-color .15s,background .15s"}}>
+        return <label key={o.id} className="beger-choice-option" data-selected={checked} style={{display:"flex",gap:10,alignItems:"center",padding:"12px 13px",minHeight:48,boxSizing:"border-box",borderRadius:13,border:"1px solid "+(checked?"#7EBE98":"#E2EAE4"),background:checked?"#EFF9F1":"#FFF",opacity:disabled?0.55:1,cursor:disabled?"not-allowed":"pointer",transition:"border-color .15s,background .15s"}}>
          <input type={g.max_select===1?"radio":"checkbox"} name={g.id} style={{width:18,height:18,accentColor:accent,flexShrink:0}} checked={checked} disabled={disabled} onChange={()=>choose(g,o)}/>
          <span style={{flex:1,minWidth:0,fontSize:13,fontWeight:checked?800:600,overflowWrap:"anywhere"}}>{title(o)}</span>
          <span style={{fontSize:12,fontWeight:800,color:Number(o.price_delta_minor)>0?"#2B7353":"#72877A",whiteSpace:"nowrap"}}>{Number(o.price_delta_minor)>0?"+"+formatPrice(Number(o.price_delta_minor),country,lang):(en?"Free":tr?"Ücretsiz":"مجاني")}</span>
