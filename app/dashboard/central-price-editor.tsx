@@ -2,8 +2,8 @@
 import {useEffect,useState,type FormEvent} from "react";
 
 type Publication={id:string;active:boolean;available:boolean;price_override_minor:number|null};
-export default function CentralPriceEditor({label,baseMinor,factor,currency,publication,busy,onBasePrice,onOverride,onAvailability}:{
- label:string; baseMinor:number; factor:number; currency:string; publication?:Publication; busy:boolean;
+export default function CentralPriceEditor({label,baseMinor,factor,currency,publication,busy,onBasePrice,onOverride,onAvailability,showBase=true}:{
+ label:string; baseMinor:number; factor:number; currency:string; publication?:Publication; busy:boolean; showBase?:boolean;
  onBasePrice:(minor:number)=>Promise<boolean>; onOverride:(minor:number|null)=>Promise<boolean>; onAvailability:()=>Promise<boolean>;
 }){
  const [base,setBase]=useState(String(baseMinor/factor));
@@ -19,10 +19,10 @@ export default function CentralPriceEditor({label,baseMinor,factor,currency,publ
  const button={padding:"8px 11px",border:"1px solid #9cbdb8",borderRadius:8,background:"#eaf6f2",cursor:"pointer"};
  return <div aria-label={label} style={{display:"grid",gap:9,margin:"10px 0",padding:10,background:"#f7faf9",borderRadius:10}}>
    {err?<p role="alert" style={{color:"#b42318"}}>{err}</p>:null}
-   <form onSubmit={changeBase} style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+   {showBase?<form onSubmit={changeBase} style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
     <label>السعر المركزي ({currency}) <input style={input} type="number" min="0" step={factor===100?"0.01":"1"} required value={base} onChange={e=>setBase(e.target.value)}/></label>
     <button style={button} disabled={busy}>حفظ السعر المركزي</button>
-   </form>
+   </form>:null}
    {publication?<div style={{display:"grid",gap:8}}>
     <form onSubmit={changeOverride} style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
       <label>سعر الفرع (اتركه فارغاً لتطبيق السعر المركزي) <input style={input} type="number" min="0" step={factor===100?"0.01":"1"} value={override} onChange={e=>setOverride(e.target.value)}/></label>
