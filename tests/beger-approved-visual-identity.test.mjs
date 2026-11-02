@@ -30,7 +30,8 @@ test("HQ and all three existing theme IDs use approved ivory, olive, coffee iden
 test("visual redesign must not simulate operational orders or unverified ratings",()=>{
  const cart=readFileSync("components/guest-cart.tsx","utf8");
  const reviews=readFileSync("components/guest-rating-preview.tsx","utf8");
- assert.match(cart,/Preview only\. No order has been placed/);
+ assert.match(cart,/notice:tableToken\?/);
+ assert.match(cart,/طلبك لن يصل للمطعم إلا بعد الضغط على/);
  assert.match(reviews,/No verified reviews yet/);
  assert.doesNotMatch(guest+cart+reviews,/submitOrder|paymentIntent|fakeRating/);
 });
