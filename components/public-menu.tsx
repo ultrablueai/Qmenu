@@ -10,8 +10,8 @@ const wording={
 } as const;
 const palettes={
  luxe_dark:{background:"#141310",surface:"#25231f",foreground:"#fff9ed",muted:"#c3bdb1",accent:"#d6aa52",border:"#484037",hero:"#211b16",buttonForeground:"#17140f"},
- clean_light:{background:"#f6f9f8",surface:"#fff",foreground:"#173639",muted:"#617b7e",accent:"#147f78",border:"#e1ebea",hero:"#dcefe9",buttonForeground:"#fff"},
- bold_commerce:{background:"#fff6ec",surface:"#fffefb",foreground:"#2c211d",muted:"#786961",accent:"#ed681f",border:"#f2d7ba",hero:"#ffe0b8",buttonForeground:"#fff"}
+ clean_light:{background:"#F8FAF9",surface:"#FFFFFF",foreground:"#18312D",muted:"#637672",accent:"#15765C",border:"#E3ECE8",hero:"#EAF5EF",buttonForeground:"#fff"},
+ bold_commerce:{background:"#FFFAF4",surface:"#FFFFFF",foreground:"#352A20",muted:"#7B6B5F",accent:"#C76D31",border:"#F0E4D8",hero:"#F9EBDC",buttonForeground:"#fff"}
 } as const;
 function detailsText(i:{description_ar:string;description_tr:string;description_en?:string},lang:GuestLang){
  return (lang==="en"?i.description_en:lang==="tr"?i.description_tr:i.description_ar)?.trim()||i.description_ar||i.description_tr||"";
@@ -20,10 +20,10 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
  const t=wording[lang],theme=palettes[appearance.theme]??palettes.clean_light;
  const base=tableToken?`/t/${tableToken}`:`/b/${branch.branch_id}`;
  return <main dir={lang==="ar"?"rtl":"ltr"} lang={lang} data-beger-theme={appearance.theme}
-  style={{minHeight:"100dvh",background:theme.background,color:theme.foreground,fontFamily:"system-ui, sans-serif",padding:"0 16px 72px"}}>
-  <div style={{maxWidth:870,margin:"auto"}}>
-   <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"20px 0",borderBottom:"1px solid "+theme.border}}>
-    <strong style={{fontSize:29,letterSpacing:"-1px"}}>Beger<span style={{color:theme.accent}}>.</span></strong>
+  style={{minHeight:"100dvh",background:theme.background,color:theme.foreground,fontFamily:"system-ui, sans-serif",padding:"0 clamp(16px,4vw,32px) 72px"}}>
+  <div style={{maxWidth:1080,margin:"auto"}}>
+   <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"22px 0",borderBottom:"1px solid "+theme.border}}>
+    <strong style={{fontSize:27,letterSpacing:"-1.1px"}}>Beger<span style={{color:theme.accent}}>.</span></strong>
     <nav aria-label="Languages" style={{display:"flex",gap:9,flexWrap:"wrap",fontSize:13}}>
       {appearance.enabled_languages.map(l=><Link key={l} href={base+"?lang="+l} hrefLang={l}
         aria-current={l===lang?"page":undefined}
@@ -32,8 +32,8 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
        </Link>)}
     </nav>
    </header>
-   <section style={{margin:"20px 0 26px",padding:"clamp(22px,5vw,40px)",borderRadius:appearance.theme==="bold_commerce"?27:21,
-    background:appearance.theme==="luxe_dark"?"linear-gradient(125deg,#352716,#1b1915)":appearance.theme==="bold_commerce"?"linear-gradient(125deg,#ffe4bf,#ffc78e)":theme.hero,
+   <section style={{margin:"20px 0 26px",padding:"clamp(22px,5vw,40px)",borderRadius:appearance.theme==="bold_commerce"?28:26,
+    background:appearance.theme==="luxe_dark"?"linear-gradient(125deg,#352716,#1b1915)":appearance.theme==="bold_commerce"?"linear-gradient(125deg,#ffe4bf,#ffc78e)":"linear-gradient(125deg,#E9F5EE,#F7FBF8)",
     border:"1px solid "+theme.border}}>
      <p style={{fontSize:13,color:appearance.theme==="luxe_dark"?theme.accent:theme.foreground,fontWeight:800,margin:"0 0 12px"}}>{t.welcome}</p>
      <h1 style={{fontSize:"clamp(29px,6vw,44px)",lineHeight:1.22,margin:"0 0 10px"}}>{branch.business_name}</h1>
@@ -46,11 +46,11 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
    {categories.length===0?<div style={{padding:30,borderRadius:18,background:theme.surface,border:"1px solid "+theme.border}}>{t.empty}</div>:
     categories.map(c=><section key={c.id} style={{marginBottom:30}} aria-labelledby={`category-${c.id}`}>
      <h3 id={`category-${c.id}`} style={{fontSize:19,marginBottom:13,borderInlineStart:"4px solid "+theme.accent,paddingInlineStart:10}}>{localizedText(c,lang)}</h3>
-     <div style={{display:"grid",gridTemplateColumns:appearance.theme==="bold_commerce"?"repeat(auto-fit,minmax(min(100%,290px),1fr))":"1fr",gap:12}}>
+     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,330px),1fr))",gap:12}}>
       {c.items.length===0?<p style={{color:theme.muted,fontSize:14}}>{t.empty}</p>:
        c.items.map(i=><article key={i.id} style={{display:"flex",gap:16,alignItems:"flex-start",background:theme.surface,border:"1px solid "+theme.border,
-         borderRadius:appearance.theme==="bold_commerce"?24:16,padding:16,boxShadow:appearance.theme==="clean_light"?"0 8px 30px rgba(24,62,65,.045)":"none"}}>
-        {i.image_url?<img src={i.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" style={{width:104,height:104,objectFit:"cover",borderRadius:13,flexShrink:0,maxWidth:"35%"}}/>:null}
+         borderRadius:22,padding:18,boxShadow:appearance.theme==="clean_light"?"0 8px 30px rgba(24,62,65,.055)":"0 4px 18px rgba(40,30,20,.04)"}}>
+        {i.image_url?<img src={i.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" style={{width:124,height:124,objectFit:"cover",borderRadius:17,flexShrink:0,maxWidth:"35%"}}/>:null}
         <div style={{flex:1,minWidth:0}}>
          <h4 style={{fontSize:17,margin:"0 0 8px"}}>{localizedText(i,lang)}</h4>
          {detailsText(i,lang)?<p style={{fontSize:13,color:theme.muted,margin:"0 0 11px",overflowWrap:"anywhere"}}>{detailsText(i,lang)}</p>:null}
