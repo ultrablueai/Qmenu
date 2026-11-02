@@ -10,7 +10,7 @@ import GuestFavorite from "./guest-favorite";
 import GuestIcon from "./guest-icons";
 import {formatPrice,localizedText,type G2Branch,type G2Category,type GuestAppearance,type GuestLang} from "../lib/g2-public";
 
-type Props={branch:G2Branch;categories:G2Category[];lang:GuestLang;appearance:GuestAppearance;tableLabel?:string;tableToken?:string};
+type Props={branch:G2Branch;categories:G2Category[];lang:GuestLang;appearance:GuestAppearance;tableLabel?:string;tableToken?:string;initialProductId?:string};
 const wording={
  ar:{welcome:"أهلاً بك في",branch:"الفرع",table:"الطاولة",menu:"القائمة الرقمية",empty:"لم تُنشر منتجات متاحة بعد.",guest:"بدون حساب أو تطبيق",note:"عرض القائمة فقط — الطلبات والدفع سيتم تفعيلهما بعد اختبار المرحلة التالية.",products:"المنتجات",discover:"استكشف قائمتنا"},
  tr:{welcome:"Hoş geldiniz",branch:"Şube",table:"Masa",menu:"Dijital Menü",empty:"Henüz yayınlanmış ürün bulunmuyor.",guest:"Hesap veya uygulama gerekmiyor",note:"Şimdilik yalnızca menü görüntüleme. Sipariş ve ödeme sonraki aşamada etkinleşecek.",products:"Ürünler",discover:"Menümüzü keşfedin"},
@@ -24,8 +24,9 @@ const palettes={
 function detailsText(i:{description_ar:string;description_tr:string;description_en?:string},lang:GuestLang){
  return (lang==="en"?i.description_en:lang==="tr"?i.description_tr:i.description_ar)?.trim()||i.description_ar||i.description_tr||"";
 }
-export default function PublicMenu({branch,categories,lang,appearance,tableLabel,tableToken}:Props){
+export default function PublicMenu({branch,categories,lang,appearance,tableLabel,tableToken,initialProductId}:Props){
  const t=wording[lang],theme=palettes[appearance.theme]??palettes.clean_light;
+ const initialCategoryId=initialProductId?categories.find(c=>c.items.some(i=>i.id===initialProductId))?.id:undefined;
  const base=tableToken?`/t/${tableToken}`:`/b/${branch.branch_id}`;
  const heroImage="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1200&q=85&fit=crop";
  const totalItems=categories.reduce((sum,category)=>sum+category.items.length,0);
@@ -66,7 +67,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
       <span className="beger-preview-pill">{lang==="ar"?"قائمة QR":lang==="tr"?"QR Menü":"QR Menu"}</span>
     </div>
    </section>
-   <GuestCatalogExplorer lang={lang} categories={categories.map(c=>({id:c.id,name:localizedText(c,lang),icon:categorySymbol(localizedText(c,lang)),count:c.items.length}))}>
+   <GuestCatalogExplorer lang={lang} initialCategoryId={initialCategoryId} categories={categories.map(c=>({id:c.id,name:localizedText(c,lang),icon:categorySymbol(localizedText(c,lang)),count:c.items.length}))}>
    {categories.length===0?<div style={{padding:30,borderRadius:18,background:theme.surface,border:"1px solid "+theme.border}}>{t.empty}</div>:
     categories.map(c=><section className="beger-menu-section" data-category-id={c.id} key={c.id} style={{marginBottom:30}} aria-labelledby={`category-${c.id}`}>
      <div className="beger-category-heading"><h3 id={`category-${c.id}`} className="beger-guest-category-name" style={{fontSize:22,marginBottom:15,borderInlineStart:"4px solid "+theme.accent,paddingInlineStart:13}}>{localizedText(c,lang)}</h3><span className="beger-category-count">{c.items.length} {t.products}</span></div>
