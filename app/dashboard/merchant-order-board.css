@@ -1,0 +1,24 @@
+.beger-order-board{margin:24px 0;border:1px solid #e4d9c9;background:#fffdf8;border-radius:21px;padding:19px;color:#382d23;box-shadow:0 6px 25px #5139220a}
+.beger-order-board *{box-sizing:border-box}
+.beger-order-board-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:15px;padding-bottom:17px;border-bottom:1px solid #eee3d7}
+.beger-order-board-header>div:first-child>span{font-size:11px;letter-spacing:.08em;color:#9d633c;font-weight:800}
+.beger-order-board-header h2{font:800 24px Georgia,"Times New Roman",serif;margin:6px 0 6px}
+.beger-order-board-header p{margin:0;font-size:12px;line-height:1.65;color:#806f60}
+.beger-order-board-header>div:last-child{display:flex;flex-direction:column;align-items:flex-start;gap:9px}
+.beger-order-board-header button{min-height:42px;border:1px solid #dbe1cc;border-radius:11px;padding:9px 12px;color:#fff;background:#637a43;font-size:12px;font-weight:800;cursor:pointer}
+.beger-order-board-header button:disabled,.beger-order-ticket button:disabled{opacity:.5}
+.beger-order-enabled,.beger-order-disabled{font-size:11px;font-weight:850;border-radius:999px;padding:7px 10px}.beger-order-enabled{color:#53703d;background:#edf4e1}.beger-order-disabled{color:#936640;background:#f8eee3}
+.beger-order-board-error,.beger-order-board-notice{font-size:12px;line-height:1.7;border-radius:12px;padding:12px}.beger-order-board-error{background:#fff0e9;color:#9b442c}.beger-order-board-notice{background:#eff5e8;color:#53703d}
+.beger-order-board-columns{display:grid;grid-template-columns:repeat(4,minmax(210px,1fr));gap:11px;overflow-x:auto;align-items:start;padding:17px 0 2px}
+.beger-order-board-column{background:#f7f2ea;border:1px solid #e9ddd0;padding:11px;border-radius:16px;min-height:180px}
+.beger-order-board-column h3{font:800 13px Arial,sans-serif;display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 13px}
+.beger-order-board-column h3 span{background:#e2e9ce;color:#607645;border-radius:50%;min-width:25px;height:25px;display:grid;place-items:center}
+.beger-order-ticket{background:#fffefa;border:1px solid #e9dfd4;border-radius:12px;padding:12px;box-shadow:0 3px 11px #6349230c;margin-bottom:9px}
+.beger-order-ticket-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.beger-order-ticket-head strong{font-size:13px}.beger-order-ticket-head time{font-size:10px;color:#897768}
+.beger-order-ticket ul{list-style:none;padding:9px 0;margin:0;display:grid;gap:8px}.beger-order-ticket li{border-bottom:1px solid #f1e9df;padding-bottom:8px;display:flex;flex-direction:column;gap:4px}
+.beger-order-ticket li strong{font-size:12px;line-height:1.4}.beger-order-ticket li small{font-size:11px;color:#857364;line-height:1.55}
+.beger-order-ticket-price{font-weight:800;color:#a35c35;margin:2px 0 10px}.beger-order-ticket-price small{font-size:10px}
+.beger-order-ticket button{width:100%;min-height:38px;border:0;border-radius:10px;background:#687c44;color:white;font-size:12px;font-weight:800;cursor:pointer;margin-top:5px}
+.beger-order-ticket .beger-order-reject{background:#f6e8e3;color:#9a4b38}
+.beger-order-board-empty{font-size:11px;line-height:1.6;color:#918272;text-align:center;padding:18px 5px}
+@media(max-width:1100px){.beger-order-board-columns{grid-template-columns:repeat(4,minmax(225px,1fr))}}@media(max-width:580px){.beger-order-board{padding:13px}.beger-order-board-header h2{font-size:21px}.beger-order-board-columns{gap:8px}}
