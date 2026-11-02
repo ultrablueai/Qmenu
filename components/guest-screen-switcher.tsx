@@ -1,5 +1,5 @@
 "use client";
-import {createContext,useContext,useState,type ReactNode} from "react";
+import {createContext,useContext,useEffect,useState,type ReactNode} from "react";
 import type {GuestLang} from "../lib/g2-public";
 import {useGuestCart} from "./guest-cart";
 import GuestIcon from "./guest-icons";
