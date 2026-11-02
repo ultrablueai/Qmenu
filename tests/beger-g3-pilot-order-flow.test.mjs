@@ -83,3 +83,18 @@ test("two orders sharing a table have independent order references and transitio
  assert.doesNotMatch(merchant,/p_table:order\.table|p_table_id:order\.table/);
  assert.match(merchant,/رقم الطلب/);
 });
+
+test("customer quantity limits match the server to prevent rejecting a valid-looking basket",()=>{
+ assert.match(cart,/quantity:Math\.min\(20,x\.quantity\+quantity\)/);
+ assert.match(cart,/quantity:Math\.min\(20,x\.quantity\+1\)/);
+ assert.match(cart,/x\.quantity<=20&&Array\.isArray\(x\.selections\)/);
+ assert.match(sql,/v_qty>20/);
+});
+test("merchant table and shop product copy accurately reflects the G3 staging capability",()=>{
+ const menu=read("components/public-menu.tsx");
+ assert.match(menu,/tableOrdering=\{Boolean\(tableToken\)\}/);
+ assert.match(product,/tableOrdering=false/);
+ assert.match(product,/Scan your table QR to submit an order/);
+ assert.match(product,/إذا كان استقبال طلبات الطاولة مفعّلاً/);
+ assert.match(product,/أضف إلى السلة"/);
+});
