@@ -8,7 +8,7 @@ test("cart is a local scoped UI and delegates active table order to the guarded 
  assert.match(basket,/notice:tableToken\?/);
  assert.match(basket,/<GuestOrderSubmission lang=\{lang\}/);
  assert.doesNotMatch(basket,/\.from\(|\.rpc\(|submitOrder|paymentIntent|checkout|localStorage/);
- assert.match(basket,/Math\.min\(99/);
+ assert.match(basket,/Math\.min\(20/);
  assert.match(basket,/setItems\(prev=>prev\.filter\(x=>x\.key!==item\.key\)\)/);
 });
 test("basket dialog supports keyboard Escape, focus and close controls",()=>{
