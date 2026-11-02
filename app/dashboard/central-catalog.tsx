@@ -5,6 +5,7 @@ import CentralPriceEditor from "./central-price-editor";
 import ProductOptionsManager from "./product-options-manager";
 import EditCentralProduct from "./edit-central-product";
 import EditCentralCategory from "./edit-central-category";
+import MenuProductQr from "../../components/menu-product-qr";
 
 type Branch={id:string;name:string};
 type Cat={id:string;name_ar:string;name_tr:string;name_en:string|null;active:boolean};
@@ -103,6 +104,7 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
                 aria-pressed={Boolean(publication?.active)} style={{...button,background:publication?.active?"#146b55":"#64748b",fontSize:12}}>
                 {branch.name} · {publication?.active?"منشور ✓":"غير منشور"}
               </button>
+              {publication?.active&&publication.available&&prod.active?<MenuProductQr branchId={branch.id} productId={prod.id} productName={prod.name_ar}/>:null}
               {publication?.active?<CentralPriceEditor key={publication.id} label={branch.name} baseMinor={Number(prod.price_minor)} factor={factor} currency={currency} publication={publication} busy={busy} showBase={false}
                 onBasePrice={async minor=>save(async()=>browserSupabase().from("catalog_products").update({price_minor:minor}).eq("id",prod.id).eq("business_id",businessId).select("id").single(),"تم تحديث السعر المركزي",true)}
                 onOverride={async minor=>save(async()=>browserSupabase().from("catalog_branch_publications").update({price_override_minor:minor}).eq("id",publication.id).eq("business_id",businessId).select("id").single(),"تم تحديث سعر الفرع",true)}
