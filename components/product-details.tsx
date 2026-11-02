@@ -3,6 +3,7 @@ import {useEffect,useRef,useState,type CSSProperties} from "react";
 import {createClient} from "@supabase/supabase-js";
 import {formatPrice,type GuestLang} from "../lib/g2-public";
 import {useGuestCart} from "./guest-cart";
+import GuestRatingPreview from "./guest-rating-preview";
 
 type Ingredient={name_ar:string;name_tr:string;name_en?:string;is_optional:boolean};
 type Option={id:string;name_ar:string;name_tr:string;name_en?:string;price_delta_minor:number};
@@ -65,8 +66,8 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
   setAdded(en?"Added to preview basket":tr?"Önizleme sepetine eklendi":"أضيف إلى السلة التجريبية");
   setOpen(false);
  }
- return <div style={{marginTop:13}}>
-  <button type="button" aria-expanded={open} onClick={toggleDetails} style={{display:"inline-flex",alignItems:"center",gap:9,padding:"11px 15px",minHeight:42,color:dark?"#20170f":"#17694E",border:"1px solid #CFE5D6",borderRadius:13,background:dark?accent:"#ECF7F0",cursor:"pointer",font:"inherit",fontSize:13,fontWeight:800}}>
+ return <div className="beger-product-action-mount" style={{marginTop:13}}>
+  <button className="beger-product-open-trigger" type="button" aria-expanded={open} onClick={toggleDetails} style={{display:"inline-flex",alignItems:"center",gap:9,padding:"11px 15px",minHeight:42,color:dark?"#20170f":"#17694E",border:"1px solid #CFE5D6",borderRadius:13,background:dark?accent:"#ECF7F0",cursor:"pointer",font:"inherit",fontSize:13,fontWeight:800}}>
    <span aria-hidden="true">✦</span> {en?"Ingredients & extras":tr?"İçindekiler ve seçenekler":"المكونات والإضافات"} <span aria-hidden="true">{open?"⌃":"⌄"}</span>
   </button>
   {open?<div className="beger-product-popup-overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false);}}>
@@ -142,6 +143,7 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
     {added?<p role="status" style={{fontSize:12,color:"#176d4c",margin:"9px 0"}}>{added}</p>:null}
     {!valid?<p role="status" style={{fontSize:12,color:"#99651c"}}>{en?"Please complete required selections.":tr?"Lütfen zorunlu seçenekleri seçin.":"يرجى إكمال الاختيارات المطلوبة."}</p>:null}
     <p style={{fontSize:11,color:"#75887B",lineHeight:1.8,marginBottom:0}}>{en?"Preview only. Ordering and payment are not active yet. Prices will be verified on the server.":tr?"Bu sadece bir önizlemedir. Sipariş ve ödeme henüz etkin değil.":"هذه معاينة فقط. الطلب والدفع غير مفعّلين بعد، والسعر يُعاد احتسابه على الخادم عند تفعيل الطلبات."}</p>
+    <GuestRatingPreview lang={lang}/>
    </div>:null}
     </div></div>
    </section></div>:null}
