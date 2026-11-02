@@ -49,15 +49,19 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
    {categories.length===0?<div style={{padding:30,borderRadius:18,background:theme.surface,border:"1px solid "+theme.border}}>{t.empty}</div>:
     categories.map(c=><section key={c.id} style={{marginBottom:30}} aria-labelledby={`category-${c.id}`}>
      <h3 id={`category-${c.id}`} style={{fontSize:19,marginBottom:13,borderInlineStart:"4px solid "+theme.accent,paddingInlineStart:10}}>{localizedText(c,lang)}</h3>
-     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,330px),1fr))",gap:12}}>
+     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,420px),1fr))",gap:12}}>
       {c.items.length===0?<p style={{color:theme.muted,fontSize:14}}>{t.empty}</p>:
-       c.items.map(i=><article key={i.id} style={{display:"flex",gap:16,alignItems:"flex-start",background:theme.surface,border:"1px solid "+theme.border,
-         borderRadius:22,padding:18,boxShadow:appearance.theme==="clean_light"?"0 8px 30px rgba(24,62,65,.055)":"0 4px 18px rgba(40,30,20,.04)"}}>
-        {i.image_url?<img src={i.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" style={{width:124,height:124,objectFit:"cover",borderRadius:17,flexShrink:0,maxWidth:"35%"}}/>:null}
-        <div style={{flex:1,minWidth:0}}>
-         <h4 style={{fontSize:17,margin:"0 0 8px"}}>{localizedText(i,lang)}</h4>
-         {detailsText(i,lang)?<p style={{fontSize:13,color:theme.muted,margin:"0 0 11px",overflowWrap:"anywhere"}}>{detailsText(i,lang)}</p>:null}
-         <strong style={{fontSize:17,color:theme.accent}}>{formatPrice(Number(i.price_minor),branch.country_code,lang)}</strong>
+       c.items.map(i=><article key={i.id} style={{display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:16,minWidth:0,width:"100%",boxSizing:"border-box",background:theme.surface,border:"1px solid "+theme.border,
+         borderRadius:22,padding:"clamp(14px,3vw,20px)",boxShadow:appearance.theme==="clean_light"?"0 8px 30px rgba(24,62,65,.055)":"0 4px 18px rgba(40,30,20,.04)"}}>
+        <div style={{display:"flex",gap:14,alignItems:"flex-start",minWidth:0,width:"100%"}}>
+         {i.image_url?<img src={i.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" style={{width:"clamp(88px,26vw,124px)",height:"clamp(88px,26vw,124px)",objectFit:"cover",borderRadius:17,flexShrink:0,maxWidth:"36%"}}/>:null}
+         <div style={{flex:"1 1 0",minWidth:0,overflowWrap:"break-word"}}>
+          <h4 style={{fontSize:17,lineHeight:1.5,margin:"0 0 8px",overflowWrap:"break-word"}}>{localizedText(i,lang)}</h4>
+          {detailsText(i,lang)?<p style={{fontSize:13,lineHeight:1.7,color:theme.muted,margin:"0 0 11px",overflowWrap:"break-word"}}>{detailsText(i,lang)}</p>:null}
+          <strong style={{fontSize:17,color:theme.accent,whiteSpace:"nowrap"}}>{formatPrice(Number(i.price_minor),branch.country_code,lang)}</strong>
+         </div>
+        </div>
+        <div style={{width:"100%",minWidth:0,boxSizing:"border-box",borderTop:"1px solid "+theme.border,paddingTop:2}}>
          <ProductDetails branchId={branch.branch_id} productId={i.id} country={branch.country_code} lang={lang} accent={theme.accent} dark={appearance.theme==="luxe_dark"}/>
          <GuestRatingPreview lang={lang}/>
         </div>
