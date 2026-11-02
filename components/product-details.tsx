@@ -69,7 +69,7 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
   const omissions=details.ingredients.filter(i=>i.is_optional&&removed.includes(i.name_ar)).map(i=>(en?"Without ":tr?"Olmadan ":"بدون ")+title(i));
   const selectedIds=details.groups.flatMap(g=>(selection[g.id]??[]).slice().sort());
   const key=JSON.stringify([productId,selectedIds,removed.slice().sort()]);
-  cart.add({key,name:title(details),unitMinor:Number(details.price_minor)+extra,baseMinor:Number(details.price_minor),extraMinor:extra,imageUrl:imageUrl??undefined,quantity,selections:[...choices,...omissions]});
+  cart.add({key,productId,optionIds:selectedIds,removedIngredients:removed, name:title(details),unitMinor:Number(details.price_minor)+extra,baseMinor:Number(details.price_minor),extraMinor:extra,imageUrl:imageUrl??undefined,quantity,selections:[...choices,...omissions]});
   setAdded(en?"Added to preview basket":tr?"Önizleme sepetine eklendi":"أضيف إلى السلة التجريبية");
   setQuantity(1);setSelection({});setRemoved([]);
   setOpen(false);
