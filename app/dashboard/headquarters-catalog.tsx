@@ -11,6 +11,10 @@ type Props = {businessId:string; country:string; branches:Branch[]};
  * business owner/manager memberships; database RLS remains authoritative. */
 export default function HeadquartersCatalog({businessId,country,branches}:Props) {
   const [selectedBranch,setSelectedBranch]=useState(branches[0]?.id ?? "");
+  const [copyNotice,setCopyNotice]=useState("");
+  const [qrReady,setQrReady]=useState(false);
+  const [origin,setOrigin]=useState("");
+  useEffect(()=>{setOrigin(window.location.origin);},[]);
   if (branches.length===0) return <section id="catalog-management" aria-label="الإدارة المركزية للمنيو">
     <h2>إدارة المنيو والطاولات</h2>
     <p>أضف أول فرع من لوحة الإدارة الرئيسية لتبدأ إعداد قائمته.</p>
@@ -18,10 +22,6 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
   const valid=branches.some(b=>b.id===selectedBranch);
   const activeId=valid?selectedBranch:branches[0].id;
   const guestPath=`/b/${activeId}`;
-  const [copyNotice,setCopyNotice]=useState("");
-  const [qrReady,setQrReady]=useState(false);
-  const [origin,setOrigin]=useState("");
-  useEffect(()=>{setOrigin(window.location.origin);},[]);
   return <section id="catalog-management" aria-label="الإدارة المركزية للمنيو" dir="rtl" style={{marginTop:26}}>
     <div style={{background:"#eaf5f3",border:"1px solid #cce3df",padding:18,borderRadius:14}}>
       <h2 style={{fontSize:22,margin:"0 0 8px"}}>إدارة الفروع والمنيو من المركز</h2>
