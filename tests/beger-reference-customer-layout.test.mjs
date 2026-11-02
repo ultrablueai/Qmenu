@@ -30,7 +30,8 @@ test("navigation and responsive reference layout work in AR/TR/EN",()=>{
 });
 test("reference visual does not create fictional orders or ratings",()=>{
  assert.match(menu,/Delivery \(soon\)/);
- assert.match(details,/Preview only\. Ordering and payment are not active yet/);
+ assert.match(details,/tableOrdering\?/);
+ assert.match(details,/Scan your table QR to submit an order/);
  assert.doesNotMatch(menu+details,/submitOrder|fakeRating|paymentIntent/);
 });
 
@@ -50,7 +51,8 @@ test("approved mobile reference keeps meaningful hierarchy without tiny vertical
 test("reference photo-led modal keeps real catalog pricing and no fabricated star score",()=>{
  assert.match(details,/formatPrice\(Number\(details\.price_minor\),country,lang\)/);
  assert.doesNotMatch(details,/1,264 Reviews|fakeRating|4\.8\s*★/);
- assert.match(details,/Preview only\. Ordering and payment are not active yet/);
+ assert.match(details,/tableOrdering\?/);
+ assert.match(details,/Scan your table QR to submit an order/);
 });
 
 test("real welcome and menu are separate phone screens with functional navigation",()=>{
