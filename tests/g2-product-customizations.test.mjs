@@ -46,6 +46,6 @@ test("guest can preview selected options and price, not submit orders in G2",()=
  assert.match(guest,/const valid=details\?\.groups\.every/);
  assert.match(guest,/min_select/);
  assert.match(guest,/max_select/);
- assert.match(guest,/الطلب والدفع غير مفعّلين بعد/);
+ assert.match(guest,/Scan your table QR to submit an order/);
  assert.doesNotMatch(guest,/submitOrder|checkout|paymentIntent|\.from\("orders"\)/);
 });
