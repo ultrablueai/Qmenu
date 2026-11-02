@@ -8,7 +8,20 @@ type Detector={detect(source:HTMLVideoElement):Promise<Detected[]>};
 type DetectorConstructor=new (options:{formats:string[]})=>Detector;
 const validRoute=/^\/(?:b|t)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/?$/i;
 function targetFromQr(value:string):string|null{
- try{const url=new URL(value,window.location.origin);const preview=/^qmenu-staging-(?:[a-z0-9]+|git-feat-g1-foundation)-ultrablueais-projects\.vercel\.app$/;const sameProjectPreview=preview.test(url.hostname)&&preview.test(window.location.hostname)&&url.protocol==="https:";if((url.origin!==window.location.origin&&!sameProjectPreview)||!validRoute.test(url.pathname))return null;const p=url.searchParams.get("product");if(p&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(p))return null;return url.pathname+(p?"?product="+encodeURIComponent(p):"");}catch{return null;}
+ try{const url=new URL(value,window.location.origin);const preview=/^qmenu-staging-(?:[a-z0-9]+|git-feat-g1-foundation)-ultrablueais-projects\.vercel\.app$/;const sameProjectPreview=preview.test(url.hostname)&&preview.test(window.location.hostname)&&url.protocol==="https:";if((url.origin!==window.location.origin&&!sameProjectPreview)||!validRoute.test(url.pathname))return null;const p=url.searchParams.get("product");
+ if(p&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(p))return null;
+ const target=new URL(url.pathname,window.location.origin);
+ if(p)target.searchParams.set("product",p);
+ const lang=url.searchParams.get("lang");
+ if(lang==="ar"||lang==="tr"||lang==="en")target.searchParams.set("lang",lang);
+ // A Vercel share link is scoped to its deployment. Preserve a scanned token only
+ // on the exact same host, or the active page's own access token when moving
+ // between customer routes on the same protected preview.
+ const scannedShare=url.searchParams.get("_vercel_share");
+ const currentShare=new URL(window.location.href).searchParams.get("_vercel_share");
+ if(url.origin===window.location.origin&&scannedShare&&/^[A-Za-z0-9_-]{12,128}$/.test(scannedShare))target.searchParams.set("_vercel_share",scannedShare);
+ else if(currentShare&&/^[A-Za-z0-9_-]{12,128}$/.test(currentShare))target.searchParams.set("_vercel_share",currentShare);
+ return target.pathname+target.search;}catch{return null;}
 }
 export default function GuestQrScanner({lang}:{lang:GuestLang}){
  const [open,setOpen]=useState(false),[active,setActive]=useState(false),[starting,setStarting]=useState(false),[error,setError]=useState(""),[manual,setManual]=useState(""),[pageUrl,setPageUrl]=useState(""),[showAlternatives,setShowAlternatives]=useState(false);
