@@ -8,7 +8,7 @@ type CartItem={key:string;productId?:string;optionIds?:string[];removedIngredien
 type CartContextValue={add:(item:Omit<CartItem,"quantity"> & {quantity?:number})=>void;count:number;open:()=>void};
 const CartContext=createContext<CartContextValue|null>(null);
 export function useGuestCart(){return useContext(CartContext);}
-export default function GuestCart({children,country,lang,accent,branchId,tableToken,tableLabel}:{children:ReactNode;country:string;lang:GuestLang;accent:string;branchId:string;tableToken?:string;tableLabel?:string}){
+export default function GuestCart({children,country,lang,accent,branchId,tableToken,tableLabel,serviceMode="browse"}:{children:ReactNode;country:string;lang:GuestLang;accent:string;branchId:string;tableToken?:string;tableLabel?:string;serviceMode?:"browse"|"dine_in"|"takeaway"}){
  const feedback=useBegerFeedback();
  const [items,setItems]=useState<CartItem[]>([]);
  const [open,setOpen]=useState(false);
@@ -31,17 +31,18 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
  const subtotal=items.reduce((n,i)=>n+i.quantity*(i.baseMinor??i.unitMinor),0);
  const additions=items.reduce((n,i)=>n+i.quantity*(i.extraMinor??0),0);
  const tr=lang==="tr",en=lang==="en";
+ const isTakeaway=serviceMode==="takeaway";
  const labels={
   cart:en?"Your Order":tr?"Siparişin":"طلبك",
   empty:en?"Your basket is empty":tr?"Sepetiniz boş":"السلة فارغة",
-  notice:tableToken?(en?"Your order will be submitted to the restaurant only when you tap Send. Prices and available options are verified by the restaurant system.":tr?"Sipariş, yalnızca Gönder butonuna bastığınızda restorana ulaşır. Fiyatlar ve ürün seçenekleri sunucuda doğrulanır.":"طلبك لن يصل للمطعم إلا بعد الضغط على «إرسال الطلب». يتحقق النظام من الأسعار والإضافات المتاحة قبل التسجيل."):(en?"Shop menu preview. Scan your table QR to send an order.":tr?"Mağaza menüsü. Sipariş göndermek için masanızdaki QR kodunu tarayın.":"هذه قائمة المتجر العامة. امسح QR الطاولة لإرسال طلب."),
+  notice:tableToken?(en?"Your order will be submitted to the restaurant only when you tap Send. Prices and available options are verified by the restaurant system.":tr?"Sipariş, yalnızca Gönder butonuna bastığınızda restorana ulaşır. Fiyatlar ve ürün seçenekleri sunucuda doğrulanır.":"طلبك لن يصل للمطعم إلا بعد الضغط على «إرسال الطلب». يتحقق النظام من الأسعار والإضافات المتاحة قبل التسجيل."):isTakeaway?(en?"Takeaway preview only: your shop has not enabled pickup checkout or packaging fees. No order will be sent.":tr?"Paket sipariş önizlemesi: mağaza henüz paket sipariş ve ambalaj ücretlerini etkinleştirmedi. Sipariş gönderilmez.":"معاينة السفري فقط: لم تُفعّل طلبات الاستلام ورسوم التغليف بعد. لن يُرسل أي طلب. "):(en?"Shop menu preview. Scan your table QR to send an order.":tr?"Mağaza menüsü. Sipariş göndermek için masanızdaki QR kodunu tarayın.":"هذه قائمة المتجر العامة. امسح QR الطاولة لإرسال طلب."),
   total:en?"Estimated total":tr?"Tahmini toplam":"المجموع التقديري",
   subtotal:en?"Subtotal":tr?"Ara Toplam":"المجموع الفرعي",
   additions:en?"Add-ons":tr?"Ekstralar":"الإضافات",
   close:en?"Close":tr?"Kapat":"إغلاق",
   clear:en?"Clear basket":tr?"Sepeti temizle":"تفريغ السلة",
   quantity:en?"Quantity":tr?"Adet":"الكمية",
-  preview:tableToken?(en?"TABLE ORDER · STAGING":tr?"MASA SİPARİŞİ · TEST":"طلب طاولة · تجريبي"):(en?"SHOP MENU · BROWSE":tr?"MAĞAZA MENÜSÜ":"منيو المتجر · تصفح"),
+  preview:tableToken?(en?"TABLE ORDER · STAGING":tr?"MASA SİPARİŞİ · TEST":"طلب طاولة · تجريبي"):isTakeaway?(en?"TAKEAWAY · PREVIEW":tr?"PAKET · ÖNİZLEME":"سفري · معاينة"):(en?"SHOP MENU · BROWSE":tr?"MAĞAZA MENÜSÜ":"منيو المتجر · تصفح"),
   items:en?"Items":tr?"Ürünler":"المنتجات",
   remove:en?"Remove product":tr?"Ürünü kaldır":"إزالة المنتج",
  };
