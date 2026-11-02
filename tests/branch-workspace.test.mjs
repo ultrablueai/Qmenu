@@ -29,7 +29,7 @@ test("branch identity and QR status are not fabricated",()=>{
   assert.doesNotMatch(branch,/Math\.random|fakeCustomerCount|fakeOrders/);
 });
 test("branch workspace has navigation and mobile style",()=>{
-  assert.match(branch,/href="\/dashboard"/);
+  assert.match(branch,/href=\{"\/dashboard\?business="\+encodeURIComponent\(business\.id\)\}/);
   assert.match(css,/\.branchPageHeader/);
   assert.match(css,/@media\(max-width:720px\)/);
 });
