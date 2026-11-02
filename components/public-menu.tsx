@@ -1,5 +1,6 @@
 import Link from "next/link";
 import "./public-menu.css";
+import "../app/qr-experience.css";
 import ProductDetails from "./product-details";
 import GuestCart from "./guest-cart";
 import GuestScreenSwitcher,{GuestOpenMenu} from "./guest-screen-switcher";
