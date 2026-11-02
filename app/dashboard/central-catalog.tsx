@@ -15,6 +15,7 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
   const [cats,setCats]=useState<Cat[]>([]),[products,setProducts]=useState<Item[]>([]),[pubs,setPubs]=useState<Publication[]>([]);
   const [catAr,setCatAr]=useState(""),[catTr,setCatTr]=useState("");
   const [nameAr,setNameAr]=useState(""),[nameTr,setNameTr]=useState(""),[price,setPrice]=useState(""),[category,setCategory]=useState("");
+  const [descAr,setDescAr]=useState(""),[descTr,setDescTr]=useState(""),[imageUrl,setImageUrl]=useState("");
   const [busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[loading,setLoading]=useState(true);
   const factor=country==="TR"?100:1,currency=country==="TR"?"TRY":country==="SY"?"SYP":country;
   async function refresh(){
@@ -39,7 +40,8 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
   async function addProduct(e:FormEvent){e.preventDefault();const n=Number(price),minor=Math.round(n*factor);
     if(!cats.some(c=>c.id===category)){setError("اختر تصنيفاً صحيحاً");return;}
     if(!Number.isFinite(n)||n<0||!Number.isSafeInteger(minor)||minor>100000000000){setError("السعر غير صالح");return;}
-    if(await save(async()=>browserSupabase().from("catalog_products").insert({business_id:businessId,category_id:category,name_ar:nameAr.trim(),name_tr:nameTr.trim(),price_minor:minor}),"تم إنشاء المنتج مرة واحدة في كتالوج المؤسسة")){setNameAr("");setNameTr("");setPrice("");}
+    if(imageUrl.trim()&&!/^https:\/\/[^\s]+$/.test(imageUrl.trim())){setError("رابط الصورة يجب أن يبدأ بـ https://");return;}
+    if(await save(async()=>browserSupabase().from("catalog_products").insert({business_id:businessId,category_id:category,name_ar:nameAr.trim(),name_tr:nameTr.trim(),description_ar:descAr.trim(),description_tr:descTr.trim(),image_url:imageUrl.trim()||null,price_minor:minor}),"تم إنشاء المنتج مرة واحدة في كتالوج المؤسسة")){setNameAr("");setNameTr("");setPrice("");setDescAr("");setDescTr("");setImageUrl("");}
   }
   async function toggleProduct(branchId:string,productId:string,existing:Publication|undefined){
     if(existing){await save(async()=>browserSupabase().from("catalog_branch_publications").update({active:!existing.active}).eq("id",existing.id).eq("business_id",businessId).select("id").single(),existing.active?"تم إلغاء نشر المنتج في الفرع":"تم نشر المنتج في الفرع",true);}
@@ -68,6 +70,11 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
           <label style={{flex:"1 1 170px"}}>الاسم بالعربية<input style={input} required maxLength={120} value={nameAr} onChange={e=>setNameAr(e.target.value)}/></label>
           <label style={{flex:"1 1 170px"}}>Türkçe ürün adı<input style={input} required maxLength={120} value={nameTr} onChange={e=>setNameTr(e.target.value)}/></label>
           <label style={{flex:"1 1 120px"}}>السعر ({currency})<input style={input} type="number" required min="0" step={factor===100?"0.01":"1"} value={price} onChange={e=>setPrice(e.target.value)}/></label>
+        </div>
+        <div style={line}>
+          <label style={{flex:"1 1 190px"}}>وصف المنتج بالعربية<textarea style={input} maxLength={1000} value={descAr} onChange={e=>setDescAr(e.target.value)}/></label>
+          <label style={{flex:"1 1 190px"}}>Türkçe açıklama<textarea style={input} maxLength={1000} value={descTr} onChange={e=>setDescTr(e.target.value)}/></label>
+          <label style={{flex:"1 1 190px"}}>رابط صورة HTTPS (اختياري)<input type="url" style={input} maxLength={2048} value={imageUrl} onChange={e=>setImageUrl(e.target.value)}/></label>
         </div>
         <button style={button} disabled={busy||!cats.length}>إنشاء المنتج</button>
       </form>
