@@ -25,7 +25,7 @@ function initials(name: string) {
   return (name.trim()[0] || "ب").toLocaleUpperCase("ar");
 }
 
-export default async function Dashboard() {
+export default async function Dashboard({searchParams}:{searchParams:Promise<{business?:string}>}) {
   const supabase = await serverSupabase();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) redirect("/login");
@@ -55,7 +55,9 @@ export default async function Dashboard() {
   const loadError = Boolean(membershipError || businessResult.error || branchResult.error);
   const businesses = businessResult.data ?? [];
   const branches = branchResult.data ?? [];
-  const primary = businesses.find((b) => b.id === ids[0]) ?? businesses[0];
+  const requestedBusiness = (await searchParams).business;
+  // The selection is only honored if it belongs to a verified membership.
+  const primary = businesses.find((b) => b.id === requestedBusiness && ids.includes(b.id)) ?? businesses.find((b) => b.id === ids[0]) ?? businesses[0];
   const currentRole = memberships?.find((m) => m.business_id === primary?.id)?.role ?? "staff";
   const displayName = primary?.name ?? "نشاطك التجاري";
   const firstName = user.email?.split("@")[0] ?? "صاحب النشاط";
@@ -78,6 +80,10 @@ export default async function Dashboard() {
             <small>{roleLabel(currentRole)} · {countryLabel(country)}</small>
           </div>
         </div>
+        {businesses.length>1?<nav aria-label="اختيار المتجر" className={styles.businessSwitcher}>
+         <strong className={styles.businessSwitchTitle}>المتجر الحالي</strong>
+         {businesses.map(b=><Link key={b.id} href={"/dashboard?business="+encodeURIComponent(b.id)} aria-current={b.id===primary?.id?"page":undefined} className={styles.businessSwitchOption}>{b.name}{b.id===primary?.id?" ✓":""}</Link>)}
+        </nav>:null}
         <nav aria-label="التنقل الرئيسي" className={styles.navGroup}>
           {canOpenPlatform && <Link className={styles.navItem} href="/admin" aria-label="الانتقال إلى إدارة منصة بيجر"><span className={styles.navIcon} aria-hidden="true">◇</span> إدارة منصة بيجر</Link>}
           <div className={styles.navLabel}>مساحة العمل</div>
