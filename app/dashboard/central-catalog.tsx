@@ -3,10 +3,11 @@ import {useEffect,useState,type FormEvent,type CSSProperties} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
 import CentralPriceEditor from "./central-price-editor";
 import ProductOptionsManager from "./product-options-manager";
+import EditCentralProduct from "./edit-central-product";
 
 type Branch={id:string;name:string};
 type Cat={id:string;name_ar:string;name_tr:string;active:boolean};
-type Item={id:string;category_id:string;name_ar:string;name_tr:string;price_minor:number;active:boolean};
+type Item={id:string;category_id:string;name_ar:string;name_tr:string;name_en:string|null;description_ar:string;description_tr:string;description_en:string;image_url:string|null;price_minor:number;active:boolean};
 type Publication={id:string;branch_id:string;product_id:string;active:boolean;available:boolean;price_override_minor:number|null};
 const input:CSSProperties={width:"100%",padding:10,border:"1px solid #c8d8da",borderRadius:9,boxSizing:"border-box",font:"inherit"};
 const button:CSSProperties={padding:"10px 16px",border:"none",background:"#176e69",color:"white",borderRadius:10,fontWeight:700,cursor:"pointer"};
@@ -23,7 +24,7 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
     const db=browserSupabase();
     const [a,b,c]=await Promise.all([
       db.from("catalog_categories").select("id,name_ar,name_tr,active").eq("business_id",businessId).order("created_at"),
-      db.from("catalog_products").select("id,category_id,name_ar,name_tr,price_minor,active").eq("business_id",businessId).order("created_at"),
+      db.from("catalog_products").select("id,category_id,name_ar,name_tr,name_en,description_ar,description_tr,description_en,image_url,price_minor,active").eq("business_id",businessId).order("created_at"),
       db.from("catalog_branch_publications").select("id,branch_id,product_id,active,available,price_override_minor").eq("business_id",businessId)
     ]);
     if(a.error||b.error||c.error)throw new Error("تعذّر قراءة الكتالوج المركزي؛ تحقق من عضوية الإدارة.");
@@ -87,6 +88,9 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
       <h3>3. نشر المنتجات على الفروع</h3>
       {products.length===0?<p>لم تُنشأ منتجات مركزية بعد.</p>:products.map(prod=><article key={prod.id} style={{padding:"14px 0",borderTop:"1px solid #e3eded"}}>
         <strong>{prod.name_ar}</strong> · <span>{prod.name_tr}</span> · <span>{(Number(prod.price_minor)/factor).toFixed(factor===100?2:0)} {currency}</span>
+        <EditCentralProduct key={prod.id} product={prod} categories={cats} busy={busy}
+          onSave={async patch=>save(async()=>browserSupabase().from("catalog_products").update(patch).eq("id",prod.id).eq("business_id",businessId).select("id").single(),"تم تعديل تفاصيل المنتج",true)}
+        />
         <CentralPriceEditor label="السعر المركزي للمنتج" baseMinor={Number(prod.price_minor)} factor={factor} currency={currency} busy={busy}
           onBasePrice={async minor=>save(async()=>browserSupabase().from("catalog_products").update({price_minor:minor}).eq("id",prod.id).eq("business_id",businessId).select("id").single(),"تم تحديث السعر المركزي",true)}
           onOverride={async()=>false} onAvailability={async()=>false}
