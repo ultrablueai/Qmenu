@@ -24,6 +24,7 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
  const tr=lang==="tr",en=lang==="en";
  const cart=useGuestCart();
  const [added,setAdded]=useState("");
+ const [quantity,setQuantity]=useState(1);
  const closeRef=useRef<HTMLButtonElement>(null);
  useEffect(()=>{if(!open)return;
   const previousOverflow=document.body.style.overflow;
@@ -68,8 +69,9 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
   const omissions=details.ingredients.filter(i=>i.is_optional&&removed.includes(i.name_ar)).map(i=>(en?"Without ":tr?"Olmadan ":"بدون ")+title(i));
   const selectedIds=details.groups.flatMap(g=>(selection[g.id]??[]).slice().sort());
   const key=JSON.stringify([productId,selectedIds,removed.slice().sort()]);
-  cart.add({key,name:title(details),unitMinor:Number(details.price_minor)+extra,baseMinor:Number(details.price_minor),extraMinor:extra,imageUrl:imageUrl??undefined,selections:[...choices,...omissions]});
+  cart.add({key,name:title(details),unitMinor:Number(details.price_minor)+extra,baseMinor:Number(details.price_minor),extraMinor:extra,imageUrl:imageUrl??undefined,quantity,selections:[...choices,...omissions]});
   setAdded(en?"Added to preview basket":tr?"Önizleme sepetine eklendi":"أضيف إلى السلة التجريبية");
+  setQuantity(1);setSelection({});setRemoved([]);
   setOpen(false);
  }
  return <div className="beger-product-action-mount" style={{marginTop:13}}>
@@ -139,12 +141,16 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
     <div style={{background:"#EAF4EC",border:"1px solid #D5E8D9",borderRadius:15,padding:14,marginTop:18}}>
      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
       <strong style={{fontSize:13}}>{en?"Estimated total":tr?"Önizleme toplamı":"المجموع التقديري"}</strong>
-      <strong style={{color:"#17694E",fontSize:20}}>{formatPrice(Number(details.price_minor)+extra,country,lang)}</strong>
+      <strong style={{color:"#17694E",fontSize:20}}>{formatPrice((Number(details.price_minor)+extra)*quantity,country,lang)}</strong>
      </div>
      {extra>0?<p style={{fontSize:11,color:"#698476",margin:"8px 0 0"}}>{en?"Includes additions":tr?"Ek seçenekler dahil":"يشمل الإضافات"} +{formatPrice(extra,country,lang)}</p>:null}
     </div>
+    <div className="beger-product-quantity-control" role="group" aria-label={en?"Product quantity":tr?"Ürün adedi":"كمية المنتج"}>
+      <span>{en?"Quantity":tr?"Adet":"الكمية"}</span>
+      <div><button type="button" aria-label={en?"Decrease quantity":tr?"Adedi azalt":"تقليل الكمية"} disabled={quantity<=1} onClick={()=>setQuantity(q=>Math.max(1,q-1))}>−</button><strong aria-live="polite">{quantity}</strong><button type="button" aria-label={en?"Increase quantity":tr?"Adedi artır":"زيادة الكمية"} disabled={quantity>=20} onClick={()=>setQuantity(q=>Math.min(20,q+1))}>+</button></div>
+    </div>
     {cart?<button className="beger-product-add-button" type="button" disabled={!valid} onClick={addToBasket} style={{width:"100%",minHeight:50,padding:"13px 16px",borderRadius:14,border:0,background:valid?accent:"#adbcb5",color:dark?"#20170f":"white",fontSize:14,fontWeight:800,cursor:valid?"pointer":"not-allowed",marginTop:13}}>
-     {en?"Add to preview basket":tr?"Önizleme sepetine ekle":"أضف إلى السلة التجريبية"} · {formatPrice(Number(details.price_minor)+extra,country,lang)}
+     {en?"Add to preview basket":tr?"Önizleme sepetine ekle":"أضف إلى السلة التجريبية"} · {formatPrice((Number(details.price_minor)+extra)*quantity,country,lang)}
     </button>:null}
     {added?<p role="status" style={{fontSize:12,color:"#176d4c",margin:"9px 0"}}>{added}</p>:null}
     {!valid?<p role="status" style={{fontSize:12,color:"#99651c"}}>{en?"Please complete required selections.":tr?"Lütfen zorunlu seçenekleri seçin.":"يرجى إكمال الاختيارات المطلوبة."}</p>:null}
