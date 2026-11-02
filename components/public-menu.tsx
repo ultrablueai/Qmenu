@@ -39,7 +39,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
        </Link>)}
     </nav>
    </header>
-   <section className="beger-welcome-screen" style={{background:theme.hero,border:"1px solid "+theme.border}}>
+   <section className="beger-guest-hero beger-welcome-screen" style={{background:theme.hero,border:"1px solid "+theme.border}}>
      <div className="beger-welcome-photo" aria-hidden="true">
        {heroImage?<img src={heroImage} alt="" loading="eager" referrerPolicy="no-referrer"/>:<span className="beger-guest-coffee-symbol">☕</span>}
      </div>
@@ -52,10 +52,10 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
          <p>{lang==="ar"?"تصفّح قائمتنا، واختَر مكوناتك وإضافاتك بكل سهولة.":lang==="tr"?"Menümüzü keşfedin, malzemelerinizi ve eklemelerinizi seçin.":"Explore the menu and personalize ingredients and extras."}</p>
          <a className="beger-welcome-cta" href="#beger-categories" style={{background:theme.accent,color:theme.buttonForeground}}>⌗ {t.discover} <span aria-hidden="true">←</span></a>
        </div>
-       <div className="beger-service-types" aria-label={lang==="ar"?"طرق الخدمة":lang==="tr"?"Servis türleri":"Service formats"}>
+       <div className="beger-service-types" aria-label={lang==="ar"?"أنواع الخدمة — عرض توضيحي":lang==="tr"?"Servis türleri — önizleme":"Service formats — preview"}>
         <span><b>☕</b>{lang==="ar"?"داخل المقهى":lang==="tr"?"Mekânda":"Dine in"}</span>
         <span><b>♧</b>{lang==="ar"?"استلام":lang==="tr"?"Paket":"Takeaway"}</span>
-        <span><b>♧</b>{lang==="ar"?"توصيل":lang==="tr"?"Teslimat":"Delivery"}</span>
+        <span><b>♧</b>{lang==="ar"?"توصيل (لاحقاً)":lang==="tr"?"Teslimat (yakında)":"Delivery (soon)"}</span>
        </div>
      </div>
    </section>
@@ -94,7 +94,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
     </section>)}
    <nav className="beger-guest-bottom-nav" aria-label={lang==="ar"?"القائمة السريعة":lang==="tr"?"Hızlı menü":"Quick navigation"}>
       <a href="#beger-categories" aria-current="page"><span aria-hidden="true">⌂</span>{lang==="ar"?"الرئيسية":lang==="tr"?"Ana sayfa":"Home"}</a>
-      <a href="#category-${categories[0]?.id??""}"><span aria-hidden="true">♧</span>{t.menu}</a>
+      <a href={`#category-${categories[0]?.id??""}`}><span aria-hidden="true">♧</span>{t.menu}</a>
       <a href="#beger-categories"><span aria-hidden="true">☕</span>{t.products}</a>
    </nav>
    <footer style={{padding:"22px 0",borderTop:"1px solid "+theme.border,color:theme.muted,fontSize:12}}>{t.note}<div style={{marginTop:10}}>Beger · Smart Business OS</div></footer>
