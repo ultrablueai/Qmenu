@@ -1,3 +1,5 @@
+> **Product identity clarification 2026-11-03:** Beger is a configurable, multi-vertical Smart Business OS. This document prioritizes the FIRST café/restaurant/bakery release slice and subscription/payment work; it does not restrict Beger to food businesses. See the 2026-11-03 addendum in docs/BEGER-CANONICAL-PLAN.md. Generic queue/pager, booking and sector enablement must remain in the product architecture, but future verticals are not represented as shipped.
+
 # Beger — Restricted Commercial Scope, Market/Pricing/Payments Checkpoint (2026-11-03)
 Status: Owner scope decision confirmed. Planning only; no activation of payments or production changes.
 
@@ -6,7 +8,7 @@ Status: Owner scope decision confirmed. Planning only; no activation of payments
 2. QR table ordering: independent per-order acceptance, add-ons, KDS/ready/pager, cash/pay-at-counter first.
 3. Shop pickup / "تعال استلم": order from anywhere, select verified branch pickup slot, server-controlled packaging prices/fulfillment, SMS verification only if needed to protect remote order. No table token.
 4. Merchant subscription/billing and robust, auditable payment reconciliation are HIGH priority.
-5. **DEFER** delivery, couriers, maps, routing, geolocation and third-party logistics and any additional verticals until user explicitly reopens scope. `lib/beger-fulfillment-planning.ts` delivery code remains inert research only.
+5. **DEFER** delivery, couriers, maps, routing, geolocation and third-party logistics and **implementation** of additional verticals until the shared core pilot is proven. Barber, salon, clinic, bakery and retail remain explicitly in the approved product vision and are NOT cancelled. `lib/beger-fulfillment-planning.ts` delivery code remains inert research only.
 
 ## Evidence / market (retrieved Nov 2026)
 - Turkish 2024 NACE 56.10 restaurant & mobile food-service count 199,016, NACE 56.30 drinks 78,942 in public TÜİK-derived dataset; not an addressable-sales count. https://www.verinays.org/dataset/tuik-df-ekonomik-faaliyete-gore-girisim-sayisi-2020-ve-sonrasi
