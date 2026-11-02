@@ -52,11 +52,11 @@ function multiplySafe(a:number,b:number):number{
  const result=a*b;if(!Number.isSafeInteger(result))throw new Error("Amount overflow");
  return result;
 }
-/** Contact policy deliberately separates verified phone from mandatory customer registration. */
+/** Lightweight passwordless phone-OTP login for remote pickup/delivery; table ordering stays anonymous. */
 export function contactRequirements(mode:ServiceMode):OrderContactRequirements{
  if(mode==="dine_in")return {loginRequired:false,verifiedContactRequired:false,addressRequired:false,tableRequired:true,pickupSlotRequired:false};
- if(mode==="pickup")return {loginRequired:false,verifiedContactRequired:true,addressRequired:false,tableRequired:false,pickupSlotRequired:true};
- if(mode==="delivery")return {loginRequired:false,verifiedContactRequired:true,addressRequired:true,tableRequired:false,pickupSlotRequired:false};
+ if(mode==="pickup")return {loginRequired:true,verifiedContactRequired:true,addressRequired:false,tableRequired:false,pickupSlotRequired:true};
+ if(mode==="delivery")return {loginRequired:true,verifiedContactRequired:true,addressRequired:true,tableRequired:false,pickupSlotRequired:false};
  throw new Error("Unknown service mode");
 }
 /** Quotes are provisional and must be confirmed in an authenticated backend checkout transaction. */
