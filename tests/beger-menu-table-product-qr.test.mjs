@@ -152,7 +152,7 @@ test("product QR chooses the containing category so modal is not hidden by menu 
  const page=read("app/b/[branchId]/page.tsx");
  const menu=read("components/public-menu.tsx");
  const explorer=read("components/guest-catalog-explorer.tsx");
- assert.match(page,/searchParams:Promise<\{lang\?:string;product\?:string\}>/);
+ assert.match(page,/searchParams:Promise<\{lang\?:string;product\?:string;service\?:string\}>/);
  assert.match(page,/categories\.some\(category=>category\.items\.some\(item=>item\.id===search\.product\)\)/);
  assert.match(menu,/initialCategoryId=initialProductId\?categories\.find\(c=>c\.items\.some\(i=>i\.id===initialProductId\)\)\?\.id/);
  assert.match(menu,/initialCategoryId=\{initialCategoryId\}/);
