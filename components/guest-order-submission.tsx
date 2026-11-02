@@ -41,7 +41,7 @@ export default function GuestOrderSubmission({lang,tableToken,tableLabel,items,o
   {tableToken&&tableLabel?<p className="beger-order-table-label">⌗ {t.table}: <strong>{tableLabel}</strong></p>:null}
   {token?<div className="beger-guest-order-tracking" role="status"><h3>{t.success}</h3><strong>{status?t[status]:t.pending}</strong>
     {status!=="rejected"?<ol className="beger-order-steps">{statuses.map((label,index)=><li className={index<=current?"is-current":""} key={label}>{label}</li>)}</ol>:null}
-    <p>{t.saved}</p><button type="button" onClick={()=>void refresh()}>{t.retry}</button>{(status==="fulfilled"||status==="rejected")?<button type="button" onClick={()=>{setToken(null);setStatus(null);requestRef.current=null;try{if(tableToken)sessionStorage.removeItem("beger-g3-order:"+tableToken)}catch{/* optional storage */}}>{t.newOrder}</button>:null}
+    <p>{t.saved}</p><button type="button" onClick={()=>void refresh()}>{t.retry}</button>{(status==="fulfilled"||status==="rejected")?<button type="button" onClick={()=>{setToken(null);setStatus(null);requestRef.current=null;try{if(tableToken)sessionStorage.removeItem("beger-g3-order:"+tableToken)}catch{/* optional storage */}}}>{t.newOrder}</button>:null}
    </div>:items.length>0?<>
     <p className="beger-order-send-note">{tableToken?enabled?t.notice:checking?t.sending:t.notEnabled:t.needTable}</p>
     {enabled&&tableToken?<button className="beger-order-send-button" type="button" disabled={busy} onClick={()=>void submit()}>{busy?t.sending:t.send}</button>:null}
