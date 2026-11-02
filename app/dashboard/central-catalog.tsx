@@ -37,12 +37,12 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
       await refresh();setNotice(message);return true;
     }catch(e){setError(e instanceof Error?e.message:"تعذر الحفظ");return false;}finally{setBusy(false);}
   }
-  async function addCategory(e:FormEvent){e.preventDefault();if(await save(async()=>browserSupabase().from("catalog_categories").insert({business_id:businessId,name_ar:catAr.trim(),name_tr:catTr.trim()}),"تمت إضافة التصنيف المركزي")){setCatAr("");setCatTr("");}}
+  async function addCategory(e:FormEvent){e.preventDefault();if(await save(async()=>browserSupabase().from("catalog_categories").insert({business_id:businessId,name_ar:catAr.trim(),name_tr:catTr.trim(),name_en:catEn.trim()||null}),"تمت إضافة التصنيف المركزي")){setCatAr("");setCatTr("");setCatEn("");}}
   async function addProduct(e:FormEvent){e.preventDefault();const n=Number(price),minor=Math.round(n*factor);
     if(!cats.some(c=>c.id===category)){setError("اختر تصنيفاً صحيحاً");return;}
     if(!Number.isFinite(n)||n<0||!Number.isSafeInteger(minor)||minor>100000000000){setError("السعر غير صالح");return;}
     if(imageUrl.trim()&&!/^https:\/\/[^\s]+$/.test(imageUrl.trim())){setError("رابط الصورة يجب أن يبدأ بـ https://");return;}
-    if(await save(async()=>browserSupabase().from("catalog_products").insert({business_id:businessId,category_id:category,name_ar:nameAr.trim(),name_tr:nameTr.trim(),description_ar:descAr.trim(),description_tr:descTr.trim(),image_url:imageUrl.trim()||null,price_minor:minor}),"تم إنشاء المنتج مرة واحدة في كتالوج المؤسسة")){setNameAr("");setNameTr("");setPrice("");setDescAr("");setDescTr("");setImageUrl("");}
+    if(await save(async()=>browserSupabase().from("catalog_products").insert({business_id:businessId,category_id:category,name_ar:nameAr.trim(),name_tr:nameTr.trim(),name_en:nameEn.trim()||null,description_ar:descAr.trim(),description_tr:descTr.trim(),description_en:descEn.trim(),image_url:imageUrl.trim()||null,price_minor:minor}),"تم إنشاء المنتج مرة واحدة في كتالوج المؤسسة")){setNameAr("");setNameTr("");setNameEn("");setPrice("");setDescAr("");setDescTr("");setDescEn("");setImageUrl("");}
   }
   async function toggleProduct(branchId:string,productId:string,existing:Publication|undefined){
     if(existing){await save(async()=>browserSupabase().from("catalog_branch_publications").update({active:!existing.active}).eq("id",existing.id).eq("business_id",businessId).select("id").single(),existing.active?"تم إلغاء نشر المنتج في الفرع":"تم نشر المنتج في الفرع",true);}
