@@ -2,6 +2,7 @@
 import {useEffect,useState,type FormEvent} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
 import QrSvg from "../../lib/qr/qr-svg";
+import QrExport from "../../components/qr-export";
 type Table={id:string;label:string;qr_token:string;active:boolean};
 const buttonStyle={border:"1px solid #cbd5b5",borderRadius:11,padding:"10px 14px",fontWeight:800,fontSize:12,cursor:"pointer",color:"#52683a",background:"#fbfdf6"} as const;
 export default function MerchantTableQr({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
@@ -20,8 +21,9 @@ export default function MerchantTableQr({businessId,branchId,branchName}:{busine
  {!loading&&rows.length===0?<p className="beger-qr-empty">لم تُنشأ طاولات بعد. أضف أول طاولة ليظهر رمزها.</p>:null}
  <div className="beger-qr-grid">{rows.map(t=>{const path="/t/"+t.qr_token;const url=origin+path;return <article key={t.id} className="beger-qr-card">
   <div className="beger-qr-card-heading"><strong>{t.label}</strong><span className={t.active?"beger-qr-active":"beger-qr-inactive"}>{t.active?"نشط":"متوقف"}</span></div>
-  <div className="beger-qr-code">{origin?<QrSvg value={url} size={170} label={"رمز QR للطاولة "+t.label}/>:<span>جارٍ إنشاء QR</span>}</div>
+  <div className="beger-qr-code" id={"beger-table-code-"+t.id}>{origin?<QrSvg value={url} size={170} label={"رمز QR للطاولة "+t.label}/>:<span>جارٍ إنشاء QR</span>}</div>
   <a href={path} target="_blank" rel="noopener noreferrer">فتح منيو الطاولة ↗</a>
+  {origin?<QrExport targetId={"beger-table-code-"+t.id} fileName={"beger-table-"+t.id} label="حفظ QR للطباعة"/>:null}
   <div className="beger-qr-card-controls"><button type="button" disabled={busy} onClick={()=>toggle(t)} style={buttonStyle}>{t.active?"إيقاف":"تفعيل"}</button><button type="button" disabled={busy} onClick={()=>rotate(t)} style={buttonStyle}>تجديد الرمز</button><button type="button" style={buttonStyle} disabled={!origin} onClick={()=>void navigator.clipboard.writeText(url).then(()=>setNotice("تم نسخ الرابط")).catch(()=>setError("تعذّر النسخ، افتح الرابط يدوياً"))}>نسخ</button></div>
  </article>})}</div>
  </section>;
