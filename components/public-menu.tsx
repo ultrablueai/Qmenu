@@ -4,7 +4,7 @@ import "../app/qr-experience.css";
 import ProductDetails from "./product-details";
 import GuestCart from "./guest-cart";
 import GuestScreenSwitcher,{GuestOpenMenu,GuestLanguageSwitcher} from "./guest-screen-switcher";
-import GuestMenuSearch from "./guest-menu-search";
+import GuestCatalogExplorer from "./guest-catalog-explorer";
 import GuestRewardsPreview from "./guest-rewards-preview";
 import GuestFavorite from "./guest-favorite";
 import GuestIcon from "./guest-icons";
@@ -65,15 +65,10 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
       <div><span className="beger-guest-overline">BEGER · MENU</span><h2>{lang==="ar"?"قائمتنا":lang==="tr"?"Menümüz":"Our Menu"}</h2><p>{t.discover} · {totalItems} {t.products}</p></div>
       <span className="beger-preview-pill">{lang==="ar"?"قائمة QR":lang==="tr"?"QR Menü":"QR Menu"}</span>
     </div>
-    <GuestMenuSearch lang={lang}/>
-    <nav id="beger-categories" aria-label={t.menu} className="beger-category-tiles">
-      {categories.map(c=><a key={c.id} href={`#category-${c.id}`} style={{borderColor:theme.border,color:theme.foreground}}>
-        <span aria-hidden="true"><GuestIcon name={categorySymbol(localizedText(c,lang))} size={25}/></span><strong>{localizedText(c,lang)}</strong>
-      </a>)}
-    </nav>
    </section>
+   <GuestCatalogExplorer lang={lang} categories={categories.map(c=>({id:c.id,name:localizedText(c,lang),icon:categorySymbol(localizedText(c,lang)),count:c.items.length}))}>
    {categories.length===0?<div style={{padding:30,borderRadius:18,background:theme.surface,border:"1px solid "+theme.border}}>{t.empty}</div>:
-    categories.map(c=><section className="beger-menu-section" key={c.id} style={{marginBottom:30}} aria-labelledby={`category-${c.id}`}>
+    categories.map(c=><section className="beger-menu-section" data-category-id={c.id} key={c.id} style={{marginBottom:30}} aria-labelledby={`category-${c.id}`}>
      <div className="beger-category-heading"><h3 id={`category-${c.id}`} className="beger-guest-category-name" style={{fontSize:22,marginBottom:15,borderInlineStart:"4px solid "+theme.accent,paddingInlineStart:13}}>{localizedText(c,lang)}</h3><span className="beger-category-count">{c.items.length} {t.products}</span></div>
      <div className="beger-menu-product-list">
       {c.items.length===0?<p style={{color:theme.muted,fontSize:14}}>{t.empty}</p>:
@@ -92,6 +87,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
        </article>)}
      </div>
     </section>)}
+   </GuestCatalogExplorer>
    <GuestRewardsPreview lang={lang}/>
    <footer className="beger-guest-footer" style={{padding:"22px 0",borderTop:"1px solid "+theme.border,color:theme.muted,fontSize:12}}>{t.note}<div style={{marginTop:10}}>Beger · Smart Business OS</div></footer>
   </div>
