@@ -32,14 +32,14 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
  const labels={
   cart:en?"Your Order":tr?"Siparişin":"طلبك",
   empty:en?"Your basket is empty":tr?"Sepetiniz boş":"السلة فارغة",
-  notice:en?"Preview only. No order has been placed or sent. Final prices will be verified by the business when ordering is enabled.":tr?"Bu sadece önizlemedir. Sipariş gönderilmedi. Sipariş özelliği açıldığında fiyatlar yeniden doğrulanacaktır.":"هذه سلة للمعاينة فقط؛ لم يتم إرسال أي طلب. ستُتحقق الأسعار عند تفعيل الطلب الفعلي.",
+  notice:tableToken?(en?"Your order will be submitted to the restaurant only when you tap Send. Prices and available options are verified by the restaurant system.":tr?"Sipariş, yalnızca Gönder butonuna bastığınızda restorana ulaşır. Fiyatlar ve ürün seçenekleri sunucuda doğrulanır.":"طلبك لن يصل للمطعم إلا بعد الضغط على «إرسال الطلب». يتحقق النظام من الأسعار والإضافات المتاحة قبل التسجيل."):(en?"Shop menu preview. Scan your table QR to send an order.":tr?"Mağaza menüsü. Sipariş göndermek için masanızdaki QR kodunu tarayın.":"هذه قائمة المتجر العامة. امسح QR الطاولة لإرسال طلب."),
   total:en?"Estimated total":tr?"Tahmini toplam":"المجموع التقديري",
   subtotal:en?"Subtotal":tr?"Ara Toplam":"المجموع الفرعي",
   additions:en?"Add-ons":tr?"Ekstralar":"الإضافات",
   close:en?"Close":tr?"Kapat":"إغلاق",
   clear:en?"Clear basket":tr?"Sepeti temizle":"تفريغ السلة",
   quantity:en?"Quantity":tr?"Adet":"الكمية",
-  preview:en?"DEMO · NO ORDER PLACED":tr?"DEMO · SİPARİŞ VERİLMEDİ":"معاينة · لم يُرسل طلب",
+  preview:tableToken?(en?"TABLE ORDER · STAGING":tr?"MASA SİPARİŞİ · TEST":"طلب طاولة · تجريبي"):(en?"SHOP MENU · BROWSE":tr?"MAĞAZA MENÜSÜ":"منيو المتجر · تصفح"),
   items:en?"Items":tr?"Ürünler":"المنتجات",
   remove:en?"Remove product":tr?"Ürünü kaldır":"إزالة المنتج",
  };
