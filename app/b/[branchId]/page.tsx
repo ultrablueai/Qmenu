@@ -3,7 +3,7 @@ import {anonymousBeger,loadPublicMenu,loadGuestAppearance,safeLanguage,type G2Br
 import PublicMenu from "../../../components/public-menu";
 export const dynamic="force-dynamic";
 export const metadata={title:"Beger | Digital Menu",robots:{index:false,follow:false}};
-type Props={params:Promise<{branchId:string}>;searchParams:Promise<{lang?:string}>};
+type Props={params:Promise<{branchId:string}>;searchParams:Promise<{lang?:string;product?:string}>};
 export default async function PublicBranch({params,searchParams}:Props){
   const [{branchId},search]=await Promise.all([params,searchParams]);
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(branchId))notFound();
@@ -13,5 +13,6 @@ export default async function PublicBranch({params,searchParams}:Props){
   if(!branch)notFound();
   const categories=await loadPublicMenu(branchId);
   const appearance=await loadGuestAppearance(branchId);
-  return <PublicMenu appearance={appearance} branch={branch} categories={categories} lang={safeLanguage(search.lang,appearance)}/>;
+  const initialProductId=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(search.product??"")&&categories.some(category=>category.items.some(item=>item.id===search.product))?search.product:undefined;
+  return <PublicMenu appearance={appearance} branch={branch} categories={categories} lang={safeLanguage(search.lang,appearance)} initialProductId={initialProductId}/>;
 }
