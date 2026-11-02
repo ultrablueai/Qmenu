@@ -7,7 +7,7 @@ const details=readFileSync("components/product-details.tsx","utf8");
 const screens=readFileSync("components/guest-screen-switcher.tsx","utf8");
 test("approved customer flow is welcome, four-across categories, compact product rows, detail popup",()=>{
  const intro=menu.indexOf("beger-welcome-screen");
- const tiles=menu.indexOf("beger-category-tiles");
+ const tiles=menu.indexOf("GuestCatalogExplorer");
  const rows=menu.indexOf("beger-menu-product-list");
  assert.ok(intro>=0&&tiles>intro&&rows>tiles,"must match mobile reference screen hierarchy");
  assert.match(css,/beger-category-tiles\{display:grid;grid-template-columns:repeat\(4/);
@@ -17,7 +17,7 @@ test("approved customer flow is welcome, four-across categories, compact product
  assert.match(menu,/imageUrl=\{i\.image_url\}/);
 });
 test("navigation and responsive reference layout work in AR/TR/EN",()=>{
- assert.match(menu,/aria-label="Languages"/);
+ assert.match(menu,/GuestLanguageSwitcher lang=\{lang\}/);
  assert.match(menu,/lang==="ar"\?"rtl":"ltr"/);
  assert.match(menu,/<GuestScreenSwitcher lang=\{lang\}>/);
  assert.match(menu,/<GuestOpenMenu lang=\{lang\}/);
@@ -61,7 +61,7 @@ test("real welcome and menu are separate phone screens with functional navigatio
  assert.match(screens,/journey\.go\("rewards"\)/);
  assert.match(css,/data-stage="welcome"\] \.beger-menu-intro/);
  assert.match(css,/data-stage="menu"\] \.beger-welcome-screen/);
- assert.match(menu,/className="beger-menu-section"/);
+ assert.match(menu,/className="beger-menu-section" data-category-id=\{c\.id\}/);
  assert.doesNotMatch(screens,/checkout|submitOrder|paymentIntent/);
 });
 
@@ -78,7 +78,7 @@ test("reference layout uses actual customer UI not presentation images",()=>{
  const favorite=readFileSync("components/guest-favorite.tsx","utf8");
  const cart=readFileSync("components/guest-cart.tsx","utf8");
  assert.match(menu,/GuestRewardsPreview lang=\{lang\}/);
- assert.match(menu,/GuestMenuSearch lang=\{lang\}/);
+ assert.match(menu,/GuestCatalogExplorer lang=\{lang\}/);
  assert.match(menu,/GuestFavorite lang=\{lang\}/);
  assert.match(search,/type="search"/);
  assert.match(search,/card\.hidden=!match/);
@@ -87,4 +87,21 @@ test("reference layout uses actual customer UI not presentation images",()=>{
  assert.match(cart,/className="beger-order-item"/);
  assert.match(cart,/formatPrice\(subtotal,country,lang\)/);
  assert.match(cart,/formatPrice\(additions,country,lang\)/);
+});
+
+test("category choice filters real products in place instead of scrolling to next section",()=>{
+ const explorer=readFileSync("components/guest-catalog-explorer.tsx","utf8");
+ assert.match(menu,/categories\.map\(c=>\(\{id:c\.id,name:localizedText\(c,lang\)/);
+ assert.match(explorer,/aria-pressed=\{selected===category\.id\}/);
+ assert.match(explorer,/section\.dataset\.categoryId===selected/);
+ assert.match(explorer,/section\.hidden=!inCategory\|\|sectionProducts===0/);
+ assert.match(explorer,/product\.hidden=!inCategory\|\|!matched/);
+ assert.doesNotMatch(menu,/href=\{\x60#category-/);
+ assert.match(css,/\.beger-category-filter\[aria-pressed="true"\]/);
+});
+test("language changes keep customer view and shopping context",()=>{
+ const screens=readFileSync("components/guest-screen-switcher.tsx","utf8");
+ assert.match(screens,/params\.set\("view","menu"\)/);
+ assert.match(screens,/params\.get\("view"\)==="menu"/);
+ assert.match(screens,/new URLSearchParams\(search\)/);
 });
