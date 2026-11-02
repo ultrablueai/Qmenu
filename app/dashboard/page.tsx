@@ -3,6 +3,7 @@ import Link from "next/link";
 import styles from "./dashboard.module.css";
 import BranchManager from "./branch-manager";
 import HeadquartersCatalog from "./headquarters-catalog";
+import HqReferenceOverview from "./hq-reference-overview";
 import { serverSupabase } from "../../lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -128,6 +129,7 @@ export default async function Dashboard() {
           {membershipError ? <div className={styles.error} role="alert">تعذّر التحقق من عضوية نشاطك. حاول إعادة تحميل الصفحة، ولا تنشئ نشاطاً جديداً قبل التأكد.</div> : null}
           {loadError && !membershipError ? <div className={styles.error} role="alert">تعذّر تحميل بعض بيانات نشاطك. حاول إعادة تحميل الصفحة؛ لن نعرض أرقاماً غير مؤكدة.</div> : null}
 
+          {canManageBranches ? <HqReferenceOverview businessName={displayName} userLabel={firstName} businessCount={ownerCount} branches={primaryBranches.map(b=>({id:b.id,name:b.name}))} loadError={loadError}/> : <>
           <section className={styles.hero} aria-label="مرحباً بنشاطك">
             <div className={styles.heroCopy}>
               <span className={styles.heroBadge}>✦ بداية مساحة عملك</span>
@@ -154,6 +156,8 @@ export default async function Dashboard() {
               <p className={styles.statHint}>لم تبدأ خدمات التشغيل التجاري بعد</p>
             </div>
           </section>
+
+          </>}
 
           <div className={styles.twoCols}>
             <section className={styles.panel} id="branches" aria-labelledby="branches-heading">
