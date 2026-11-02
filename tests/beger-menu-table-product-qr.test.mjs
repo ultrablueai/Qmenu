@@ -147,3 +147,15 @@ test("a verified table QR opens its own menu immediately, while the shop QR keep
  assert.match(guest,/useState<Stage>\(initialStage\)/);
  assert.doesNotMatch(branchPage,/tableToken=\{/);
 });
+
+test("product QR chooses the containing category so modal is not hidden by menu filtering",()=>{
+ const page=read("app/b/[branchId]/page.tsx");
+ const menu=read("components/public-menu.tsx");
+ const explorer=read("components/guest-catalog-explorer.tsx");
+ assert.match(page,/searchParams:Promise<\{lang\?:string;product\?:string\}>/);
+ assert.match(page,/categories\.some\(category=>category\.items\.some\(item=>item\.id===search\.product\)\)/);
+ assert.match(menu,/initialCategoryId=initialProductId\?categories\.find\(c=>c\.items\.some\(i=>i\.id===initialProductId\)\)\?\.id/);
+ assert.match(menu,/initialCategoryId=\{initialCategoryId\}/);
+ assert.match(explorer,/useState\(initialCategoryId\?\?categories\.find/);
+ assert.match(product,/requested===productId/);
+});
