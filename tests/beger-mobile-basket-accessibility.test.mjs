@@ -23,7 +23,7 @@ test("all quantity controls are localized and mobile sheet has safe-area spacing
  assert.match(basket,/remove:en\?/);
  assert.match(basket,/aria-label=\{labels\.quantity/);
  assert.match(css,/\.beger-basket-sheet/);
- assert.match(css,/92dvh/);
+ assert.match(css,/95dvh/);
  assert.match(css,/env\(safe-area-inset-bottom/);
 });
 test("required product choices stay enforced before a basket preview item",()=>{
