@@ -1,6 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import BegerAuthLayout from "../../components/beger-auth-layout";
 import { browserSupabase } from "../../lib/supabase/browser";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -30,18 +31,16 @@ export default function LoginPage() {
       setBusy(false);
     } finally { setBusy(false); }
   }
-  return <main style={{maxWidth:420, margin:"12vh auto", padding:24}}>
-    <h1>تسجيل الدخول إلى بيجر</h1>
-    <p>حسابك الإلكتروني يكفي للدخول. إذا لم تنشئ نشاطاً بعد، سننقلك إلى صفحة إعداده تلقائياً.</p>
-    <form onSubmit={submit}>
-      <label htmlFor="email">البريد الإلكتروني</label>
-      <input id="email" type="email" required autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} style={{display:"block",width:"100%",padding:12,marginBottom:16,boxSizing:"border-box"}}/>
-      <label htmlFor="password">كلمة المرور</label>
-      <input id="password" type="password" required autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} style={{display:"block",width:"100%",padding:12,marginBottom:16,boxSizing:"border-box"}}/>
-      {error && <p role="alert">{error}</p>}
-      <button disabled={busy} type="submit">{busy?"جارٍ التحقق...":"دخول"}</button>
+  return <BegerAuthLayout title="أهلاً بعودتك إلى Beger" eyebrow="MERCHANT LOGIN · دخول التاجر">
+    <p className="beger-auth-description">ادخل إلى مساحة التاجر لإدارة الفروع، الكتالوج، المنيو وخيارات المنتجات. يتم التحقق من عضويتك وصلاحياتك بأمان.</p>
+    <form className="beger-auth-form" onSubmit={submit}>
+      <label className="beger-auth-label" htmlFor="email">البريد الإلكتروني</label>
+      <input className="beger-auth-input" id="email" type="email" required autoComplete="email" inputMode="email" placeholder="name@example.com" dir="ltr" value={email} onChange={e=>setEmail(e.target.value)}/>
+      <label className="beger-auth-label" htmlFor="password">كلمة المرور</label>
+      <input className="beger-auth-input" id="password" type="password" required autoComplete="current-password" placeholder="••••••••••" dir="ltr" value={password} onChange={e=>setPassword(e.target.value)}/>
+      {error&&<p className="beger-auth-error" role="alert">{error}</p>}
+      <button className="beger-marketing-button" disabled={busy} type="submit">{busy?"جارٍ التحقق...":"دخول إلى لوحة التاجر ←"}</button>
     </form>
-    <p><Link href="/forgot-password">نسيت كلمة المرور؟ استعد حسابك الحالي</Link></p>
-    <p>ليس لديك حساب؟ <Link href="/signup">إنشاء حساب جديد</Link></p>
-  </main>;
+    <nav className="beger-auth-links" aria-label="خيارات الحساب"><Link href="/forgot-password">نسيت كلمة المرور؟</Link><Link href="/signup">إنشاء حساب تاجر جديد</Link><Link href="/">العودة للرئيسية</Link></nav>
+  </BegerAuthLayout>;
 }
