@@ -37,12 +37,16 @@ export function useBegerFeedback(){
  const [settings,setSettings]=useState<FeedbackSettings>(DEFAULT);
  const settingsRef=useRef(DEFAULT);
  const [message,setMessage]=useState("");
- useEffect(()=>{try{const value=JSON.parse(localStorage.getItem(storage)??"null");if(value&&typeof value.sound==="boolean"&&typeof value.vibration==="boolean"){
- const p={sound:value.sound,vibration:value.vibration};settingsRef.current=p;setSettings(p);
- }}catch{/* No local storage available */}},[]);
+ useEffect(()=>{
+  const read=()=>{try{const value=JSON.parse(localStorage.getItem(storage)??"null");if(value&&typeof value.sound==="boolean"&&typeof value.vibration==="boolean"){
+   const p={sound:value.sound,vibration:value.vibration};settingsRef.current=p;setSettings(p);
+  }}catch{/* No local storage available */}};
+  read();window.addEventListener("storage",read);window.addEventListener("beger-feedback-change",read);
+  return()=>{window.removeEventListener("storage",read);window.removeEventListener("beger-feedback-change",read)};
+ },[]);
  const change=useCallback((next:FeedbackSettings)=>{
   settingsRef.current=next;setSettings(next);
-  try{localStorage.setItem(storage,JSON.stringify(next))}catch{/* Preferences still work until reload */}
+  try{localStorage.setItem(storage,JSON.stringify(next));window.dispatchEvent(new Event("beger-feedback-change"))}catch{/* Preferences still work until reload */}
   // Resume only from the user's settings click, never on a timer.
   if(next.sound){const ctx=audio();if(ctx?.state==="suspended")void ctx.resume().catch(()=>{});}
  },[]);
@@ -59,7 +63,7 @@ export function useBegerFeedback(){
 }
 export function BegerFeedbackControls({settings,onChange,labels}:{settings:FeedbackSettings;onChange:(next:FeedbackSettings)=>void;labels?:{sound:string;vibration:string}}){
  return <fieldset className="beger-feedback-controls">
-  <legend>{labels?"التنبيهات":"التنبيهات داخل التطبيق"}</legend>
+  <legend>{labels?.sound==="Sound"?"Alerts":labels?.sound==="Ses"?"Bildirimler":"التنبيهات"}</legend>
   <label><input type="checkbox" checked={settings.sound} onChange={e=>onChange({...settings,sound:e.target.checked})}/>{labels?.sound??"الصوت"}</label>
   <label><input type="checkbox" checked={settings.vibration} onChange={e=>onChange({...settings,vibration:e.target.checked})}/>{labels?.vibration??"اهتزاز الهاتف"}</label>
  </fieldset>;
