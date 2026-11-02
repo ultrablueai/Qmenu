@@ -4,6 +4,8 @@ import styles from "./dashboard.module.css";
 import BranchManager from "./branch-manager";
 import HeadquartersCatalog from "./headquarters-catalog";
 import HqReferenceOverview from "./hq-reference-overview";
+import BegerSectorConfigurator from "../../components/beger-sector-configurator";
+import "../../components/beger-sector-configurator.css";
 import { serverSupabase } from "../../lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -99,6 +101,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
           </span>
           <div className={styles.navLabel} style={{marginTop:19}}>إدارة الأعمال</div>
           <a className={styles.navItem} href="#branches"><span className={styles.navIcon} aria-hidden="true">⌂</span> الفروع</a>
+          {canManageBranches?<a className={styles.navItem} href="#business-model"><span className={styles.navIcon} aria-hidden="true">✧</span> نموذج العمل والميزات</a>:null}
           <a className={styles.navItem} href="#business-details"><span className={styles.navIcon} aria-hidden="true">⚙</span> معلومات النشاط</a>
           <span className={`${styles.navItem} ${styles.navItemSoon}`} aria-disabled="true">
             <span className={styles.navIcon} aria-hidden="true">▥</span> التقارير <span className={styles.soon}>قريباً</span>
@@ -198,6 +201,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
 
           {!loadError && primary && canManageBranches && <HeadquartersCatalog businessId={primary.id} country={primary.country_code} branches={primaryBranches.map(b => ({id:b.id,name:b.name}))}/>}
 
+          {!loadError && primary && canManageBranches ? <div id="business-model" style={{margin:"26px 0"}}><BegerSectorConfigurator key={primary.id} draftKey={primary.id}/></div>:null}
           <section className={styles.modules} aria-labelledby="modules-heading">
             <div className={styles.panelHead}>
               <div><h2 className={styles.panelTitle} id="modules-heading">أدوات أعمالك</h2><p className={styles.panelSubtitle}>وحدات ستُفعّل بحسب نوع النشاط بعد استكمال البناء والاختبارات</p></div>
