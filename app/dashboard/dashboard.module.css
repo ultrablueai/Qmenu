@@ -128,3 +128,26 @@
 .stat,.panel{box-shadow:0 9px 24px #74624709}
 .previewBadge,.headBadge{background:#F7F2E9;border-color:#E8DFD3}
 .pageHead h1,.heading{color:#352A20}
+
+/* Reference HQ structure: left sidebar, refined ivory canvas, olive controls. */
+@media(min-width:761px){
+ .shell{direction:ltr;grid-template-columns:230px minmax(0,1fr)!important}
+ .sidebar{direction:rtl;border-left:0;border-right:1px solid #eadfd2;height:100dvh;padding:20px 13px}
+ .main{direction:rtl}
+ .topbar{height:68px;padding:0 26px}
+ .content{max-width:1460px;padding:26px 27px 85px}
+ .sidebar .brand{direction:ltr;justify-content:flex-start}
+ .sidebar .brandTitle{font-family:Georgia,"Times New Roman",serif}
+ .navItem{border-radius:11px;font-size:12px;padding:9px 10px;min-height:40px}
+ .pageHead{margin-bottom:18px}
+ .heading{font-family:Georgia,"Times New Roman",serif;line-height:1.25}
+}
+.shell{background:#faf6ef}
+.sidebar,.topbar{background:#fffdfa}
+.sidebar{box-shadow:4px 0 22px #46342008}
+.navItemActive{background:linear-gradient(110deg,#e9edda,#f5f1e7);color:#536938}
+.branchOpenLink{background:#edf0df;color:#596c3a}
+.primaryAction,.smallAction{background:#637b41;border-color:#637b41}
+.ghostAction{color:#647846;border-color:#d9dfcb}
+.field:focus-visible{border-color:#7a8a51;box-shadow:0 0 0 3px #8e9f5229}
+@media(max-width:760px){.content{padding-top:21px}.pageHead{margin-bottom:21px}.heading{font-size:26px}}
