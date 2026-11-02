@@ -216,3 +216,26 @@
  .beger-modifier-card label{min-height:45px!important;padding:10px 9px!important}
  .beger-product-add-button{min-height:52px!important;border-radius:13px!important}
 }
+
+/* Reference-layout structural correction: real separate phone screens, not one long landing page. */
+.beger-screen-switcher[data-stage="welcome"] .beger-menu-intro,
+.beger-screen-switcher[data-stage="welcome"] .beger-menu-section,
+.beger-screen-switcher[data-stage="welcome"] .beger-guest-footer{display:none}
+.beger-screen-switcher[data-stage="menu"] .beger-welcome-screen{display:none}
+.beger-screen-switcher[data-stage="menu"] .beger-menu-intro{margin-top:18px}
+.beger-screen-switcher[data-stage="welcome"] .beger-guest-header{border:0!important}
+.beger-welcome-cta{font:inherit;border:0;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%;color:#fff;background:var(--beg-olive,#71834d)}
+.beger-welcome-cta span:first-child{font-size:20px}
+.beger-welcome-cta span:last-child{font-size:23px}
+.beger-guest-bottom-nav button,.beger-guest-bottom-nav .beger-guest-nav-future{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:inherit;font-size:11px;font-weight:750;color:#786f63;min-width:0;flex:1;padding:5px 2px;min-height:46px;border:0;background:transparent;cursor:pointer;position:relative}
+.beger-guest-bottom-nav button[aria-current="page"]{color:#657944}
+.beger-guest-bottom-nav button span,.beger-guest-nav-future>span{font-size:22px;line-height:1.1}
+.beger-guest-bottom-nav .beger-guest-nav-future{color:#b3a99b;cursor:not-allowed}
+.beger-nav-count{position:absolute;top:0;inset-inline-end:20%;border-radius:999px;background:#a65c37;color:#fff;font-size:9px;min-width:16px;padding:2px 4px}
+@media(max-width:650px){
+ .beger-guest-bottom-nav{display:flex;direction:inherit;gap:2px}
+ .beger-guest-bottom-nav button,.beger-guest-bottom-nav .beger-guest-nav-future{font-size:10px;min-height:48px}
+ .beger-screen-switcher[data-stage="welcome"] .beger-welcome-screen{margin-top:2px}
+ .beger-screen-switcher[data-stage="menu"] .beger-guest-header{padding-bottom:12px!important}
+ .beger-screen-switcher[data-stage="menu"] .beger-menu-intro{margin-top:13px}
+}
