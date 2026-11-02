@@ -164,3 +164,9 @@
 .branchOperationsNav a{min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 145px;border-radius:11px;padding:11px 13px;text-decoration:none;background:#eff2e7;border:1px solid #dce6cd;color:#536d37;font-size:12px;font-weight:800;line-height:1.5}
 .branchOperationsNav a:first-child{background:#637a43;border-color:#637a43;color:white}
 .branchOperationsNav a:focus-visible{outline:3px solid #b3c397;outline-offset:3px}
+
+.branchOperationsIntro{display:flex;flex-direction:column;align-items:flex-start;gap:7px;direction:rtl;background:linear-gradient(110deg,#eef2e4,#faf7ed);border:1px solid #dfe6d2;border-radius:17px;margin:17px 0 5px;padding:17px 19px;color:#445c34}
+.branchOperationsIntro>span{font-size:10px;color:#9f7751;letter-spacing:.09em;font-weight:900}
+.branchOperationsIntro strong{font:800 21px Georgia,"Times New Roman",serif;line-height:1.35}
+.branchOperationsIntro p{margin:0;font-size:12px;line-height:1.7;color:#786f5c}
+@media(max-width:600px){.branchOperationsIntro{padding:14px}.branchOperationsIntro strong{font-size:18px}}
