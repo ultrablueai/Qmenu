@@ -2,12 +2,14 @@
 import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNode} from "react";
 import {formatPrice,type GuestLang} from "../lib/g2-public";
 import GuestOrderSubmission from "./guest-order-submission";
+import {useBegerFeedback} from "./beger-feedback";
 
 type CartItem={key:string;productId?:string;optionIds?:string[];removedIngredients?:string[];name:string;unitMinor:number;baseMinor?:number;extraMinor?:number;imageUrl?:string;quantity:number;selections:string[]};
 type CartContextValue={add:(item:Omit<CartItem,"quantity"> & {quantity?:number})=>void;count:number;open:()=>void};
 const CartContext=createContext<CartContextValue|null>(null);
 export function useGuestCart(){return useContext(CartContext);}
 export default function GuestCart({children,country,lang,accent,branchId,tableToken,tableLabel}:{children:ReactNode;country:string;lang:GuestLang;accent:string;branchId:string;tableToken?:string;tableLabel?:string}){
+ const feedback=useBegerFeedback();
  const [items,setItems]=useState<CartItem[]>([]);
  const [open,setOpen]=useState(false);
  const [hydrated,setHydrated]=useState(false);
@@ -45,8 +47,9 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
  };
  const context=useMemo(()=>({count,open:()=>setOpen(true),add(item:Omit<CartItem,"quantity"> & {quantity?:number}){
   setItems(existing=>{const quantity=Math.max(1,Math.min(20,Math.trunc(item.quantity??1)));const idx=existing.findIndex(x=>x.key===item.key);if(idx<0)return [...existing,{...item,quantity}];return existing.map((x,i)=>i===idx?{...x,quantity:Math.min(20,x.quantity+quantity)}:x);});
+  feedback.signal("added",lang==="ar"?"تمت إضافة المنتج إلى السلة":lang==="tr"?"Ürün sepete eklendi":"Product added to basket");
   setOpen(true);
- }}),[count]);
+ }}),[count,feedback.signal,lang]);
  return <CartContext.Provider value={context}>
   {children}
   <button ref={openerRef} className="beger-basket-trigger" type="button" onClick={()=>setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label={labels.cart} style={{position:"fixed",bottom:20,insetInlineEnd:20,zIndex:40,background:accent,color:"#fff",border:0,borderRadius:19,padding:"14px 20px",fontWeight:800,boxShadow:"0 13px 35px #183b3250",cursor:"pointer",fontSize:14}}>
@@ -59,6 +62,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
      <button ref={closeRef} type="button" onClick={()=>setOpen(false)} style={{padding:"8px 13px",background:"#edf3ef",border:0,borderRadius:11,cursor:"pointer"}}>{labels.close} ✕</button>
     </div>
     <p style={{color:"#637b6c",fontSize:13,lineHeight:1.8,margin:0}}>{labels.notice}</p>
+    {feedback.message?<p className="beger-feedback-toast" role="status">{feedback.message}</p>:null}
     {items.length>0?<strong style={{fontSize:13,color:"#6F7658"}}>{labels.items} · {count}</strong>:null}
     {items.length===0?<p style={{padding:35,textAlign:"center",color:"#73887d",background:"#F3F0E7",borderRadius:17}}>{labels.empty}</p>:items.map(item=><article className="beger-order-item" key={item.key} style={{border:"1px solid #E9E1D5",background:"#fff",borderRadius:18,padding:16,minWidth:0}}>
      {item.imageUrl?<img className="beger-order-item-photo" src={item.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer"/>:null}
