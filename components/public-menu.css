@@ -202,3 +202,16 @@
  .beger-screen-switcher[data-stage="welcome"] .beger-guest-header{top:8px;gap:12px}
  .beger-screen-switcher[data-stage="welcome"] .beger-welcome-screen{margin-top:0}
 }
+
+/* Product rows match the reference: one compact tap target, not stacked action buttons. */
+.beger-menu-product-list .beger-guest-product{position:relative;cursor:pointer;gap:0!important}
+.beger-product-action-mount{height:0!important;min-height:0!important;margin:0!important;padding:0!important;position:static}
+.beger-product-open-trigger{
+ position:absolute;inset:0;width:100%!important;height:100%!important;
+ min-height:0!important;padding:0!important;margin:0!important;
+ opacity:0!important;cursor:pointer!important;z-index:1;border:0!important
+}
+.beger-product-side{position:relative;z-index:2;pointer-events:none}
+.beger-favorite-button{position:relative;z-index:3;pointer-events:auto}
+.beger-menu-product-list .beger-guest-product:has(.beger-product-open-trigger:focus-visible){outline:3px solid #b9814d;outline-offset:2px}
+.beger-menu-product-list .beger-guest-product:has(.beger-product-open-trigger:hover){border-color:#d5c9b9!important;box-shadow:0 5px 15px #382b1c1e!important}
