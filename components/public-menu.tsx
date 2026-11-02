@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type {G2Branch,G2Category} from "../lib/g2-public";
 import {formatPrice} from "../lib/g2-public";
+import ProductDetails from "./product-details";
 
 type Props={branch:G2Branch;categories:G2Category[];lang:"ar"|"tr";tableLabel?:string;tableToken?:string};
 const a={ar:{welcome:"أهلاً بك في",branch:"الفرع",table:"الطاولة",menu:"القائمة الرقمية",empty:"لم تُنشر منتجات متاحة بعد.",unavailable:"القائمة غير متاحة حالياً",guest:"بدون حساب أو تطبيق",note:"عرض القائمة فقط — الطلبات والدفع سيتم تفعيلهما بعد اختبار المرحلة التالية."},
@@ -35,6 +36,7 @@ export default function PublicMenu({branch,categories,lang,tableLabel,tableToken
                 <h4 style={{fontSize:17,margin:"0 0 6px"}}>{lang==="tr"?i.name_tr:i.name_ar}</h4>
                 {(lang==="tr"?i.description_tr:i.description_ar)?<p style={{margin:"0 0 8px",fontSize:13,color:"#687d82",overflowWrap:"anywhere"}}>{lang==="tr"?i.description_tr:i.description_ar}</p>:null}
                 <strong style={{color:"#11746b",fontSize:16}}>{formatPrice(Number(i.price_minor),branch.country_code,lang)}</strong>
+                <ProductDetails branchId={branch.branch_id} productId={i.id} country={branch.country_code} lang={lang}/>
               </div>
             </article>)}
           </div>
