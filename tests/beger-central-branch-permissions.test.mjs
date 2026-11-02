@@ -15,12 +15,14 @@ test("catalog administration is mounted only in merchant HQ",()=>{
  assert.match(hq,/branches\.some\(b=>b\.id===selectedBranch\)/);
  assert.doesNotMatch(branch,/import MenuManager|<MenuManager|menu-manager/);
  assert.doesNotMatch(branch,/<HeadquartersCatalog|browserSupabase/);
+ assert.match(branch,/<MerchantOrderBoard/);
+ assert.match(branch,/canManageOrders/);
 });
 
 test("branch UI links authorized owners back to HQ but does not offer catalog edit",()=>{
  assert.match(branch,/role === "owner" \|\| role === "manager"/);
- assert.match(branch,/\/dashboard#catalog-management/);
- assert.match(branch,/مخصصة للتشغيل المحلي/);
+ assert.match(branch,/const centralLink = "\/dashboard\?business="\+encodeURIComponent\(business\.id\)\+"#catalog-management"/);
+ assert.match(branch,/الطلبات التشغيلية وQR الطاولات فتجدها أدناه/);
 });
 
 test("central editor retains tenant-scoped mutation fields and policy checks",()=>{
