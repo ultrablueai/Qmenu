@@ -76,6 +76,10 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
       <h3>3. نشر المنتجات على الفروع</h3>
       {products.length===0?<p>لم تُنشأ منتجات مركزية بعد.</p>:products.map(prod=><article key={prod.id} style={{padding:"14px 0",borderTop:"1px solid #e3eded"}}>
         <strong>{prod.name_ar}</strong> · <span>{prod.name_tr}</span> · <span>{(Number(prod.price_minor)/factor).toFixed(factor===100?2:0)} {currency}</span>
+        <CentralPriceEditor label="السعر المركزي للمنتج" baseMinor={Number(prod.price_minor)} factor={factor} currency={currency} busy={busy}
+          onBasePrice={async minor=>save(async()=>browserSupabase().from("catalog_products").update({price_minor:minor}).eq("id",prod.id).eq("business_id",businessId).select("id").single(),"تم تحديث السعر المركزي",true)}
+          onOverride={async()=>false} onAvailability={async()=>false}
+        />
         <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:10}}>
           {branches.map(branch=>{const publication=pubs.find(p=>p.branch_id===branch.id&&p.product_id===prod.id);
             return <div key={branch.id} style={{padding:10,border:"1px solid #d6e3e3",borderRadius:10,flex:"1 1 220px"}}>
@@ -83,7 +87,7 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
                 aria-pressed={Boolean(publication?.active)} style={{...button,background:publication?.active?"#146b55":"#64748b",fontSize:12}}>
                 {branch.name} · {publication?.active?"منشور ✓":"غير منشور"}
               </button>
-              {publication?.active?<CentralPriceEditor key={publication.id} label={branch.name} baseMinor={Number(prod.price_minor)} factor={factor} currency={currency} publication={publication} busy={busy}
+              {publication?.active?<CentralPriceEditor key={publication.id} label={branch.name} baseMinor={Number(prod.price_minor)} factor={factor} currency={currency} publication={publication} busy={busy} showBase={false}
                 onBasePrice={async minor=>save(async()=>browserSupabase().from("catalog_products").update({price_minor:minor}).eq("id",prod.id).eq("business_id",businessId).select("id").single(),"تم تحديث السعر المركزي",true)}
                 onOverride={async minor=>save(async()=>browserSupabase().from("catalog_branch_publications").update({price_override_minor:minor}).eq("id",publication.id).eq("business_id",businessId).select("id").single(),"تم تحديث سعر الفرع",true)}
                 onAvailability={async()=>save(async()=>browserSupabase().from("catalog_branch_publications").update({available:!publication.available}).eq("id",publication.id).eq("business_id",businessId).select("id").single(),"تم تحديث توفر الفرع",true)}
