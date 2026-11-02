@@ -151,3 +151,10 @@
 .ghostAction{color:#647846;border-color:#d9dfcb}
 .field:focus-visible{border-color:#7a8a51;box-shadow:0 0 0 3px #8e9f5229}
 @media(max-width:760px){.content{padding-top:21px}.pageHead{margin-bottom:21px}.heading{font-size:26px}}
+
+/* Merchant business switcher: only memberships verified server-side appear. */
+.businessSwitcher{display:grid;gap:7px;margin:11px 10px 17px;padding:12px;border:1px solid #e4d9c7;border-radius:15px;background:#fffbf4;color:#514633;min-width:0}
+.businessSwitchTitle{font-weight:850;font-size:12px;color:#73654d;margin-bottom:2px}
+.businessSwitchOption{display:block;min-width:0;overflow-wrap:anywhere;text-decoration:none;color:#586d3a;border:1px solid #e7e2d4;border-radius:11px;background:white;padding:10px 11px;font-size:12px;font-weight:750}
+.businessSwitchOption[aria-current="page"]{background:#edf2e1;border-color:#cdd9b7;color:#4e693a}
+.businessSwitchOption:hover,.businessSwitchOption:focus-visible{outline:2px solid #9eb77a;outline-offset:2px}
