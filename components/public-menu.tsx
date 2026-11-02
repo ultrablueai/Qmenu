@@ -8,9 +8,10 @@ import GuestCatalogExplorer from "./guest-catalog-explorer";
 import GuestRewardsPreview from "./guest-rewards-preview";
 import GuestFavorite from "./guest-favorite";
 import GuestIcon from "./guest-icons";
+import GuestServiceChoice from "./guest-service-choice";
 import {formatPrice,localizedText,type G2Branch,type G2Category,type GuestAppearance,type GuestLang} from "../lib/g2-public";
 
-type Props={branch:G2Branch;categories:G2Category[];lang:GuestLang;appearance:GuestAppearance;tableLabel?:string;tableToken?:string;initialProductId?:string};
+type Props={branch:G2Branch;categories:G2Category[];lang:GuestLang;appearance:GuestAppearance;tableLabel?:string;tableToken?:string;initialProductId?:string;serviceMode?:"browse"|"takeaway"};
 const wording={
  ar:{welcome:"أهلاً بك في",branch:"الفرع",table:"الطاولة",menu:"القائمة الرقمية",empty:"لم تُنشر منتجات متاحة بعد.",guest:"بدون حساب أو تطبيق",note:"عرض القائمة فقط — الطلبات والدفع سيتم تفعيلهما بعد اختبار المرحلة التالية.",products:"المنتجات",discover:"استكشف قائمتنا"},
  tr:{welcome:"Hoş geldiniz",branch:"Şube",table:"Masa",menu:"Dijital Menü",empty:"Henüz yayınlanmış ürün bulunmuyor.",guest:"Hesap veya uygulama gerekmiyor",note:"Şimdilik yalnızca menü görüntüleme. Sipariş ve ödeme sonraki aşamada etkinleşecek.",products:"Ürünler",discover:"Menümüzü keşfedin"},
@@ -24,7 +25,7 @@ const palettes={
 function detailsText(i:{description_ar:string;description_tr:string;description_en?:string},lang:GuestLang){
  return (lang==="en"?i.description_en:lang==="tr"?i.description_tr:i.description_ar)?.trim()||i.description_ar||i.description_tr||"";
 }
-export default function PublicMenu({branch,categories,lang,appearance,tableLabel,tableToken,initialProductId}:Props){
+export default function PublicMenu({branch,categories,lang,appearance,tableLabel,tableToken,initialProductId,serviceMode="browse"}:Props){
  const t=wording[lang],theme=palettes[appearance.theme]??palettes.clean_light;
  const initialCategoryId=initialProductId?categories.find(c=>c.items.some(i=>i.id===initialProductId))?.id:undefined;
  const base=tableToken?`/t/${tableToken}`:`/b/${branch.branch_id}`;
@@ -33,7 +34,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
  const categorySymbol=(label:string):"coffee"|"sandwich"|"dessert"|"more"=>/قهو|coffee|kahve|drink|مشروب|içecek/i.test(label)?"coffee":/sandwich|sandviç|سندوي|burger|برغر|food|وجبة/i.test(label)?"sandwich":/حلو|tatlı|dessert|cake/i.test(label)?"dessert":"more";
  return <main className="beger-guest" dir={lang==="ar"?"rtl":"ltr"} lang={lang} data-beger-theme={appearance.theme}
   style={{minHeight:"100dvh",background:theme.background,color:theme.foreground,fontFamily:"system-ui, sans-serif",padding:"0 clamp(16px,4vw,32px) 92px"}}>
-  <GuestCart key={branch.branch_id} country={branch.country_code} lang={lang} accent={theme.accent} branchId={branch.branch_id} tableToken={tableToken} tableLabel={tableLabel}>
+  <GuestCart key={branch.branch_id} country={branch.country_code} lang={lang} accent={theme.accent} branchId={branch.branch_id} tableToken={tableToken} tableLabel={tableLabel} serviceMode={tableToken?"dine_in":serviceMode}>
   <GuestScreenSwitcher lang={lang} initialStage={tableToken?"menu":"welcome"}>
   <div className="beger-guest-container" style={{maxWidth:1120,margin:"auto"}}>
    <header className="beger-guest-header" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"22px 0",borderBottom:"1px solid "+theme.border}}>
@@ -54,13 +55,11 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
          <p>{lang==="ar"?"تصفّح قائمتنا، واختَر مكوناتك وإضافاتك بكل سهولة.":lang==="tr"?"Menümüzü keşfedin, malzemelerinizi ve eklemelerinizi seçin.":"Explore the menu and personalize ingredients and extras."}</p>
          <GuestOpenMenu lang={lang}/>
        </div>
-       <div className="beger-service-types" aria-label={lang==="ar"?"أنواع الخدمة — عرض توضيحي":lang==="tr"?"Servis türleri — önizleme":"Service formats — preview"}>
-        <span><b><GuestIcon name="dine"/></b>{lang==="ar"?"داخل المقهى":lang==="tr"?"Mekânda":"Dine in"}</span>
-        <span><b><GuestIcon name="bag"/></b>{lang==="ar"?"استلام":lang==="tr"?"Paket":"Takeaway"}</span>
-        <span><b><GuestIcon name="delivery"/></b>{lang==="ar"?"توصيل (لاحقاً)":lang==="tr"?"Teslimat (yakında)":"Delivery (soon)"}</span>
-       </div>
+       <GuestServiceChoice lang={lang} branchId={branch.branch_id} mode={serviceMode}/>
+
      </div>
    </section>
+   {serviceMode==="takeaway"&&!tableToken?<div className="beger-service-context" role="status"><strong>{lang==="ar"?"سفري · استلام من المحل":lang==="tr"?"Paket · Mağazadan teslim":"Takeaway · Pick up at shop"}</strong><p>{lang==="ar"?"تصفح المنتجات واختر إضافاتك. الطلب السفري والتغليف وأسعارهما لم يُفعّلا بعد؛ لن يُرسل طلب من هذه المعاينة.":lang==="tr"?"Ürünlere göz atın. Paket sipariş ve ambalaj ücretleri henüz etkin değil; bu önizleme sipariş göndermez.":"Browse products and add-ons. Takeaway ordering and packaging charges are not active yet; this preview cannot submit an order."}</p></div>:null}
    <section className="beger-menu-intro" aria-label={t.menu}>
     <div className="beger-menu-intro-top">
       <div><span className="beger-guest-overline">BEGER · MENU</span><h2>{lang==="ar"?"قائمتنا":lang==="tr"?"Menümüz":"Our Menu"}</h2><p>{t.discover} · {totalItems} {t.products}</p></div>
