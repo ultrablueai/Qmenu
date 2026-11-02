@@ -7,7 +7,7 @@ const rating=readFileSync("components/guest-rating-preview.tsx","utf8");
 const menu=readFileSync("components/public-menu.tsx","utf8");
 test("guest menu mounts a branch-local preview cart and non-fabricated ratings",()=>{
  assert.match(menu,/<GuestCart key=\{branch\.branch_id\}/);
- assert.match(menu,/<GuestRatingPreview lang=\{lang\}/);
+ assert.match(details,/<GuestRatingPreview lang=\{lang\}/);
  assert.match(rating,/لا توجد تقييمات موثقة بعد/);
  assert.match(rating,/لم يُنشر تقييمك/);
 });
@@ -28,3 +28,12 @@ test("product customization respects required group limits before basket",()=>{
 });
 
 // Preview release: basket, modifiers, ratings and QR are non-production demonstration features.
+
+test("compact menu rows open full customization by tapping rather than stacked buttons",()=>{
+ const css=readFileSync("components/public-menu.css","utf8");
+ assert.match(details,/className="beger-product-open-trigger"/);
+ assert.match(css,/\.beger-product-open-trigger\{/);
+ assert.match(css,/\.beger-product-action-mount\{height:0/);
+ assert.match(css,/\.beger-favorite-button\{position:relative;z-index:3/);
+ assert.doesNotMatch(menu,/<GuestRatingPreview lang=\{lang\}/);
+});
