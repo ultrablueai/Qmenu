@@ -1,5 +1,5 @@
 "use client";
-import {useState} from "react";
+import {useEffect,useState} from "react";
 import MenuManager from "./branches/[branchId]/menu-manager";
 import CentralCatalog from "./central-catalog";
 import MerchantAppearance from "./merchant-appearance";
@@ -17,6 +17,11 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
   </section>;
   const valid=branches.some(b=>b.id===selectedBranch);
   const activeId=valid?selectedBranch:branches[0].id;
+  const guestPath=`/b/${activeId}`;
+  const [copyNotice,setCopyNotice]=useState("");
+  const [qrReady,setQrReady]=useState(false);
+  const [origin,setOrigin]=useState("");
+  useEffect(()=>{setOrigin(window.location.origin);},[]);
   return <section id="catalog-management" aria-label="الإدارة المركزية للمنيو" dir="rtl" style={{marginTop:26}}>
     <div style={{background:"#eaf5f3",border:"1px solid #cce3df",padding:18,borderRadius:14}}>
       <h2 style={{fontSize:22,margin:"0 0 8px"}}>إدارة الفروع والمنيو من المركز</h2>
@@ -26,6 +31,23 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
         style={{display:"block",marginTop:8,width:"100%",maxWidth:420,padding:"11px",border:"1px solid #a2c4c0",borderRadius:10,background:"white",font:"inherit"}}>
         {branches.map(b=><option value={b.id} key={b.id}>{b.name}</option>)}
       </select>
+    </div>
+    <div style={{background:"#fff",border:"1px solid #dcebe2",borderRadius:18,padding:20,marginTop:18}}>
+      <h3 style={{margin:"0 0 8px",fontSize:20,color:"#193d32"}}>رمز QR للمنيو — جاهز للزبائن</h3>
+      <p style={{fontSize:13,color:"#64776c",margin:"0 0 17px",lineHeight:1.8}}>رمز الفرع المحدد يفتح القائمة مباشرةً من دون تسجيل دخول. لا تحتاج إلى إنشاء طاولة للحصول على رمز الفرع العام.</p>
+      <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:18}}>
+        <div style={{background:"#fff",border:"1px solid #e4ece8",padding:12,borderRadius:15,minWidth:198,minHeight:198}}>
+          {origin?<img src={"https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data="+encodeURIComponent(origin+guestPath)} width={174} height={174} alt="رمز QR لصفحة المنيو العامة" onLoad={()=>setQrReady(true)} onError={()=>setQrReady(false)} />:<p>جارٍ تجهيز الرابط...</p>}
+        </div>
+        <div style={{display:"grid",gap:10,flex:"1 1 230px"}}>
+          <strong style={{overflowWrap:"anywhere",fontSize:13}}>{origin?origin+guestPath:guestPath}</strong>
+          <a href={guestPath} target="_blank" rel="noopener noreferrer" style={{background:"#177657",color:"white",borderRadius:10,padding:"12px 16px",textAlign:"center",fontWeight:750,textDecoration:"none"}}>فتح منيو الزبون ↗</a>
+          <button type="button" disabled={!origin} onClick={async()=>{try{await navigator.clipboard.writeText(origin+guestPath);setCopyNotice("تم نسخ رابط المنيو");}catch{setCopyNotice("تعذّر النسخ تلقائياً؛ انسخ الرابط المعروض أعلاه");}}} style={{background:"#eef7f1",color:"#176248",border:"1px solid #d6e8dc",borderRadius:10,padding:"12px 16px",fontWeight:750,cursor:"pointer"}}>نسخ رابط المنيو</button>
+          {origin?<a href={"https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&margin=24&data="+encodeURIComponent(origin+guestPath)} target="_blank" rel="noopener noreferrer" style={{textAlign:"center",color:"#176248",fontSize:13,fontWeight:700}}>عرض رمز QR كبير للطباعة ↗</a>:null}
+          {copyNotice?<span role="status" style={{fontSize:12,color:"#176248"}}>{copyNotice}</span>:null}
+          {origin&&!qrReady?<span style={{fontSize:12,color:"#7d6647"}}>إن لم تظهر صورة QR، استخدم رابط المنيو المباشر. مصدر صورة QR خارجي حالياً.</span>:null}
+        </div>
+      </div>
     </div>
     <MerchantAppearance businessId={businessId}/>
     <CentralCatalog businessId={businessId} country={country} branches={branches}/>
