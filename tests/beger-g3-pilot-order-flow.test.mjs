@@ -71,3 +71,7 @@ test("guest may start another table order after fulfillment or rejection, not wh
  assert.match(guest,/newOrder:"بدء طلب جديد"/);
  assert.match(guest,/sessionStorage\.removeItem\("beger-g3-order:"\+tableToken\)/);
 });
+
+test("repeat-order button closes event callback properly for JSX",()=>{
+ assert.match(guest,/catch\{\/\* optional storage \*\/\}\}\}>\{t\.newOrder\}/);
+});
