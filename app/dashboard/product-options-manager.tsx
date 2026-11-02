@@ -11,9 +11,9 @@ const button={padding:"9px 14px",background:"#116d65",color:"white",border:0,bor
 const box={border:"1px solid #deeaeb",background:"#fff",padding:18,borderRadius:14,marginTop:14};
 export default function ProductOptionsManager({businessId,country,products}:{businessId:string;country:string;products:Product[]}){
  const [productId,setProductId]=useState(""),[ingredients,setIngredients]=useState<Ingredient[]>([]),[groups,setGroups]=useState<Group[]>([]),[options,setOptions]=useState<Option[]>([]);
- const [nameAr,setNameAr]=useState(""),[nameTr,setNameTr]=useState(""),[optional,setOptional]=useState(false);
- const [groupAr,setGroupAr]=useState(""),[groupTr,setGroupTr]=useState(""),[min,setMin]=useState(0),[max,setMax]=useState(1);
- const [optionGroup,setOptionGroup]=useState(""),[optionAr,setOptionAr]=useState(""),[optionTr,setOptionTr]=useState(""),[delta,setDelta]=useState("0");
+ const [nameAr,setNameAr]=useState(""),[nameTr,setNameTr]=useState(""),[nameEn,setNameEn]=useState(""),[optional,setOptional]=useState(false);
+ const [groupAr,setGroupAr]=useState(""),[groupTr,setGroupTr]=useState(""),[groupEn,setGroupEn]=useState(""),[min,setMin]=useState(0),[max,setMax]=useState(1);
+ const [optionGroup,setOptionGroup]=useState(""),[optionAr,setOptionAr]=useState(""),[optionTr,setOptionTr]=useState(""),[optionEn,setOptionEn]=useState(""),[delta,setDelta]=useState("0");
  const [busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const factor=country==="TR"?100:1,currency=country==="TR"?"TRY":country==="SY"?"SYP":country;
  const selected=products.some(p=>p.id===productId)?productId:products[0]?.id??"";
@@ -38,16 +38,16 @@ export default function ProductOptionsManager({businessId,country,products}:{bus
   finally{setBusy(false);}
  }
  async function addIngredient(e:FormEvent){e.preventDefault();if(!selected)return;
-  if(await run(async()=>browserSupabase().from("catalog_product_ingredients").insert({business_id:businessId,product_id:selected,name_ar:nameAr.trim(),name_tr:nameTr.trim(),is_optional:optional}),"تم حفظ مكوّن المنتج")){setNameAr("");setNameTr("");setOptional(false);}
+  if(await run(async()=>browserSupabase().from("catalog_product_ingredients").insert({business_id:businessId,product_id:selected,name_ar:nameAr.trim(),name_tr:nameTr.trim(),name_en:nameEn.trim()||null,is_optional:optional}),"تم حفظ مكوّن المنتج")){setNameAr("");setNameTr("");setNameEn("");setOptional(false);}
  }
  async function addGroup(e:FormEvent){e.preventDefault();if(!selected)return;
   if(min<0||max<1||min>max||max>20){setError("عدد الاختيارات غير صالح");return;}
-  if(await run(async()=>browserSupabase().from("catalog_modifier_groups").insert({business_id:businessId,product_id:selected,name_ar:groupAr.trim(),name_tr:groupTr.trim(),min_select:min,max_select:max}),"تم حفظ مجموعة الاختيارات")){setGroupAr("");setGroupTr("");setMin(0);setMax(1);}
+  if(await run(async()=>browserSupabase().from("catalog_modifier_groups").insert({business_id:businessId,product_id:selected,name_ar:groupAr.trim(),name_tr:groupTr.trim(),name_en:groupEn.trim()||null,min_select:min,max_select:max}),"تم حفظ مجموعة الاختيارات")){setGroupAr("");setGroupTr("");setGroupEn("");setMin(0);setMax(1);}
  }
  async function addOption(e:FormEvent){e.preventDefault();if(!groups.some(g=>g.id===optionGroup))return;
   const n=Number(delta),minor=Math.round(n*factor);
   if(!Number.isFinite(n)||n<0||!Number.isSafeInteger(minor)||minor>100000000000){setError("سعر الإضافة غير صالح");return;}
-  if(await run(async()=>browserSupabase().from("catalog_modifier_options").insert({business_id:businessId,group_id:optionGroup,name_ar:optionAr.trim(),name_tr:optionTr.trim(),price_delta_minor:minor}),"تم حفظ الخيار")){setOptionAr("");setOptionTr("");setDelta("0");}
+  if(await run(async()=>browserSupabase().from("catalog_modifier_options").insert({business_id:businessId,group_id:optionGroup,name_ar:optionAr.trim(),name_tr:optionTr.trim(),name_en:optionEn.trim()||null,price_delta_minor:minor}),"تم حفظ الخيار")){setOptionAr("");setOptionTr("");setOptionEn("");setDelta("0");}
  }
  if(!products.length)return <section style={box}><h3>تفاصيل المنتجات والإضافات</h3><p>أنشئ منتجاً مركزياً أولاً لإعداد مكوّناته وخياراته.</p></section>;
  return <section dir="rtl" style={{...box,marginTop:26}} aria-label="تفاصيل المنتج وتخصيصه">
