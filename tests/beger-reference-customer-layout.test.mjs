@@ -1,0 +1,31 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const menu=readFileSync("components/public-menu.tsx","utf8");
+const css=readFileSync("components/public-menu.css","utf8");
+const details=readFileSync("components/product-details.tsx","utf8");
+test("approved customer flow is welcome, four-across categories, compact product rows, detail popup",()=>{
+ const intro=menu.indexOf("beger-welcome-screen");
+ const tiles=menu.indexOf("beger-category-tiles");
+ const rows=menu.indexOf("beger-menu-product-list");
+ assert.ok(intro>=0&&tiles>intro&&rows>tiles,"must match mobile reference screen hierarchy");
+ assert.match(css,/beger-category-tiles\{display:grid;grid-template-columns:repeat\(4/);
+ assert.match(css,/beger-menu-product-list\{display:grid/);
+ assert.match(details,/role="dialog" aria-modal="true"/);
+ assert.match(details,/beger-product-popup-hero/);
+ assert.match(menu,/imageUrl=\{i\.image_url\}/);
+});
+test("navigation and responsive reference layout work in AR/TR/EN",()=>{
+ assert.match(menu,/aria-label="Languages"/);
+ assert.match(menu,/lang==="ar"\?"rtl":"ltr"/);
+ assert.match(menu,/href=\{\x60#category-\$\{categories\[0\]/);
+ assert.match(css,/@media\(max-width:650px\)/);
+ assert.match(css,/\.beger-guest-bottom-nav\{position:fixed/);
+ assert.match(css,/\.beger-product-popup\{width:100%/);
+ assert.match(css,/safe-area-inset-bottom/);
+});
+test("reference visual does not create fictional orders or ratings",()=>{
+ assert.match(menu,/Delivery \(soon\)/);
+ assert.match(details,/Preview only\. Ordering and payment are not active yet/);
+ assert.doesNotMatch(menu+details,/submitOrder|fakeRating|paymentIntent/);
+});
