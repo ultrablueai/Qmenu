@@ -26,3 +26,5 @@ test("product customization respects required group limits before basket",()=>{
  assert.match(details,/removed\.slice\(\)\.sort\(\)/);
  assert.match(details,/unitMinor:Number\(details\.price_minor\)\+extra/);
 });
+
+// Preview release: basket, modifiers, ratings and QR are non-production demonstration features.
