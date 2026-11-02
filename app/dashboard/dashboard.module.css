@@ -158,3 +158,9 @@
 .businessSwitchOption{display:block;min-width:0;overflow-wrap:anywhere;text-decoration:none;color:#586d3a;border:1px solid #e7e2d4;border-radius:11px;background:white;padding:10px 11px;font-size:12px;font-weight:750}
 .businessSwitchOption[aria-current="page"]{background:#edf2e1;border-color:#cdd9b7;color:#4e693a}
 .businessSwitchOption:hover,.businessSwitchOption:focus-visible{outline:2px solid #9eb77a;outline-offset:2px}
+
+/* G3 branch operations: surfaced directly at the branch URL, not buried in HQ. */
+.branchOperationsNav{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:17px 0;padding:12px;border-radius:16px;border:1px solid #e5ddcc;background:#fefbf5;direction:rtl}
+.branchOperationsNav a{min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 145px;border-radius:11px;padding:11px 13px;text-decoration:none;background:#eff2e7;border:1px solid #dce6cd;color:#536d37;font-size:12px;font-weight:800;line-height:1.5}
+.branchOperationsNav a:first-child{background:#637a43;border-color:#637a43;color:white}
+.branchOperationsNav a:focus-visible{outline:3px solid #b3c397;outline-offset:3px}
