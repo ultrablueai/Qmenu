@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useState,type FormEvent} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
+import "./product-options-manager.css";
 
 type Product={id:string;name_ar:string};
 type Ingredient={id:string;product_id:string;name_ar:string;name_tr:string;is_optional:boolean};
