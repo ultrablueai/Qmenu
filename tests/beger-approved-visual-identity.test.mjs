@@ -9,7 +9,10 @@ const home=readFileSync("app/page.tsx","utf8");
 test("approved warm, responsive cafe visual identity is implemented in customer UI",()=>{
  assert.match(guest,/import "\.\/public-menu\.css"/);
  assert.match(guest,/beger-guest-hero/);
- assert.match(guest,/beger-guest-categories/);
+ assert.match(guest,/beger-category-tiles/);
+ assert.match(guest,/beger-welcome-screen/);
+ assert.match(guest,/beger-menu-product-list/);
+ assert.match(guest,/beger-guest-bottom-nav/);
  assert.match(guest,/beger-guest-product/);
  assert.match(css,/@media\(max-width:650px\)/);
  assert.match(css,/prefers-reduced-motion:reduce/);
