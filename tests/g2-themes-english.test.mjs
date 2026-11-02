@@ -56,3 +56,8 @@ test("Luxe Dark product customization remains legible and English prompts are co
  assert.match(details,/en\?" · Required"/);
  assert.match(details,/en\?"Free"/);
 });
+
+test("HQ appearance normalizes Supabase thenable before Promise.finally",()=>{
+ assert.match(settings,/Promise\.resolve\(browserSupabase\(\)\.from\("business_menu_appearance"\)/);
+ assert.match(settings,/\.finally\(\(\)=>\{if\(active\)setLoading\(false\)\}\)/);
+});
