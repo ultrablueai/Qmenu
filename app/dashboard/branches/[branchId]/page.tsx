@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { serverSupabase } from "../../../../lib/supabase/server";
 import styles from "../../dashboard.module.css";
-import MenuManager from "./menu-manager";
 
 export const dynamic = "force-dynamic";
 
@@ -79,11 +78,15 @@ export default async function BranchDashboard({ params }: Props) {
         <section className={styles.panel}>
           <h2 className={styles.panelTitle}>QR المتجر والطاولة</h2>
           <p className={styles.panelSubtitle}>سيأخذ الرمز الزبون إلى منيو هذا الفرع مباشرةً، دون إجباره على إنشاء حساب.</p>
-          <div className={styles.empty} style={{marginTop:16}}>صفحة الزبون العامة قيد التجربة. عرض المنتجات وإنشاء QR للطاولات سيأتيان لاحقاً في G2.</div>
+          <div className={styles.empty} style={{marginTop:16}}>يمكن للزبون فتح قائمة هذا الفرع دون حساب. إدارة المنيو وQR والطاولات موجودة حصراً في لوحة المتجر الرئيسي.</div>
           <Link href={`/b/${branch.id}`} target="_blank" rel="noopener noreferrer" className={styles.branchOpenLink}>معاينة صفحة الزبون العامة ←</Link>
         </section>
       </div>
-      {(role === "owner" || role === "manager") ? <MenuManager businessId={branch.business_id} branchId={branch.id} country={business.country_code}/> : null}
+      <section className={styles.panel} aria-label="إدارة الفرع من المتجر الرئيسي">
+        <h2 className={styles.panelTitle}>صلاحيات إدارة الفرع</h2>
+        <p className={styles.panelSubtitle}>المنيو والأسعار والتصنيفات وإعدادات الطاولات وQR تُدار مركزياً من لوحة المتجر الرئيسي. هذه الصفحة مخصصة للتشغيل المحلي حسب صلاحية الموظف.</p>
+        {(role === "owner" || role === "manager") ? <Link href="/dashboard#catalog-management" className={styles.branchOpenLink}>العودة إلى الإدارة المركزية ←</Link> : null}
+      </section>
       <section className={styles.modules} aria-labelledby="branch-tools-heading">
         <h2 className={styles.panelTitle} id="branch-tools-heading">وحدات هذا الفرع</h2>
         <div className={styles.moduleGrid} style={{marginTop:15}}>
