@@ -3,6 +3,7 @@ import {createContext,useContext,useState,type ReactNode} from "react";
 import type {GuestLang} from "../lib/g2-public";
 import {useGuestCart} from "./guest-cart";
 import GuestIcon from "./guest-icons";
+import GuestQrScanner from "./guest-qr-scanner";
 
 type Stage="welcome"|"menu"|"rewards";
 type Journey={stage:Stage;go:(next:Stage)=>void};
@@ -10,9 +11,11 @@ const ScreenContext=createContext<Journey|null>(null);
 
 export default function GuestScreenSwitcher({lang,children}:{lang:GuestLang;children:ReactNode}){
  const [stage,setStage]=useState<Stage>("welcome");
+ useEffect(()=>{const params=new URLSearchParams(window.location.search);if(params.has("product"))setStage("menu")},[]);
  function go(next:Stage){setStage(next);window.scrollTo({top:0,behavior:"auto"});}
  return <ScreenContext.Provider value={{stage,go}}>
   <div className="beger-screen-switcher" data-stage={stage}>{children}
+   {stage==="welcome"?<GuestQrScanner lang={lang}/>:null}
    <GuestBottomNavigation lang={lang}/>
   </div>
  </ScreenContext.Provider>;
