@@ -41,7 +41,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
     <h3>{titles[stage]} <span>{orders.filter(o=>o.status===stage).length}</span></h3>
     {orders.filter(o=>o.status===stage).map(o=><article className="beger-order-ticket" key={o.id}>
       <div className="beger-order-ticket-head"><strong>⌗ {o.table}</strong><time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</time></div>
-      <ul>{o.items.map((item,index)=><li key={index}><strong>{item.quantity}× {item.name}</strong><small>{(item.selections?.options??[]).map(opt=>opt.name_ar).filter(Boolean).join(" · ")}{(item.selections?.removedIngredients??[]).length?" · بدون "+item.selections.removedIngredients.join("، "):""}</small></li>)}</ul>
+      <ul>{o.items.map((item,index)=><li key={index}><strong>{item.quantity}× {item.name}</strong><small>{(item.selections?.options??[]).map(opt=>opt.name_ar).filter(Boolean).join(" · ")}{(item.selections?.removedIngredients??[]).length?" · بدون "+(item.selections?.removedIngredients??[]).join("، "):""}</small></li>)}</ul>
       <div className="beger-order-ticket-price">{o.totalMinor.toLocaleString("ar")} <small>{o.currency}</small></div>
       {next[o.status]?<button disabled={busy} type="button" onClick={()=>void transition(o,next[o.status]!.value)}>{next[o.status]!.label}</button>:null}
       {(o.status==="pending"||o.status==="accepted")?<button className="beger-order-reject" disabled={busy} type="button" onClick={()=>{if(confirm("رفض الطلب؟ سيتم إبلاغ الزبون بحالة الرفض."))void transition(o,"rejected")}}>رفض الطلب</button>:null}
