@@ -35,3 +35,10 @@
 .beger-scanner-error{background:#fff0e7;border:1px solid #f0d5c6;color:#a24c35!important;padding:12px;border-radius:12px}
 @media(max-width:650px){.beger-scanner-overlay{align-items:flex-end;padding:0}.beger-scanner-panel{border-radius:23px 23px 0 0;max-height:95dvh;width:100%;padding:19px 16px calc(20px + env(safe-area-inset-bottom,0px))}.beger-qr-manager{padding:14px}.beger-qr-grid{grid-template-columns:1fr}}
 @media print{.beger-qr-manager .beger-qr-add-table,.beger-qr-card-controls,.beger-qr-manager>p{display:none}.beger-qr-card{break-inside:avoid}.beger-qr-code{border:0}}
+
+.beger-qr-export{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}
+.beger-qr-export button{background:#edf0df;color:#526c36;border:1px solid #dbe3cb;padding:10px 14px;border-radius:11px;cursor:pointer;font:800 12px Arial,sans-serif}
+.beger-qr-export small{font-size:11px;color:#a04535}
+.beger-scanner-photo-label{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;padding:12px;margin:12px 0 0;background:#f7f0e7;border-radius:12px;border:1px dashed #d2c1ae;font-size:12px;font-weight:800;color:#637a42;cursor:pointer}
+.beger-scanner-photo-label input{display:block;width:100%;max-width:300px;font-size:11px;color:#504538}
+@media print{.beger-qr-export{display:none}}
