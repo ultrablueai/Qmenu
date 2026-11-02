@@ -29,7 +29,7 @@ test("navigation and responsive reference layout work in AR/TR/EN",()=>{
  assert.match(css,/safe-area-inset-bottom/);
 });
 test("reference visual does not create fictional orders or ratings",()=>{
- assert.match(menu,/Delivery \(soon\)/);
+ assert.match(readFileSync("components/guest-service-choice.tsx","utf8"),/Delivery/);
  assert.match(details,/tableOrdering\?/);
  assert.match(details,/Scan your table QR to submit an order/);
  assert.doesNotMatch(menu+details,/submitOrder|fakeRating|paymentIntent/);
