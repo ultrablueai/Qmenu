@@ -1,5 +1,5 @@
 import {notFound} from "next/navigation";
-import {anonymousBeger,loadPublicMenu,safeLanguage,type G2Branch} from "../../../lib/g2-public";
+import {anonymousBeger,loadPublicMenu,loadGuestAppearance,safeLanguage,type G2Branch} from "../../../lib/g2-public";
 import PublicMenu from "../../../components/public-menu";
 export const dynamic="force-dynamic";
 export const metadata={title:"Beger | Table Menu",robots:{index:false,follow:false}};
@@ -13,5 +13,6 @@ export default async function PublicTable({params,searchParams}:Props){
   const t=(data?.[0]??null) as Locator|null;
   if(!t)notFound();
   const categories=await loadPublicMenu(t.branch_id);
-  return <PublicMenu branch={t} categories={categories} lang={safeLanguage(search.lang)} tableLabel={t.table_label} tableToken={token}/>;
+  const appearance=await loadGuestAppearance(t.branch_id);
+  return <PublicMenu appearance={appearance} branch={t} categories={categories} lang={safeLanguage(search.lang,appearance)} tableLabel={t.table_label} tableToken={token}/>;
 }
