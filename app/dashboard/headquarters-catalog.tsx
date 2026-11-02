@@ -6,6 +6,7 @@ import MerchantAppearance from "./merchant-appearance";
 import QrSvg from "../../lib/qr/qr-svg";
 import QrExport from "../../components/qr-export";
 import MerchantTableQr from "./merchant-table-qr";
+import MerchantOrderBoard from "./merchant-order-board";
 import "../qr-experience.css";
 
 type Branch = {id:string; name:string};
@@ -53,6 +54,7 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
       </div>
     </div>
     <MerchantTableQr key={activeId} businessId={businessId} branchId={activeId} branchName={branches.find(b=>b.id===activeId)?.name??""}/>
+    <MerchantOrderBoard key={"orders-"+activeId} businessId={businessId} branchId={activeId} branchName={branches.find(b=>b.id===activeId)?.name??""}/>
     <MerchantAppearance businessId={businessId}/>
     <CentralCatalog businessId={businessId} country={country} branches={branches}/>
     <details style={{marginTop:22}}><summary style={{cursor:"pointer",fontWeight:700}}>إدارة القوائم القديمة الخاصة بالفرع (مرحلة انتقالية)</summary>
