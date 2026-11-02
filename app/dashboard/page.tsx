@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import styles from "./dashboard.module.css";
 import BranchManager from "./branch-manager";
+import HeadquartersCatalog from "./headquarters-catalog";
 import { serverSupabase } from "../../lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -82,9 +83,7 @@ export default async function Dashboard() {
           <a className={`${styles.navItem} ${styles.navItemActive}`} href="/dashboard" aria-current="page">
             <span className={styles.navIcon} aria-hidden="true">▦</span> نظرة عامة
           </a>
-          <span className={`${styles.navItem} ${styles.navItemSoon}`} aria-disabled="true">
-            <span className={styles.navIcon} aria-hidden="true">▤</span> المنيو والخدمات <span className={styles.soon}>قريباً</span>
-          </span>
+          {canManageBranches ? <a className={styles.navItem} href="#catalog-management"><span className={styles.navIcon} aria-hidden="true">▤</span> إدارة المنيو والأسعار</a> : null}
           <span className={`${styles.navItem} ${styles.navItemSoon}`} aria-disabled="true">
             <span className={styles.navIcon} aria-hidden="true">◷</span> الحجوزات والطوابير <span className={styles.soon}>قريباً</span>
           </span>
@@ -187,6 +186,8 @@ export default async function Dashboard() {
             </section>
           </div>
 
+          {!loadError && primary && canManageBranches && <HeadquartersCatalog businessId={primary.id} country={primary.country_code} branches={primaryBranches.map(b => ({id:b.id,name:b.name}))}/>}
+
           <section className={styles.modules} aria-labelledby="modules-heading">
             <div className={styles.panelHead}>
               <div><h2 className={styles.panelTitle} id="modules-heading">أدوات أعمالك</h2><p className={styles.panelSubtitle}>وحدات ستُفعّل بحسب نوع النشاط بعد استكمال البناء والاختبارات</p></div>
@@ -202,7 +203,7 @@ export default async function Dashboard() {
               ))}
             </div>
           </section>
-          <footer className={styles.footer}>Qmenu · Smart Business OS · نسخة Staging للاختبار فقط</footer>
+          <footer className={styles.footer}>Beger · Smart Business OS · نسخة Staging للاختبار فقط</footer>
         </main>
       </div>
 
