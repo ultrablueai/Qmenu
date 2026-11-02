@@ -1,10 +1,13 @@
 "use client";
-import {useState} from "react";
+import {useEffect,useState} from "react";
 import {capabilities,previewPlan,sectorById,sectors,type BusinessSector,type Capability} from "../lib/beger-sector-catalog";
 
-export default function BegerSectorConfigurator({onSelectionChange}:{onSelectionChange?:(sector:BusinessSector,features:Capability[])=>void}){
+export default function BegerSectorConfigurator({onSelectionChange,draftKey}:{onSelectionChange?:(sector:BusinessSector,features:Capability[])=>void;draftKey?:string}){
  const [sector,setSector]=useState<BusinessSector>("cafe");
  const [chosen,setChosen]=useState<Capability[]>(sectorById("cafe").defaultCapabilities);
+ const [loaded,setLoaded]=useState(false);
+ useEffect(()=>{try{if(draftKey){const raw=localStorage.getItem("beger-sector-draft:"+draftKey);if(raw){const saved=JSON.parse(raw) as {sector?:BusinessSector;features?:string[]};if(sectors.some(x=>x.id===saved.sector)&&Array.isArray(saved.features)){const valid=previewPlan(saved.sector!,saved.features).enabled;setSector(saved.sector!);setChosen(valid);onSelectionChange?.(saved.sector!,valid);}}}}catch{/* local drafts optional */}setLoaded(true);},[draftKey]);
+ useEffect(()=>{if(!loaded||!draftKey)return;try{localStorage.setItem("beger-sector-draft:"+draftKey,JSON.stringify({sector,features:chosen}))}catch{/* local drafts optional */}},[sector,chosen,loaded,draftKey]);
  const definition=sectorById(sector),plan=previewPlan(sector,chosen);
  function selectSector(next:BusinessSector){
   const defaults=sectorById(next).defaultCapabilities;
@@ -31,7 +34,7 @@ export default function BegerSectorConfigurator({onSelectionChange}:{onSelection
   </fieldset>
   <div className="beger-sector-summary" role="status"><strong>{plan.enabled.length} ميزات مختارة</strong>
    <span>{plan.pilot.length} جاهزة للتجربة · {plan.planned.length} مخطط لها</span>
-   <p>التسعير والدفع والاشتراك حسب الميزات غير مفعّلين بعد. الاختيارات هنا معاينة للنموذج وليست اشتراكاً مدفوعاً أو تفعيل صلاحيات.</p>
+   <p>التسعير والدفع والاشتراك حسب الميزات غير مفعّلين بعد. الاختيارات مسودة محفوظة على هذا الجهاز فقط وليست اشتراكاً مدفوعاً أو تفعيل صلاحيات.</p>
   </div>
  </section>;
 }
