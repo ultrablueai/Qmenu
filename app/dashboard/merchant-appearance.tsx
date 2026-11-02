@@ -16,7 +16,7 @@ export default function MerchantAppearance({businessId}:{businessId:string}){
  const [defaultLang,setDefaultLang]=useState<Lang>("ar");
  const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState(""),[notice,setNotice]=useState("");
  useEffect(()=>{let active=true;
-   browserSupabase().from("business_menu_appearance").select("theme,enabled_languages,default_lang").eq("business_id",businessId).maybeSingle()
+   Promise.resolve(browserSupabase().from("business_menu_appearance").select("theme,enabled_languages,default_lang").eq("business_id",businessId).maybeSingle())
    .then(({data,error})=>{if(!active)return;if(error){setError("تعذّر تحميل إعدادات الواجهة");return;}
     if(data){const ids=langNames.map(x=>x.id);const enabled=(data.enabled_languages as string[]).filter((s):s is Lang=>ids.includes(s as Lang));
       if(enabled.length){setLangs(enabled);setDefaultLang(enabled.includes(data.default_lang as Lang)?data.default_lang as Lang:enabled[0]);}
