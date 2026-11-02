@@ -46,7 +46,7 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
           <strong style={{overflowWrap:"anywhere",fontSize:13}}>{origin?origin+guestPath:guestPath}</strong>
           <a href={guestPath} target="_blank" rel="noopener noreferrer" style={{background:"#177657",color:"white",borderRadius:10,padding:"12px 16px",textAlign:"center",fontWeight:750,textDecoration:"none"}}>فتح منيو الزبون ↗</a>
           <button type="button" disabled={!origin} onClick={async()=>{try{await navigator.clipboard.writeText(origin+guestPath);setCopyNotice("تم نسخ رابط المنيو");}catch{setCopyNotice("تعذّر النسخ تلقائياً؛ انسخ الرابط المعروض أعلاه");}}} style={{background:"#eef7f1",color:"#176248",border:"1px solid #d6e8dc",borderRadius:10,padding:"12px 16px",fontWeight:750,cursor:"pointer"}}>نسخ رابط المنيو</button>
-          {origin?<QrExport targetId={"beger-shop-code-"+activeId} fileName={"beger-shop-"+activeId} label="حفظ رمز المتجر للطباعة (SVG)"/>:null}
+          {origin?<QrExport targetId={"beger-shop-code-"+activeId} fileName={"beger-shop-"+activeId} stickerTitle={branches.find(b=>b.id===activeId)?.name??"Beger"} label="حفظ رمز المتجر للطباعة (SVG)"/>:null}
           {copyNotice?<span role="status" style={{fontSize:12,color:"#176248"}}>{copyNotice}</span>:null}
           
         </div>
