@@ -45,3 +45,10 @@ test("branch inbox and table QR appear above low-priority branch metadata on mob
  assert.match(branch,/branchOperationsIntro/);
  assert.doesNotMatch(branch,/className=\{styles\.hero\} style=\{\{ marginTop:24 \}\}/);
 });
+
+test("merchant workflow remains accessible from authenticated branch, never from guest menu",()=>{
+ assert.match(branch,/const canManageOrders = role === "owner" \|\| role === "manager"/);
+ assert.match(branch,/g3|MerchantOrderBoard/);
+ assert.doesNotMatch(cart,/g3_transition_order|g3_branch_orders/);
+ assert.match(orderBoard,/g3_transition_order/);
+});
