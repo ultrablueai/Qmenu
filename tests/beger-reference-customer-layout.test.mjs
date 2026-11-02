@@ -19,7 +19,7 @@ test("approved customer flow is welcome, four-across categories, compact product
 test("navigation and responsive reference layout work in AR/TR/EN",()=>{
  assert.match(menu,/GuestLanguageSwitcher lang=\{lang\}/);
  assert.match(menu,/lang==="ar"\?"rtl":"ltr"/);
- assert.match(menu,/<GuestScreenSwitcher lang=\{lang\}>/);
+ assert.match(menu,/<GuestScreenSwitcher lang=\{lang\} initialStage=\{tableToken\?"menu":"welcome"\}>/);
  assert.match(menu,/<GuestOpenMenu lang=\{lang\}/);
  assert.match(screens,/journey\?\.go\("menu"\)/);
  assert.match(css,/@media\(max-width:650px\)/);
