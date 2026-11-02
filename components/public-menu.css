@@ -54,3 +54,73 @@
  .beger-basket-overlay{align-items:flex-end!important}
  .beger-basket-sheet{height:min(92dvh,850px)!important;border-radius:22px 22px 0 0;padding:22px 16px calc(22px + env(safe-area-inset-bottom,0px))!important}
 }
+
+/* Approved customer reference: a welcome phone, a compact menu phone and a
+   dedicated product customization phone, never a continuous tall desktop grid. */
+.beger-guest{--beg-olive:#71834d;--beg-copper:#a55c37}
+.beger-welcome-screen{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:410px;margin:18px 0 30px;border-radius:27px;overflow:hidden;box-shadow:0 16px 42px #4d362719}
+.beger-welcome-photo{position:relative;min-height:100%;overflow:hidden;background:linear-gradient(135deg,#efe5d5,#b38b63);display:grid;place-items:center}
+.beger-welcome-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#29201613,#29201600)}
+.beger-welcome-photo img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.beger-welcome-content{display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;padding:clamp(20px,4vw,42px);background:linear-gradient(160deg,#fff9f0,#fbf5ed);color:#332d23}
+.beger-welcome-content h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(29px,3.4vw,47px);margin:13px 0 7px;line-height:1.18;max-width:100%;overflow-wrap:anywhere}
+.beger-welcome-content>p{color:#796b5d;font-size:13px;line-height:1.7;margin:0 0 20px}
+.beger-welcome-panel{width:100%;max-width:410px;padding:19px;border-radius:19px;background:#fffefa;border:1px solid #efe5d7;box-shadow:0 8px 28px #6a583a0b}
+.beger-welcome-panel h2{font-family:Georgia,"Times New Roman",serif;color:#a2502f;margin:0 0 8px;font-size:26px}
+.beger-welcome-panel p{margin:0 0 17px;font-size:13px;line-height:1.8;color:#655c51}
+.beger-welcome-cta{display:flex;justify-content:center;align-items:center;gap:12px;text-decoration:none;padding:13px 19px;min-height:48px;border-radius:999px;font-weight:800;font-size:14px}
+.beger-service-types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;max-width:400px;gap:7px;margin-top:16px}
+.beger-service-types span{display:flex;flex-direction:column;align-items:center;gap:4px;color:#655c51;font-size:11px;line-height:1.5}
+.beger-service-types b{font-size:22px;font-weight:500;color:#627643}
+.beger-menu-intro{margin-bottom:24px}
+.beger-menu-intro-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}
+.beger-menu-intro h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(27px,3vw,35px);margin:3px 0 5px}
+.beger-menu-intro p{color:#776a5a;margin:0;font-size:13px}
+.beger-preview-pill{border:1px solid #e8ddce;background:#f5eee5;padding:8px 12px;border-radius:999px;color:#886643;font-size:11px;font-weight:800}
+.beger-category-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;scroll-margin-top:24px}
+.beger-category-tiles a{display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;gap:8px;min-height:103px;min-width:0;padding:11px 8px;border:1px solid;border-radius:19px;text-decoration:none;background:#fffefa;box-shadow:0 5px 20px #4e3a2608}
+.beger-category-tiles a:first-child{background:#e9ebd4;border-color:#d4ddb9!important}
+.beger-category-tiles a span{font-size:29px;line-height:1.2}
+.beger-category-tiles a strong{font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.beger-menu-product-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:11px}
+.beger-menu-product-list .beger-guest-product{border-radius:17px!important;padding:13px!important;box-shadow:0 4px 20px #44342109!important}
+.beger-menu-product-list .beger-guest-product-top{align-items:center!important}
+.beger-menu-product-list .beger-guest-product-photo{border-radius:12px!important}
+.beger-menu-product-list .beger-guest-product>div:last-child{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;padding:8px 0 0!important}
+.beger-menu-product-list .beger-guest-product>div:last-child>div{flex:1 1 auto}
+.beger-guest-bottom-nav{display:none}
+.beger-product-popup-overlay{position:fixed;inset:0;z-index:55;background:#1f1b16b0;display:grid;place-items:center;padding:15px;overscroll-behavior:contain}
+.beger-product-popup{background:#fffaf4;color:#30291f;width:min(100%,530px);max-height:min(94dvh,910px);overflow:auto;overscroll-behavior:contain;border-radius:24px;box-shadow:0 24px 80px #170e0e35}
+.beger-product-popup-hero{width:100%;height:clamp(160px,26vh,235px);background:linear-gradient(120deg,#d9ac85,#f4e8dc);position:relative;overflow:hidden}
+.beger-product-popup-hero img{width:100%;height:100%;object-fit:cover}
+.beger-product-popup-close{position:absolute;top:12px;inset-inline-start:12px;border:0!important;border-radius:999px!important;background:#fffef4e8!important;color:#413026!important;min-height:42px;min-width:42px;font-size:21px;cursor:pointer;box-shadow:0 2px 16px #2d211c18}
+.beger-product-popup-body{padding:0 18px 23px}
+@media(max-width:650px){
+ .beger-welcome-screen{grid-template-columns:1fr;min-height:0;border-radius:22px;margin:12px 0 25px}
+ .beger-welcome-photo{height:190px;min-height:190px}
+ .beger-welcome-content{padding:15px 18px 17px}
+ .beger-welcome-content h1{font-size:31px;margin:9px 0 4px}
+ .beger-welcome-content>p{margin:0 0 13px}
+ .beger-welcome-panel{padding:13px 16px;border-radius:17px}
+ .beger-welcome-panel h2{font-size:23px}
+ .beger-welcome-panel p{font-size:12px;line-height:1.6;margin-bottom:10px}
+ .beger-welcome-cta{min-height:44px;padding:10px 14px}
+ .beger-service-types{margin-top:12px}
+ .beger-category-tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+ .beger-category-tiles a{min-height:87px;padding:9px 3px;border-radius:14px}
+ .beger-category-tiles a span{font-size:22px}
+ .beger-category-tiles a strong{font-size:10px}
+ .beger-menu-product-list{grid-template-columns:1fr;gap:9px}
+ .beger-menu-product-list .beger-guest-product{padding:12px!important;gap:4px!important}
+ .beger-menu-product-list .beger-guest-product-top{gap:12px!important}
+ .beger-menu-product-list .beger-guest-product-photo{height:88px!important;width:88px!important;max-width:30%!important}
+ .beger-guest-bottom-nav{position:fixed;bottom:0;inset-inline:0;display:flex;justify-content:space-around;align-items:center;z-index:35;background:#fffcf7f2;border-top:1px solid #e9e0d3;backdrop-filter:blur(16px);padding:7px 8px calc(8px + env(safe-area-inset-bottom,0px))}
+ .beger-guest-bottom-nav a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#6f7458;text-decoration:none;min-width:55px}
+ .beger-guest-bottom-nav span{font-size:19px}
+ .beger-product-popup-overlay{padding:0;align-items:end}
+ .beger-product-popup{width:100%;max-height:95dvh;border-radius:23px 23px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
+ .beger-product-popup-hero{height:190px}
+ .beger-product-popup-body{padding:0 13px 18px}
+ .beger-basket-trigger{bottom:calc(70px + env(safe-area-inset-bottom,0px))!important;inset-inline-end:10px!important}
+}
+@media(max-width:370px){.beger-category-tiles a strong{font-size:9px}.beger-menu-product-list .beger-guest-product-photo{width:78px!important;height:78px!important}}
