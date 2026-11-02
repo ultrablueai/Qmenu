@@ -4,8 +4,9 @@ import {readFileSync} from "node:fs";
 const basket=readFileSync("components/guest-cart.tsx","utf8");
 const css=readFileSync("components/public-menu.css","utf8");
 const details=readFileSync("components/product-details.tsx","utf8");
-test("preview basket stays a local UI state, never triggers checkout",()=>{
- assert.match(basket,/Preview only\. No order has been placed or sent/);
+test("cart is a local scoped UI and delegates active table order to the guarded submit component",()=>{
+ assert.match(basket,/notice:tableToken\?/);
+ assert.match(basket,/<GuestOrderSubmission lang=\{lang\}/);
  assert.doesNotMatch(basket,/\.from\(|\.rpc\(|submitOrder|paymentIntent|checkout|localStorage/);
  assert.match(basket,/Math\.min\(99/);
  assert.match(basket,/setItems\(prev=>prev\.filter\(x=>x\.key!==item\.key\)\)/);
