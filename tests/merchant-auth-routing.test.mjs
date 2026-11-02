@@ -1,0 +1,35 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const login = readFileSync("app/login/page.tsx", "utf8");
+const dashboard = readFileSync("app/dashboard/page.tsx", "utf8");
+const onboarding = readFileSync("app/onboarding/page.tsx", "utf8");
+const onboardingLayout = readFileSync("app/onboarding/layout.tsx", "utf8");
+
+test("login validates Supabase session before using server-side dashboard membership gate", () => {
+  assert.match(login, /auth\.signInWithPassword/);
+  assert.match(login, /if \(!data\.session\)/);
+  assert.match(login, /window\.location\.replace\(target === "\/admin" \? "\/admin" : "\/dashboard"\)/);
+});
+
+test("dashboard redirects anonymous users to login", () => {
+  assert.match(dashboard, /if \(error \|\| !user\) redirect\("\/login"\)/);
+});
+
+test("dashboard automatically redirects authenticated users without memberships to onboarding", () => {
+  assert.match(dashboard, /if \(!membershipError && !memberships\?\.length\) redirect\("\/onboarding"\)/);
+  assert.match(dashboard, /\{membershipError \?/);
+});
+
+test("onboarding rejects anonymous sessions and directs existing merchants to dashboard", () => {
+  assert.match(onboardingLayout, /if \(error \|\| !user\) redirect\("\/login"\)/);
+  assert.match(onboardingLayout, /if \(memberships\?\.length\) redirect\("\/dashboard"\)/);
+  assert.match(onboardingLayout, /if \(membershipError\)/);
+});
+
+test("onboarding still creates businesses using authenticated Supabase RPC only", () => {
+  assert.match(onboarding, /auth\.getUser\(\)/);
+  assert.match(onboarding, /\.rpc\("create_first_business"/);
+  assert.doesNotMatch(onboarding, /service_role|SUPABASE_SERVICE_ROLE_KEY/);
+});
