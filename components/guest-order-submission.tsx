@@ -41,7 +41,7 @@ export default function GuestOrderSubmission({lang,tableToken,tableLabel,items,o
  const ordered=["pending","accepted","preparing","ready","fulfilled"] as const;
  const current=ordered.indexOf(status as typeof ordered[number]);
  return <section className="beger-guest-order-submit" aria-label={t.status}>
-  <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} labels={lang==="ar"?{sound:"الصوت",vibration:"اهتزاز"}:lang==="tr"?{sound:"Ses",vibration:"Titreşim"}:{sound:"Sound",vibration:"Vibration"}}/>
+  <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("ready",lang==="ar"?"هذا تنبيه تجريبي":lang==="tr"?"Bu bir test bildirimidir":"This is a test alert")} labels={lang==="ar"?{sound:"الصوت",vibration:"اهتزاز",test:"تجربة التنبيه"}:lang==="tr"?{sound:"Ses",vibration:"Titreşim",test:"Bildirimi dene"}:{sound:"Sound",vibration:"Vibration",test:"Test alert"}}/>
   {feedback.message?<p className="beger-feedback-toast" role="status">{feedback.message}</p>:null}
   {tableToken&&tableLabel?<p className="beger-order-table-label">⌗ {t.table}: <strong>{tableLabel}</strong></p>:null}
   {token?<div className="beger-guest-order-tracking" role="status"><h3>{t.success}</h3><strong>{status?t[status]:t.pending}</strong>
