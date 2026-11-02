@@ -75,3 +75,11 @@ test("guest may start another table order after fulfillment or rejection, not wh
 test("repeat-order button closes event callback properly for JSX",()=>{
  assert.match(guest,/catch\{\/\* optional storage \*\/\}\}\}>\{t\.newOrder\}/);
 });
+
+test("two orders sharing a table have independent order references and transitions",()=>{
+ assert.match(merchant,/function orderReference\(id:string\)/);
+ assert.match(merchant,/orderReference\(o\.id\)/);
+ assert.match(merchant,/p_order:order\.id,p_next:status/);
+ assert.doesNotMatch(merchant,/p_table:order\.table|p_table_id:order\.table/);
+ assert.match(merchant,/رقم الطلب/);
+});
