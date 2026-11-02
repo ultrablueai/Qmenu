@@ -1,12 +1,13 @@
 "use client";
 import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNode} from "react";
 import {formatPrice,type GuestLang} from "../lib/g2-public";
+import GuestOrderSubmission from "./guest-order-submission";
 
-type CartItem={key:string;name:string;unitMinor:number;baseMinor?:number;extraMinor?:number;imageUrl?:string;quantity:number;selections:string[]};
+type CartItem={key:string;productId?:string;optionIds?:string[];removedIngredients?:string[];name:string;unitMinor:number;baseMinor?:number;extraMinor?:number;imageUrl?:string;quantity:number;selections:string[]};
 type CartContextValue={add:(item:Omit<CartItem,"quantity"> & {quantity?:number})=>void;count:number;open:()=>void};
 const CartContext=createContext<CartContextValue|null>(null);
 export function useGuestCart(){return useContext(CartContext);}
-export default function GuestCart({children,country,lang,accent}:{children:ReactNode;country:string;lang:GuestLang;accent:string}){
+export default function GuestCart({children,country,lang,accent,tableToken,tableLabel}:{children:ReactNode;country:string;lang:GuestLang;accent:string;tableToken?:string;tableLabel?:string}){
  const [items,setItems]=useState<CartItem[]>([]);
  const [open,setOpen]=useState(false);
  const closeRef=useRef<HTMLButtonElement|null>(null);
@@ -74,6 +75,7 @@ export default function GuestCart({children,country,lang,accent}:{children:React
      <div className="beger-order-total-line"><span>{labels.subtotal}</span><strong>{formatPrice(subtotal,country,lang)}</strong></div>
      <div className="beger-order-total-line"><span>{labels.additions}</span><strong>{formatPrice(additions,country,lang)}</strong></div>
      <div style={{display:"flex",justifyContent:"space-between",gap:15,fontSize:19,marginBottom:13}}><strong>{labels.total}</strong><strong>{formatPrice(total,country,lang)}</strong></div>
+     <GuestOrderSubmission lang={lang} tableToken={tableToken} tableLabel={tableLabel} items={items} onSent={()=>setItems([])}/>
      {items.length>0?<button type="button" onClick={()=>setItems([])} style={{width:"100%",padding:12,border:"1px solid #dce6dd",color:"#5d6e62",background:"#fff",borderRadius:12,cursor:"pointer"}}>{labels.clear}</button>:null}
     </div>
    </section>
