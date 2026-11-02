@@ -11,11 +11,13 @@ test("guest menu mounts a branch-local preview cart and non-fabricated ratings",
  assert.match(rating,/لا توجد تقييمات موثقة بعد/);
  assert.match(rating,/لم يُنشر تقييمك/);
 });
-test("basket stays in browser memory, cannot transmit checkout or ratings",()=>{
+test("basket stays scoped to the branch and table and cannot initiate payment or ratings",()=>{
  assert.match(cart,/useState<CartItem\[\]>/);
  assert.match(cart,/quantity:Math\.min\(99/);
  assert.match(cart,/لم يتم إرسال أي طلب/);
- assert.doesNotMatch(cart+rating,/fetch\(|\.insert\(|\.upsert\(|localStorage|sessionStorage|submitOrder|checkout|paymentIntent/);
+ assert.match(cart,/sessionStorage\.setItem\(storageKey/);
+ assert.match(cart,/<GuestOrderSubmission/);
+ assert.doesNotMatch(cart+rating,/paymentIntent|fakeRating|chargeCard|service_role/);
 });
 test("product customization respects required group limits before basket",()=>{
  assert.match(details,/const valid=details\?\.groups\.every/);
@@ -27,7 +29,7 @@ test("product customization respects required group limits before basket",()=>{
  assert.match(details,/unitMinor:Number\(details\.price_minor\)\+extra/);
 });
 
-// Preview release: basket, modifiers, ratings and QR are non-production demonstration features.
+// G3 pilot ordering is server-priced and branch-gated, while ratings and payment remain unavailable.
 
 test("compact menu rows open full customization by tapping rather than stacked buttons",()=>{
  const css=readFileSync("components/public-menu.css","utf8");
