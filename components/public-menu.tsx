@@ -3,7 +3,6 @@ import "./public-menu.css";
 import ProductDetails from "./product-details";
 import GuestCart from "./guest-cart";
 import GuestScreenSwitcher,{GuestOpenMenu} from "./guest-screen-switcher";
-import GuestRatingPreview from "./guest-rating-preview";
 import GuestMenuSearch from "./guest-menu-search";
 import GuestRewardsPreview from "./guest-rewards-preview";
 import GuestFavorite from "./guest-favorite";
@@ -93,10 +92,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
          </div>
          <div className="beger-product-side"><GuestFavorite lang={lang}/><strong>{formatPrice(Number(i.price_minor),branch.country_code,lang)}</strong></div>
         </div>
-        <div className="beger-product-actions" style={{width:"100%",minWidth:0,boxSizing:"border-box",borderTop:"1px solid "+theme.border,paddingTop:2}}>
-         <ProductDetails branchId={branch.branch_id} productId={i.id} country={branch.country_code} lang={lang} accent={theme.accent} dark={false} imageUrl={i.image_url}/>
-         <GuestRatingPreview lang={lang}/>
-        </div>
+        <ProductDetails branchId={branch.branch_id} productId={i.id} country={branch.country_code} lang={lang} accent={theme.accent} dark={false} imageUrl={i.image_url}/>
        </article>)}
      </div>
     </section>)}
