@@ -2,6 +2,7 @@
 import {useEffect,useState,type FormEvent,type CSSProperties} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
 import CentralPriceEditor from "./central-price-editor";
+import ProductOptionsManager from "./product-options-manager";
 
 type Branch={id:string;name:string};
 type Cat={id:string;name_ar:string;name_tr:string;active:boolean};
@@ -104,5 +105,6 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
         </div>
       </article>)}
     </section>
+    <ProductOptionsManager businessId={businessId} country={country} products={products.map(p=>({id:p.id,name_ar:p.name_ar}))}/>
   </section>;
 }
