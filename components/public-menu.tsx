@@ -1,5 +1,7 @@
 import Link from "next/link";
 import ProductDetails from "./product-details";
+import GuestCart from "./guest-cart";
+import GuestRatingPreview from "./guest-rating-preview";
 import {formatPrice,localizedText,type G2Branch,type G2Category,type GuestAppearance,type GuestLang} from "../lib/g2-public";
 
 type Props={branch:G2Branch;categories:G2Category[];lang:GuestLang;appearance:GuestAppearance;tableLabel?:string;tableToken?:string};
@@ -21,6 +23,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
  const base=tableToken?`/t/${tableToken}`:`/b/${branch.branch_id}`;
  return <main dir={lang==="ar"?"rtl":"ltr"} lang={lang} data-beger-theme={appearance.theme}
   style={{minHeight:"100dvh",background:theme.background,color:theme.foreground,fontFamily:"system-ui, sans-serif",padding:"0 clamp(16px,4vw,32px) 72px"}}>
+  <GuestCart key={branch.branch_id} country={branch.country_code} lang={lang} accent={theme.accent}>
   <div style={{maxWidth:1080,margin:"auto"}}>
    <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"22px 0",borderBottom:"1px solid "+theme.border}}>
     <strong style={{fontSize:27,letterSpacing:"-1.1px"}}>Beger<span style={{color:theme.accent}}>.</span></strong>
@@ -56,11 +59,13 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
          {detailsText(i,lang)?<p style={{fontSize:13,color:theme.muted,margin:"0 0 11px",overflowWrap:"anywhere"}}>{detailsText(i,lang)}</p>:null}
          <strong style={{fontSize:17,color:theme.accent}}>{formatPrice(Number(i.price_minor),branch.country_code,lang)}</strong>
          <ProductDetails branchId={branch.branch_id} productId={i.id} country={branch.country_code} lang={lang} accent={theme.accent} dark={appearance.theme==="luxe_dark"}/>
+         <GuestRatingPreview lang={lang}/>
         </div>
        </article>)}
      </div>
     </section>)}
    <footer style={{padding:"22px 0",borderTop:"1px solid "+theme.border,color:theme.muted,fontSize:12}}>{t.note}<div style={{marginTop:10}}>Beger · Smart Business OS</div></footer>
   </div>
+  </GuestCart>
  </main>;
 }
