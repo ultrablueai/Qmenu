@@ -268,3 +268,21 @@
 .beger-order-steps li.is-current{color:#607b3e;font-weight:800}
 .beger-order-steps li.is-current::before{background:#708744;border-color:#708744}
 @media(max-width:420px){.beger-order-steps li{font-size:9px}.beger-guest-order-submit{padding:11px}}
+
+/* Feedback is visible without audio and animation respects accessibility settings. */
+.beger-feedback-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border:1px solid #e2e7d6;background:#f7f7ed;border-radius:13px;padding:10px 13px;margin:10px 0;color:#56683d;font-size:12px}
+.beger-feedback-controls legend{font-size:11px;font-weight:800;padding:0 5px}
+.beger-feedback-controls label{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-weight:750}
+.beger-feedback-controls input{width:17px;height:17px;accent-color:#718748}
+.beger-feedback-toast{border:1px solid #cddfb8;background:#eef4e2;color:#506a39;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.6;font-weight:750;animation:beger-feedback-in .28s ease-out}
+@keyframes beger-feedback-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.beger-guest-product{transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease}
+.beger-guest-product:focus-within{box-shadow:0 6px 22px #6f854424}
+.beger-category-filter{transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease}
+.beger-category-filter:active{transform:scale(.97)}
+.beger-product-popup{animation:beger-product-enter .24s ease-out}
+@keyframes beger-product-enter{from{opacity:.7;transform:translateY(10px) scale(.992)}to{opacity:1;transform:translateY(0) scale(1)}}
+.beger-basket-sheet{animation:beger-basket-enter .24s ease-out}
+@keyframes beger-basket-enter{from{opacity:.75;transform:translateX(15px)}to{opacity:1;transform:translateX(0)}}
+.beger-guest-order-tracking .beger-order-steps li.is-current::before{transition:background .3s ease,border-color .3s ease}
+@media(prefers-reduced-motion:reduce){.beger-guest .beger-feedback-toast,.beger-guest .beger-product-popup,.beger-guest .beger-basket-sheet{animation:none!important}.beger-guest .beger-category-filter,.beger-guest .beger-guest-product{transition:none!important}}
