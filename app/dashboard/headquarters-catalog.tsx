@@ -5,6 +5,7 @@ import CentralCatalog from "./central-catalog";
 import MerchantAppearance from "./merchant-appearance";
 import QrSvg from "../../lib/qr/qr-svg";
 import MerchantTableQr from "./merchant-table-qr";
+import "../qr-experience.css";
 
 type Branch = {id:string; name:string};
 type Props = {businessId:string; country:string; branches:Branch[]};
