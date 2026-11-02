@@ -89,7 +89,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
     </section>)}
    </GuestCatalogExplorer>
    <GuestRewardsPreview lang={lang}/>
-   <footer className="beger-guest-footer" style={{padding:"22px 0",borderTop:"1px solid "+theme.border,color:theme.muted,fontSize:12}}>{t.note}<div style={{marginTop:10}}>Beger · Smart Business OS</div></footer>
+   <footer className="beger-guest-footer" style={{padding:"22px 0",borderTop:"1px solid "+theme.border,color:theme.muted,fontSize:12}}>{tableToken?(lang==="ar"?"طلب الطاولة التجريبي يحتاج موافقة المطعم؛ الدفع الإلكتروني غير مفعّل.":lang==="tr"?"Masa siparişleri restoran onayı gerektirir; online ödeme aktif değildir.":"Pilot table orders require restaurant approval; online payment is not active."):serviceMode==="takeaway"?(lang==="ar"?"وضع السفري للمعاينة فقط؛ لا يتم إرسال الطلبات.":lang==="tr"?"Paket siparişleri sadece önizlemedir; gönderilmez.":"Takeaway mode is a preview only; no order is sent."):t.note}<div style={{marginTop:10}}>Beger · Smart Business OS</div></footer>
   </div>
   </GuestScreenSwitcher>
   </GuestCart>
