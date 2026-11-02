@@ -35,10 +35,10 @@ test("reference visual does not create fictional orders or ratings",()=>{
 });
 
 test("approved mobile reference keeps meaningful hierarchy without tiny vertical text",()=>{
- assert.match(css,/\.beger-welcome-photo\{height:245px;min-height:245px\}/);
+ assert.match(css,/\.beger-welcome-photo\{height:345px;min-height:345px\}/);
  assert.match(css,/\.beger-category-tiles a strong\{font-size:clamp\(9px,2\.7vw,12px\)/);
  assert.match(css,/\.beger-menu-product-list \.beger-guest-product-photo\{height:74px!important;width:74px!important/);
- assert.match(css,/\.beger-guest-bottom-nav\{min-height:64px/);
+ assert.match(css,/\.beger-guest-bottom-nav\{position:fixed/);
  assert.match(css,/@media\(max-width:360px\)/);
  assert.match(details,/className="beger-product-name"/);
  assert.match(details,/\{title\(details\)\}/);
@@ -58,7 +58,7 @@ test("real welcome and menu are separate phone screens with functional navigatio
  assert.match(screens,/go\("welcome"\)/);
  assert.match(screens,/go\("menu"\)/);
  assert.match(screens,/basket\?\.open\(\)/);
- assert.match(screens,/aria-disabled="true"/);
+ assert.match(screens,/journey\.go\("rewards"\)/);
  assert.match(css,/data-stage="welcome"\] \.beger-menu-intro/);
  assert.match(css,/data-stage="menu"\] \.beger-welcome-screen/);
  assert.match(menu,/className="beger-menu-section"/);
@@ -68,6 +68,23 @@ test("real welcome and menu are separate phone screens with functional navigatio
 test("customer navigation is functional without inventing loyalty features",()=>{
  assert.match(screens,/useGuestCart\(\)/);
  assert.match(screens,/basket\?\.count/);
- assert.match(screens,/Rewards soon/);
+ assert.match(screens,/\["Home","Menu","Basket","Rewards"\]/);
  assert.doesNotMatch(screens,/1,250 Points|ratingAverage|orderCompleted/);
+});
+
+test("reference layout uses actual customer UI not presentation images",()=>{
+ const reward=readFileSync("components/guest-rewards-preview.tsx","utf8");
+ const search=readFileSync("components/guest-menu-search.tsx","utf8");
+ const favorite=readFileSync("components/guest-favorite.tsx","utf8");
+ const cart=readFileSync("components/guest-cart.tsx","utf8");
+ assert.match(menu,/GuestRewardsPreview lang=\{lang\}/);
+ assert.match(menu,/GuestMenuSearch lang=\{lang\}/);
+ assert.match(menu,/GuestFavorite lang=\{lang\}/);
+ assert.match(search,/type="search"/);
+ assert.match(search,/card\.hidden=!match/);
+ assert.match(favorite,/aria-pressed=\{saved\}/);
+ assert.match(reward,/Loyalty is not active yet/);
+ assert.match(cart,/className="beger-order-item"/);
+ assert.match(cart,/formatPrice\(subtotal,country,lang\)/);
+ assert.match(cart,/formatPrice\(additions,country,lang\)/);
 });
