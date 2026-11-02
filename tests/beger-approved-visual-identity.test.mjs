@@ -24,7 +24,8 @@ test("HQ and all three existing theme IDs use approved ivory, olive, coffee iden
  for(const id of ["luxe_dark","clean_light","bold_commerce"])assert.ok(selector.includes('id:"'+id+'"'));
  for(const label of ["Olive Premium","Soft Light","Warm Editorial"])assert.ok(selector.includes(label));
  assert.match(hq,/Approved Beger HQ design/);
- assert.match(home,/#FAF7F0/);
+ assert.match(home,/beger-marketing/);
+ assert.match(readFileSync("app/beger-marketing.css","utf8"),/background:#faf6ef/);
 });
 test("visual redesign must not simulate operational orders or unverified ratings",()=>{
  const cart=readFileSync("components/guest-cart.tsx","utf8");
