@@ -30,7 +30,7 @@
 .beger-service-types span+span{border-inline-start:1px solid #e9ded0}
 .beger-service-types b{font-size:23px;color:#617740;font-weight:400;line-height:1}
 .beger-menu-intro{padding:0 2px 14px;margin-top:7px}
-.beger-menu-intro-top{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px}
+.beger-menu-intro-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:12px}
 .beger-menu-intro h2{font-family:Georgia,"Times New Roman",serif;font-size:30px;line-height:1.13;margin:3px 0 4px;color:#27221c}
 .beger-menu-intro p{margin:0;font-size:12px;line-height:1.45;color:#756c62}
 .beger-preview-pill{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;font-size:10px;font-weight:800;color:#7a653e;background:#f5eddf;border-radius:999px;padding:7px 10px;border:1px solid #eadfcf}
@@ -105,7 +105,7 @@
 .beger-rewards-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;background:#f6f0e7;border-radius:14px}
 .beger-rewards-tabs button{border:0;border-radius:11px;background:transparent;min-height:38px;font:700 12px Arial,sans-serif;color:#756a5e;cursor:pointer}
 .beger-rewards-tabs button[aria-selected="true"]{color:white;background:linear-gradient(110deg,#7a8a50,#586d35)}
-.beger-offer-preview{position:relative;isolation:isolate;min-height:237px;margin-top:17px;border-radius:18px;background:#6f4d3e;overflow:hidden;display:flex;align-items:end}
+.beger-offer-preview{position:relative;isolation:isolate;min-height:237px;margin-top:17px;border-radius:18px;background:#6f4d3e;overflow:hidden;display:flex;align-items:flex-end}
 .beger-offer-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
 .beger-offer-gradient{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#51301ce3,#40241715)}
 .beger-offer-copy{padding:25px;color:#fff;max-width:72%}.beger-offer-copy small{background:#ffc46b;border-radius:999px;padding:5px 9px;color:#66402b;font-weight:800}.beger-offer-copy h3{font:800 31px Georgia,serif;margin:16px 0 4px}.beger-offer-copy p{font-size:12px;line-height:1.5}
