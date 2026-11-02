@@ -61,10 +61,11 @@ export function useBegerFeedback(){
  },[]);
  return {settings,change,signal,message,clear:()=>setMessage("")};
 }
-export function BegerFeedbackControls({settings,onChange,labels}:{settings:FeedbackSettings;onChange:(next:FeedbackSettings)=>void;labels?:{sound:string;vibration:string}}){
+export function BegerFeedbackControls({settings,onChange,onTest,labels}:{settings:FeedbackSettings;onChange:(next:FeedbackSettings)=>void;onTest?:()=>void;labels?:{sound:string;vibration:string;test?:string}}){
  return <fieldset className="beger-feedback-controls">
   <legend>{labels?.sound==="Sound"?"Alerts":labels?.sound==="Ses"?"Bildirimler":"التنبيهات"}</legend>
   <label><input type="checkbox" checked={settings.sound} onChange={e=>onChange({...settings,sound:e.target.checked})}/>{labels?.sound??"الصوت"}</label>
   <label><input type="checkbox" checked={settings.vibration} onChange={e=>onChange({...settings,vibration:e.target.checked})}/>{labels?.vibration??"اهتزاز الهاتف"}</label>
+  {onTest?<button type="button" className="beger-feedback-test" onClick={onTest}>{labels?.test??"تجربة التنبيه"}</button>:null}
  </fieldset>;
 }
