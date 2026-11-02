@@ -33,7 +33,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
  return <main className="beger-guest" dir={lang==="ar"?"rtl":"ltr"} lang={lang} data-beger-theme={appearance.theme}
   style={{minHeight:"100dvh",background:theme.background,color:theme.foreground,fontFamily:"system-ui, sans-serif",padding:"0 clamp(16px,4vw,32px) 92px"}}>
   <GuestCart key={branch.branch_id} country={branch.country_code} lang={lang} accent={theme.accent} branchId={branch.branch_id} tableToken={tableToken} tableLabel={tableLabel}>
-  <GuestScreenSwitcher lang={lang}>
+  <GuestScreenSwitcher lang={lang} initialStage={tableToken?"menu":"welcome"}>
   <div className="beger-guest-container" style={{maxWidth:1120,margin:"auto"}}>
    <header className="beger-guest-header" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"22px 0",borderBottom:"1px solid "+theme.border}}>
     <strong className="beger-guest-brand" style={{fontSize:27,letterSpacing:"-1.1px"}}><span className="beger-brand-symbol" aria-hidden="true">B</span> Beger<span style={{color:"#BD7044"}}>.</span></strong>
