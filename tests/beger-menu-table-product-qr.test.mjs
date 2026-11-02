@@ -58,3 +58,16 @@ test("staging scan accepts only same origin or Beger owned preview deployments",
  assert.match(scanner,/url\.pathname\+\(p\?/);
  assert.doesNotMatch(scanner,/window\.location\.assign\(value\)/);
 });
+
+test("QR camera supports Safari and saved photos without network upload",()=>{
+ const license=read("lib/qr/decoder/LICENSE-APACHE-2.0.txt");
+ const decoder=read("lib/qr/decoder/jsQR.js");
+ assert.match(license,/Apache License/);
+ assert.ok(decoder.length>100000);
+ assert.match(scanner,/import\("\.\.\/lib\/qr\/decoder\/jsQR"\)/);
+ assert.match(scanner,/context\.getImageData\(0,0,width,height\)/);
+ assert.match(scanner,/scanPhoto\(file:File\|null\)/);
+ assert.match(scanner,/type="file" accept="image\/\*"/);
+ assert.match(scanner,/!window\.isSecureContext\|\|!navigator\.mediaDevices\?\.getUserMedia/);
+ assert.doesNotMatch(scanner,/fetch\(|axios|api\.qrserver/);
+});
