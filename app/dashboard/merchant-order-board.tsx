@@ -6,6 +6,7 @@ type Status="pending"|"accepted"|"preparing"|"ready"|"fulfilled"|"rejected";
 type Item={name:string;quantity:number;selections:{options?:{name_ar?:string}[];removedIngredients?:string[]}};
 type Order={id:string;table:string;status:Status;totalMinor:number;currency:string;createdAt:string;items:Item[]};
 const titles:Record<Status,string>={pending:"بانتظار الموافقة",accepted:"تم قبول الطلب",preparing:"قيد التحضير",ready:"جاهز للتسليم",fulfilled:"تم التسليم",rejected:"مرفوض"};
+function formatOrderTotal(minor:number,currency:string){const factor=currency==="TRY"?100:1;return new Intl.NumberFormat("ar",{minimumFractionDigits:currency==="TRY"?2:0,maximumFractionDigits:currency==="TRY"?2:0}).format(minor/factor)+" "+currency;}
 const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"accepted",label:"قبول الطلب"},accepted:{value:"preparing",label:"إرسال للمطبخ"},preparing:{value:"ready",label:"جاهز للتسليم"},ready:{value:"fulfilled",label:"تأكيد التسليم"}};
 export default function MerchantOrderBoard({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
  const [enabled,setEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
@@ -19,6 +20,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   if(list.error)throw list.error;
   setEnabled(cap.data?.enabled===true);
   setOrders(Array.isArray(list.data)?list.data as Order[]:[]);
+  setError("");
   setLoaded(true);
  }
  useEffect(()=>{let live=true;setLoaded(false);const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);return()=>{live=false;window.clearInterval(timer)}},[branchId,businessId]);
@@ -37,12 +39,13 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   {error?<p role="alert" className="beger-order-board-error">{error}</p>:null}
   {notice?<p role="status" className="beger-order-board-notice">{notice}</p>:null}
   {!loaded?<p role="status">جارٍ تحميل حالة الطلبات...</p>:null}
+  <div className="beger-order-board-controls"><button type="button" disabled={busy} onClick={()=>void refresh().catch(()=>setError("تعذّر تحديث الطلبات. تحقق من الاتصال والصلاحية."))}>تحديث الطلبات الآن ↻</button><span>تُحدَّث الطلبات تلقائياً كل 7 ثوانٍ</span></div>
   <div className="beger-order-board-columns">{(["pending","accepted","preparing","ready"] as const).map(stage=><section key={stage} className="beger-order-board-column" aria-label={titles[stage]}>
     <h3>{titles[stage]} <span>{orders.filter(o=>o.status===stage).length}</span></h3>
     {orders.filter(o=>o.status===stage).map(o=><article className="beger-order-ticket" key={o.id}>
       <div className="beger-order-ticket-head"><strong>⌗ {o.table}</strong><time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</time></div>
       <ul>{o.items.map((item,index)=><li key={index}><strong>{item.quantity}× {item.name}</strong><small>{(item.selections?.options??[]).map(opt=>opt.name_ar).filter(Boolean).join(" · ")}{(item.selections?.removedIngredients??[]).length?" · بدون "+(item.selections?.removedIngredients??[]).join("، "):""}</small></li>)}</ul>
-      <div className="beger-order-ticket-price">{o.totalMinor.toLocaleString("ar")} <small>{o.currency}</small></div>
+      <div className="beger-order-ticket-price">{formatOrderTotal(o.totalMinor,o.currency)}</div>
       {next[o.status]?<button disabled={busy} type="button" onClick={()=>void transition(o,next[o.status]!.value)}>{next[o.status]!.label}</button>:null}
       {(o.status==="pending"||o.status==="accepted")?<button className="beger-order-reject" disabled={busy} type="button" onClick={()=>{if(confirm("رفض الطلب؟ سيتم إبلاغ الزبون بحالة الرفض."))void transition(o,"rejected")}}>رفض الطلب</button>:null}
     </article>)}
