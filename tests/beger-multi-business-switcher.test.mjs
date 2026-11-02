@@ -4,6 +4,6 @@ test("merchant can choose only businesses verified from their memberships",()=>{
  assert.match(page,/\.eq\("user_id", user\.id\)/);
  assert.match(page,/businesses\.find\(\(b\) => b\.id === requestedBusiness && ids\.includes\(b\.id\)\)/);
  assert.match(page,/businesses\.map\(b=><Link key=\{b\.id\}/);
- assert.match(page,/href=\{\/dashboard\?business=/);
+ assert.match(page,/href=\{"\/dashboard\?business="\+/);
  assert.match(css,/\.businessSwitchOption\[aria-current="page"\]/);
 });
