@@ -64,3 +64,10 @@ test("real welcome and menu are separate phone screens with functional navigatio
  assert.match(menu,/className="beger-menu-section"/);
  assert.doesNotMatch(screens,/checkout|submitOrder|paymentIntent/);
 });
+
+test("customer navigation is functional without inventing loyalty features",()=>{
+ assert.match(screens,/useGuestCart\(\)/);
+ assert.match(screens,/basket\?\.count/);
+ assert.match(screens,/Rewards soon/);
+ assert.doesNotMatch(screens,/1,250 Points|ratingAverage|orderCompleted/);
+});
