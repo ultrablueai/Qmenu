@@ -1,5 +1,5 @@
 import {notFound} from "next/navigation";
-import {anonymousBeger,loadPublicMenu,safeLanguage,type G2Branch} from "../../../lib/g2-public";
+import {anonymousBeger,loadPublicMenu,loadGuestAppearance,safeLanguage,type G2Branch} from "../../../lib/g2-public";
 import PublicMenu from "../../../components/public-menu";
 export const dynamic="force-dynamic";
 export const metadata={title:"Beger | Digital Menu",robots:{index:false,follow:false}};
@@ -12,5 +12,6 @@ export default async function PublicBranch({params,searchParams}:Props){
   const branch=(data?.[0]??null) as G2Branch|null;
   if(!branch)notFound();
   const categories=await loadPublicMenu(branchId);
-  return <PublicMenu branch={branch} categories={categories} lang={safeLanguage(search.lang)}/>;
+  const appearance=await loadGuestAppearance(branchId);
+  return <PublicMenu appearance={appearance} branch={branch} categories={categories} lang={safeLanguage(search.lang,appearance)}/>;
 }
