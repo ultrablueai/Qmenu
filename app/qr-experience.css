@@ -42,3 +42,18 @@
 .beger-scanner-photo-label{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;padding:12px;margin:12px 0 0;background:#f7f0e7;border-radius:12px;border:1px dashed #d2c1ae;font-size:12px;font-weight:800;color:#637a42;cursor:pointer}
 .beger-scanner-photo-label input{display:block;width:100%;max-width:300px;font-size:11px;color:#504538}
 @media print{.beger-qr-export{display:none}}
+
+/* The camera is the primary QR action. Secondary inputs are deliberately collapsed. */
+.beger-scanner-status{margin:10px 0!important;padding:9px 12px;background:#eef1e2;border-radius:11px;color:#607447!important;font-weight:700;text-align:center}
+.beger-scanner-alternatives{margin-top:14px;border-top:1px solid #e9dfd3;padding-top:10px}
+.beger-scanner-alternatives-toggle{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:46px;border:1px solid #e7ddcc;background:#fbf6ef;color:#627747;border-radius:13px;font:800 13px Arial,sans-serif;cursor:pointer}
+.beger-scanner-alternatives-toggle span{font-size:22px;line-height:1}
+.beger-scanner-alternatives-content{padding-top:5px}
+.beger-scanner-browser-link{display:block;text-align:center;margin:13px 0 4px;color:#617644;font-size:12px;font-weight:700;text-underline-offset:3px}
+.beger-scanner-panel .beger-scanner-video{border:2px solid #e4d8c8}
+.beger-scanner-panel :is(button,a,input):focus-visible{outline:3px solid #9aaf70;outline-offset:3px}
+@media(max-width:650px){
+ .beger-scanner-panel{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+ .beger-scanner-video{max-height:52dvh}
+ .beger-scanner-alternatives-toggle{min-height:46px}
+}
