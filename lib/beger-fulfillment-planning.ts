@@ -28,8 +28,10 @@ export type DeliveryQuote={
  feeMinor:number|null;
  freeDelivery:boolean;
 };
+export type PackagingCartItem={productId:string;quantity:number};
 export type PackagingRule={
  id:string;
+ productId?:string;
  unitPriceMinor:number;
  quantityPerProduct:number;
  policy:PackagingPolicy;
@@ -80,14 +82,27 @@ export function quoteDeliveryFromVerifiedRoute(route:RouteEvidence,policy:Delive
  return {...common,eligible:true as const,feeMinor:fee};
 }
 /** Per-order packaging rules are charged ONCE; per-item rules follow the quantity ordered. */
-export function calculatePackaging(rules:PackagingRule[],itemQuantity:number):{lines:PackagingCharge[];totalMinor:number}{
- natural(itemQuantity,"item quantity",false);
+export function calculatePackaging(rules:PackagingRule[],items:PackagingCartItem[]):{lines:PackagingCharge[];totalMinor:number}{
+ if(items.length===0)throw new Error("Packaging requires an order");
+ const quantities=new Map<string,number>();
+ for(const item of items){
+  if(!item.productId)throw new Error("Missing product ID");
+  natural(item.quantity,"item quantity",false);
+  quantities.set(item.productId,addSafe(quantities.get(item.productId)??0,item.quantity));
+ }
  let totalMinor=0;
+ const seenRules=new Set<string>();
  const lines=rules.map(rule=>{
-  if(!rule.id)throw new Error("Missing packaging ID");
+  if(!rule.id||seenRules.has(rule.id))throw new Error("Missing or duplicate packaging ID");
+  seenRules.add(rule.id);
   natural(rule.quantityPerProduct,"packaging units");
   natural(rule.unitPriceMinor,"packaging price");
-  const units=rule.scope==="order"?rule.quantityPerProduct:multiplySafe(rule.quantityPerProduct,itemQuantity);
+  if(rule.scope!=="item"&&rule.scope!=="order")throw new Error("Unknown packaging scope");
+  if(rule.policy!=="charged"&&rule.policy!=="free"&&rule.policy!=="included")throw new Error("Unknown packaging policy");
+  if(rule.scope==="item"&&!rule.productId)throw new Error("Item packaging must reference a product");
+  // Per-order packaging is evaluated once for the entire basket, even if the
+  // same item appears in multiple lines with different modifiers.
+  const units=rule.scope==="order"?rule.quantityPerProduct:multiplySafe(rule.quantityPerProduct,quantities.get(rule.productId!)??0);
   const total=rule.policy==="charged"?multiplySafe(units,rule.unitPriceMinor):0;
   totalMinor=addSafe(totalMinor,total);
   return {ruleId:rule.id,units,totalMinor:total,policy:rule.policy};
