@@ -4,9 +4,10 @@ import {browserSupabase} from "../../lib/supabase/browser";
 import CentralPriceEditor from "./central-price-editor";
 import ProductOptionsManager from "./product-options-manager";
 import EditCentralProduct from "./edit-central-product";
+import EditCentralCategory from "./edit-central-category";
 
 type Branch={id:string;name:string};
-type Cat={id:string;name_ar:string;name_tr:string;active:boolean};
+type Cat={id:string;name_ar:string;name_tr:string;name_en:string|null;active:boolean};
 type Item={id:string;category_id:string;name_ar:string;name_tr:string;name_en:string|null;description_ar:string;description_tr:string;description_en:string;image_url:string|null;price_minor:number;active:boolean};
 type Publication={id:string;branch_id:string;product_id:string;active:boolean;available:boolean;price_override_minor:number|null};
 const input:CSSProperties={width:"100%",padding:10,border:"1px solid #c8d8da",borderRadius:9,boxSizing:"border-box",font:"inherit"};
@@ -23,7 +24,7 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
   async function refresh(){
     const db=browserSupabase();
     const [a,b,c]=await Promise.all([
-      db.from("catalog_categories").select("id,name_ar,name_tr,active").eq("business_id",businessId).order("created_at"),
+      db.from("catalog_categories").select("id,name_ar,name_tr,name_en,active").eq("business_id",businessId).order("created_at"),
       db.from("catalog_products").select("id,category_id,name_ar,name_tr,name_en,description_ar,description_tr,description_en,image_url,price_minor,active").eq("business_id",businessId).order("created_at"),
       db.from("catalog_branch_publications").select("id,branch_id,product_id,active,available,price_override_minor").eq("business_id",businessId)
     ]);
@@ -63,7 +64,7 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
         <label style={{flex:"1 1 170px"}}>Türkçe kategori<input style={input} required maxLength={100} value={catTr} onChange={e=>setCatTr(e.target.value)}/></label>
         <button style={button} disabled={busy}>إضافة تصنيف</button>
       </form>
-      {cats.map(c=><div key={c.id} style={line}><strong>{c.name_ar}</strong><span>({c.name_tr})</span></div>)}
+      {cats.map(c=><div key={c.id} style={{...line,borderTop:"1px solid #e3eded",paddingTop:10}}><strong>{c.name_ar}</strong><span>({c.name_tr})</span><EditCentralCategory key={c.id} category={c} busy={busy} onSave={async patch=>save(async()=>browserSupabase().from("catalog_categories").update(patch).eq("id",c.id).eq("business_id",businessId).select("id").single(),"تم تعديل التصنيف المركزي",true)}/></div>)}
     </section>
     <section style={section}>
       <h3>2. إنشاء المنتج المركزي</h3>
