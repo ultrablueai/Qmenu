@@ -180,3 +180,16 @@ begin
 end $$;
 revoke all on function public.g3_transition_order(uuid,text) from public,anon;
 grant execute on function public.g3_transition_order(uuid,text) to authenticated;
+
+-- Public capability is a boolean only. It does not expose merchant settings.
+create or replace function public.g3_table_order_enabled(p_table_token uuid)
+returns boolean language sql stable security definer set search_path=''
+as $$
+ select exists (
+  select 1 from public.dining_tables t
+  join public.g3_branch_order_settings f on f.branch_id=t.branch_id and f.business_id=t.business_id and f.enabled=true
+  where t.qr_token=p_table_token and t.active=true
+ )
+$$;
+revoke all on function public.g3_table_order_enabled(uuid) from public;
+grant execute on function public.g3_table_order_enabled(uuid) to anon,authenticated;
