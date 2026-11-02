@@ -64,3 +64,23 @@
 @media(max-width:1150px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.visualGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.topProducts{grid-column:1/-1;min-height:100px}.emptyProducts{min-height:80px;flex-direction:row}.banner{grid-template-columns:70px 1fr 1.2fr}.bannerCoffee{width:60px;height:65px}}
 @media(max-width:740px){.top{flex-direction:column}.staging{align-self:flex-start}.visualGrid,.bottomPanels{grid-template-columns:1fr}.topProducts{grid-column:auto}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.banner{grid-template-columns:58px 1fr;padding:14px}.banner ul{grid-column:1/-1}.bannerCoffee{width:51px;height:54px;font-size:29px}.branchRow{grid-template-columns:minmax(0,1fr) auto;gap:8px}.branchStatus{justify-self:end}.qrLink,.editLink{margin-top:5px}}
 @media(max-width:380px){.root{gap:11px}.kpi{padding:11px 8px;min-height:110px}.kpi strong{font-size:20px}.branchHead{flex-direction:column;align-items:flex-start}.branchPanel{padding:13px}}
+
+/* Wide screens match the reference desktop/dashboard + branch tablet composition. */
+@media(min-width:1350px){
+ .root{display:grid;grid-template-columns:minmax(0,1fr) minmax(258px,.46fr);gap:14px}
+ .top{grid-column:1/-1;grid-row:1}
+ .kpis{grid-column:1;grid-row:2;grid-template-columns:repeat(3,minmax(0,1fr))}
+ .visualGrid{grid-column:1;grid-row:3;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+ .topProducts{grid-column:1/-1;min-height:115px}
+ .emptyProducts{min-height:70px;flex-direction:row;justify-content:flex-start;text-align:start}
+ .banner{grid-column:1;grid-row:4;grid-template-columns:55px 1fr}
+ .bannerCoffee{width:53px;height:56px;font-size:29px}
+ .banner ul{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .branchPanel{grid-column:2;grid-row:2/span 3;align-self:stretch}
+ .branchHead{flex-direction:column;align-items:flex-start}
+ .branchRows{gap:8px}
+ .branchRow{grid-template-columns:1fr auto;gap:9px}
+ .branchStatus{justify-self:end}
+ .qrLink,.editLink{font-size:10px}
+ .bottomPanels{grid-column:1/-1;grid-row:5}
+}
