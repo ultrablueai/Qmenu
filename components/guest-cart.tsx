@@ -3,7 +3,7 @@ import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNod
 import {formatPrice,type GuestLang} from "../lib/g2-public";
 
 type CartItem={key:string;name:string;unitMinor:number;baseMinor?:number;extraMinor?:number;imageUrl?:string;quantity:number;selections:string[]};
-type CartContextValue={add:(item:Omit<CartItem,"quantity">)=>void;count:number;open:()=>void};
+type CartContextValue={add:(item:Omit<CartItem,"quantity"> & {quantity?:number})=>void;count:number;open:()=>void};
 const CartContext=createContext<CartContextValue|null>(null);
 export function useGuestCart(){return useContext(CartContext);}
 export default function GuestCart({children,country,lang,accent}:{children:ReactNode;country:string;lang:GuestLang;accent:string}){
@@ -38,8 +38,8 @@ export default function GuestCart({children,country,lang,accent}:{children:React
   items:en?"Items":tr?"Ürünler":"المنتجات",
   remove:en?"Remove product":tr?"Ürünü kaldır":"إزالة المنتج",
  };
- const context=useMemo(()=>({count,open:()=>setOpen(true),add(item:Omit<CartItem,"quantity">){
-  setItems(existing=>{const idx=existing.findIndex(x=>x.key===item.key);if(idx<0)return [...existing,{...item,quantity:1}];return existing.map((x,i)=>i===idx?{...x,quantity:Math.min(99,x.quantity+1)}:x);});
+ const context=useMemo(()=>({count,open:()=>setOpen(true),add(item:Omit<CartItem,"quantity"> & {quantity?:number}){
+  setItems(existing=>{const quantity=Math.max(1,Math.min(20,Math.trunc(item.quantity??1)));const idx=existing.findIndex(x=>x.key===item.key);if(idx<0)return [...existing,{...item,quantity}];return existing.map((x,i)=>i===idx?{...x,quantity:Math.min(99,x.quantity+quantity)}:x);});
   setOpen(true);
  }}),[count]);
  return <CartContext.Provider value={context}>
