@@ -8,7 +8,7 @@ CREATE TABLE public.business_menu_appearance (
  updated_at timestamptz NOT NULL DEFAULT now(),
  CONSTRAINT beg_menu_nonempty_lang CHECK (array_length(enabled_languages,1) BETWEEN 1 AND 3),
  CONSTRAINT beg_menu_valid_langs CHECK (enabled_languages <@ ARRAY['ar','tr','en']::text[]),
- CONSTRAINT beg_menu_no_duplicate_langs CHECK (cardinality(enabled_languages)= (SELECT count(DISTINCT x) FROM unnest(enabled_languages) x)),
+ CONSTRAINT beg_menu_no_duplicate_langs CHECK (\n  (array_length(enabled_languages,1)<2 OR enabled_languages[1]<>enabled_languages[2]) AND\n  (array_length(enabled_languages,1)<3 OR (enabled_languages[1]<>enabled_languages[3] AND enabled_languages[2]<>enabled_languages[3]))\n ),
  CONSTRAINT beg_menu_default_enabled CHECK (default_lang=ANY(enabled_languages))
 );
 ALTER TABLE public.business_menu_appearance ENABLE ROW LEVEL SECURITY;
