@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import type {GuestLang} from "../lib/g2-public";
+import GuestIcon from "./guest-icons";
 export default function GuestMenuSearch({lang}:{lang:GuestLang}){
  const [term,setTerm]=useState("");
  const [found,setFound]=useState(true);
@@ -16,7 +17,7 @@ export default function GuestMenuSearch({lang}:{lang:GuestLang}){
  },[term]);
  const hint=lang==="ar"?"ابحث عن قهوة أو منتج":lang==="tr"?"Ürün veya kahve ara":"Search coffee, sandwiches...";
  return <div className="beger-menu-search">
-  <span aria-hidden="true">⌕</span>
+  <span aria-hidden="true"><GuestIcon name="search" size={21}/></span>
   <input type="search" autoComplete="off" aria-label={hint} placeholder={hint} value={term} onChange={e=>setTerm(e.target.value)} />
   {!found?<small role="status">{lang==="ar"?"ما لقينا نتائج":lang==="tr"?"Sonuç bulunamadı":"No results found"}</small>:null}
  </div>;
