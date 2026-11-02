@@ -13,7 +13,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
  const [items,setItems]=useState<CartItem[]>([]);
  const [open,setOpen]=useState(false);
  const [hydrated,setHydrated]=useState(false);
- const storageKey="beger-preview-basket:"+branchId+":"+(tableToken??"shop");
+ const storageKey="beger-preview-basket:"+branchId+":"+(tableToken??(serviceMode==="takeaway"?"takeaway":"shop"));
  useEffect(()=>{try{const saved=window.sessionStorage.getItem(storageKey);if(saved){const parsed:unknown=JSON.parse(saved);if(Array.isArray(parsed)&&parsed.length<=25){const valid=parsed.filter((x):x is CartItem=>x&&typeof x==="object"&&typeof x.key==="string"&&typeof x.name==="string"&&Number.isSafeInteger(x.unitMinor)&&x.unitMinor>=0&&Number.isInteger(x.quantity)&&x.quantity>=1&&x.quantity<=20&&Array.isArray(x.selections));setItems(valid);}}}catch{/* storage unavailable */}setHydrated(true);},[storageKey]);
  useEffect(()=>{if(!hydrated)return;try{window.sessionStorage.setItem(storageKey,JSON.stringify(items))}catch{/* storage optional */}},[storageKey,items,hydrated]);
  const closeRef=useRef<HTMLButtonElement|null>(null);
