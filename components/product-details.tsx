@@ -46,6 +46,12 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
   }catch{setError(en?"Could not load product details.":tr?"Ürün detayları yüklenemedi.":"تعذر تحميل تفاصيل المنتج.");}
   finally{setLoading(false);}
  }
+ useEffect(()=>{
+  const requested=new URLSearchParams(window.location.search).get("product");
+  if(requested===productId){void toggleDetails();}
+  // A product QR opens its detail on first mount, never bypasses public catalog publication.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[branchId,productId]);
  function choose(g:Group,o:Option){
   const current=selection[g.id]??[];
   const next=current.includes(o.id)?current.filter(x=>x!==o.id):g.max_select===1?[o.id]:current.length<g.max_select?[...current,o.id]:current;
