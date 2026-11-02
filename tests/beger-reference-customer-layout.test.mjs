@@ -54,7 +54,7 @@ test("reference photo-led modal keeps real catalog pricing and no fabricated sta
 });
 
 test("real welcome and menu are separate phone screens with functional navigation",()=>{
- assert.match(screens,/useState<Stage>\("welcome"\)/);
+ assert.match(screens,/useState<Stage>\(initialStage\)/);
  assert.match(screens,/go\("welcome"\)/);
  assert.match(screens,/go\("menu"\)/);
  assert.match(screens,/basket\?\.open\(\)/);
@@ -78,7 +78,7 @@ test("reference layout uses actual customer UI not presentation images",()=>{
  const favorite=readFileSync("components/guest-favorite.tsx","utf8");
  const cart=readFileSync("components/guest-cart.tsx","utf8");
  assert.match(menu,/GuestRewardsPreview lang=\{lang\}/);
- assert.match(menu,/<GuestCatalogExplorer lang=\{lang\}/);
+ assert.match(menu,/<GuestCatalogExplorer lang=\{lang\} initialCategoryId=\{initialCategoryId\}/);
  assert.match(menu,/GuestFavorite lang=\{lang\}/);
  assert.match(search,/type="search"/);
  assert.match(search,/card\.hidden=!match/);
