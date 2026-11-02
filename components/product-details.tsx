@@ -82,12 +82,13 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
     <div style={{display:"flex",alignItems:"center",gap:10,justifyContent:"space-between",flexWrap:"wrap"}}>
      <div>
       <span style={{color:"#698274",fontWeight:750,fontSize:10,letterSpacing:".09em"}}>{en?"MAKE IT YOURS":tr?"KENDİNE GÖRE":"على ذوقك"}</span>
-      <h5 style={{fontSize:19,margin:"4px 0 2px",fontWeight:850}}>{en?"Customize your choice":tr?"Ürününü kişiselleştir":"خصّص منتجك"}</h5>
+      <h5 className="beger-product-name" style={{fontSize:23,margin:"4px 0 2px",fontWeight:850}}>{title(details)}</h5>
+      <strong className="beger-product-base-price" style={{display:"block",fontSize:19,color:"#A65330",marginTop:4}}>{formatPrice(Number(details.price_minor),country,lang)}</strong>
      </div>
      <span style={{borderRadius:999,padding:"7px 10px",fontSize:11,fontWeight:750,background:"#EAF6EE",color:"#327051"}}>{en?"Preview":tr?"Önizleme":"معاينة"}</span>
     </div>
     {(en?details.description_en||details.description_ar:tr?details.description_tr:details.description_ar)?<p style={{color:"#647C6F",fontSize:13,lineHeight:1.8,margin:"10px 0"}}>{en?details.description_en||details.description_ar:tr?details.description_tr:details.description_ar}</p>:null}
-    {details.ingredients.length>0?<fieldset style={sectionCard}>
+    {details.ingredients.length>0?<fieldset className="beger-ingredients-card" style={sectionCard}>
      <legend style={{padding:"0 6px",fontWeight:850,fontSize:14}}>{en?"Ingredients":tr?"İçindekiler":"المكونات"}</legend>
      <p style={{color:"#7A8A7E",fontSize:12,margin:"3px 0 10px"}}>{en?"Uncheck a removable ingredient":tr?"Çıkarılabilir malzemelerin işaretini kaldırın":"أزل علامة الاختيار عن المكوّن القابل للإزالة"}</p>
      <div style={{display:"grid",gap:8}}>
@@ -105,7 +106,7 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
       const picked=selection[g.id]??[];
       const maxed=picked.length>=g.max_select;
       const fulfilled=picked.length>=g.min_select;
-      return <fieldset key={g.id} style={{...sectionCard,borderColor:fulfilled?"#DDE9E0":"#E9D8B6"}}>
+      return <fieldset key={g.id} className="beger-modifier-card" style={{...sectionCard,borderColor:fulfilled?"#DDE9E0":"#E9D8B6"}}>
        <legend style={{padding:"0 5px",fontSize:12,color:"#778A7A",fontWeight:800}}>{en?"Option":tr?"Seçenek":"المجموعة"} {index+1}</legend>
        <div style={{display:"flex",gap:10,alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",marginBottom:12}}>
         <div style={{minWidth:0,flex:"1 1 140px"}}>
@@ -135,7 +136,7 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
      </div>
      {extra>0?<p style={{fontSize:11,color:"#698476",margin:"8px 0 0"}}>{en?"Includes additions":tr?"Ek seçenekler dahil":"يشمل الإضافات"} +{formatPrice(extra,country,lang)}</p>:null}
     </div>
-    {cart?<button type="button" disabled={!valid} onClick={addToBasket} style={{width:"100%",minHeight:50,padding:"13px 16px",borderRadius:14,border:0,background:valid?accent:"#adbcb5",color:dark?"#20170f":"white",fontSize:14,fontWeight:800,cursor:valid?"pointer":"not-allowed",marginTop:13}}>
+    {cart?<button className="beger-product-add-button" type="button" disabled={!valid} onClick={addToBasket} style={{width:"100%",minHeight:50,padding:"13px 16px",borderRadius:14,border:0,background:valid?accent:"#adbcb5",color:dark?"#20170f":"white",fontSize:14,fontWeight:800,cursor:valid?"pointer":"not-allowed",marginTop:13}}>
      {en?"Add to preview basket":tr?"Önizleme sepetine ekle":"أضف إلى السلة التجريبية"} · {formatPrice(Number(details.price_minor)+extra,country,lang)}
     </button>:null}
     {added?<p role="status" style={{fontSize:12,color:"#176d4c",margin:"9px 0"}}>{added}</p>:null}
