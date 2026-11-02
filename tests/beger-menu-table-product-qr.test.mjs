@@ -71,3 +71,9 @@ test("QR camera supports Safari and saved photos without network upload",()=>{
  assert.match(scanner,/!window\.isSecureContext\|\|!navigator\.mediaDevices\?\.getUserMedia/);
  assert.doesNotMatch(scanner,/fetch\(|axios|api\.qrserver/);
 });
+
+test("same canonical product published to two branches exports distinct QR codes",()=>{
+ const source=read("components/menu-product-qr.tsx");
+ assert.match(source,/id=\{"beger-product-code-"\+branchId\+"-"\+productId\}/);
+ assert.match(source,/fileName=\{"beger-product-"\+branchId\+"-"\+productId\}/);
+});
