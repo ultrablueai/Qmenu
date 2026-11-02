@@ -289,3 +289,21 @@
 
 .beger-feedback-test{border:1px solid #cfdabd;border-radius:10px;padding:8px 11px;min-height:36px;background:#fff;color:#56703c;font-size:11px;font-weight:800;cursor:pointer}
 .beger-feedback-test:focus-visible{outline:3px solid #a1b77c;outline-offset:2px}
+
+/* Contextual ordering: clear separation between table service and pickup preview. */
+.beger-service-choice{margin:20px 0 5px;text-align:start;color:#3d3628}
+.beger-service-choice h3{font-size:15px;font-weight:850;margin:0 0 11px}
+.beger-service-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.beger-service-choice-card{display:flex;flex-direction:column;gap:7px;padding:13px;min-width:0;background:#fffdf8;border:1px solid #e7dfd3;border-radius:15px;color:#4d4336;text-decoration:none;text-align:start}
+.beger-service-choice-card>span:first-child{font-size:24px}
+.beger-service-choice-card strong{font-size:13px;line-height:1.4}
+.beger-service-choice-card p{font-size:11px;line-height:1.5;flex:1;color:#817366;margin:0}
+.beger-service-choice-card small,.beger-service-mini-note{font-size:10px;line-height:1.5;color:#9c653f}
+.beger-service-pickup{background:#f1f5e9;border-color:#d7e2c5}
+.beger-service-pickup:hover,.beger-service-pickup:focus-visible{border-color:#829b65;box-shadow:0 3px 15px #59783d20}
+.beger-service-pickup[aria-current="page"]{outline:2px solid #758c53}
+.beger-service-disabled{opacity:.65}
+.beger-service-context{margin:12px 0 19px;padding:14px 17px;background:#f0f5e9;border:1px solid #d9e6cb;border-radius:13px;color:#50683b}
+.beger-service-context strong{font-size:14px}.beger-service-context p{margin:6px 0 0;font-size:12px;line-height:1.6}
+@media(max-width:600px){.beger-service-choice-grid{grid-template-columns:1fr}.beger-service-choice-card{flex-direction:row;align-items:center;flex-wrap:wrap}.beger-service-choice-card>span:first-child{font-size:22px}.beger-service-choice-card p{flex:1 1 100%}.beger-service-choice-card small{flex-basis:100%}}
+@media(prefers-reduced-motion:reduce){.beger-service-pickup{transition:none!important}}
