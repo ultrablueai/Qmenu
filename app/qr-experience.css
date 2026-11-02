@@ -2,7 +2,7 @@
 .beger-qr-manager{margin:18px 0;padding:20px;border-radius:20px;border:1px solid #e6d9c9;background:#fffdf9;color:#392c22}
 .beger-qr-manager h3{font:800 23px Georgia,"Times New Roman",serif;margin:0 0 7px}
 .beger-qr-manager>p{font-size:13px;color:#827465;line-height:1.75;margin:0 0 18px}
-.beger-qr-add-table{display:flex;flex-wrap:wrap;align-items:end;gap:9px;margin-bottom:18px}
+.beger-qr-add-table{display:flex;flex-wrap:wrap;align-items:flex-end;gap:9px;margin-bottom:18px}
 .beger-qr-add-table label{display:block;font-size:12px;font-weight:800;width:100%}
 .beger-qr-add-table input{flex:1 1 180px;min-height:43px;border:1px solid #ded1c1;border-radius:11px;background:#fff;padding:10px 13px;font:inherit;min-width:0}
 .beger-qr-add-table button{min-height:43px;border:0;border-radius:11px;padding:10px 17px;background:#637a40;color:#fff;font-weight:800;cursor:pointer}
