@@ -14,7 +14,7 @@ test("guest menu mounts a branch-local preview cart and non-fabricated ratings",
 test("basket stays scoped to the branch and table and cannot initiate payment or ratings",()=>{
  assert.match(cart,/useState<CartItem\[\]>/);
  assert.match(cart,/quantity:Math\.min\(99/);
- assert.match(cart,/لم يتم إرسال أي طلب/);
+ assert.match(cart,/طلبك لن يصل للمطعم إلا بعد الضغط على/);
  assert.match(cart,/sessionStorage\.setItem\(storageKey/);
  assert.match(cart,/<GuestOrderSubmission/);
  assert.doesNotMatch(cart+rating,/paymentIntent|fakeRating|chargeCard|service_role/);
