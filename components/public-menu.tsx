@@ -3,7 +3,7 @@ import "./public-menu.css";
 import "../app/qr-experience.css";
 import ProductDetails from "./product-details";
 import GuestCart from "./guest-cart";
-import GuestScreenSwitcher,{GuestOpenMenu} from "./guest-screen-switcher";
+import GuestScreenSwitcher,{GuestOpenMenu,GuestLanguageSwitcher} from "./guest-screen-switcher";
 import GuestMenuSearch from "./guest-menu-search";
 import GuestRewardsPreview from "./guest-rewards-preview";
 import GuestFavorite from "./guest-favorite";
@@ -37,13 +37,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
   <div className="beger-guest-container" style={{maxWidth:1120,margin:"auto"}}>
    <header className="beger-guest-header" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"22px 0",borderBottom:"1px solid "+theme.border}}>
     <strong className="beger-guest-brand" style={{fontSize:27,letterSpacing:"-1.1px"}}><span className="beger-brand-symbol" aria-hidden="true">B</span> Beger<span style={{color:"#BD7044"}}>.</span></strong>
-    <nav className="beger-guest-languages" aria-label="Languages" style={{display:"flex",gap:9,flexWrap:"wrap",fontSize:13}}>
-      {appearance.enabled_languages.map(l=><Link key={l} href={base+"?lang="+l} hrefLang={l}
-        aria-current={l===lang?"page":undefined}
-        style={{color:l===lang?theme.buttonForeground:theme.foreground,background:l===lang?theme.accent:"transparent",border:"1px solid "+theme.border,borderRadius:10,padding:"8px 10px",fontWeight:l===lang?800:500}}>
-         {l==="ar"?"العربية":l==="tr"?"Türkçe":"English"}
-       </Link>)}
-    </nav>
+    <GuestLanguageSwitcher lang={lang} enabled={appearance.enabled_languages}/>
    </header>
    {tableLabel?<div className="beger-table-confirmation" role="status" aria-label={lang==="ar"?"الطاولة المحددة":lang==="tr"?"Seçilen masa":"Selected table"}><span aria-hidden="true">▦</span><div><small>{lang==="ar"?"أنت تتصفح منيو الطاولة":lang==="tr"?"Bu masanın menüsünü görüntülüyorsunuz":"You're viewing the menu for"}</small><strong>{tableLabel}</strong></div><span className="beger-table-confirmed">{lang==="ar"?"تم التعرف على الطاولة":lang==="tr"?"Masa tanındı":"Table identified"} ✓</span></div>:null}
    <section className="beger-guest-hero beger-welcome-screen" style={{background:theme.hero,border:"1px solid "+theme.border}}>
@@ -73,14 +67,14 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
     </div>
     <GuestMenuSearch lang={lang}/>
     <nav id="beger-categories" aria-label={t.menu} className="beger-category-tiles">
-      {categories.slice(0,4).map(c=><a key={c.id} href={`#category-${c.id}`} style={{borderColor:theme.border,color:theme.foreground}}>
+      {categories.map(c=><a key={c.id} href={`#category-${c.id}`} style={{borderColor:theme.border,color:theme.foreground}}>
         <span aria-hidden="true"><GuestIcon name={categorySymbol(localizedText(c,lang))} size={25}/></span><strong>{localizedText(c,lang)}</strong>
       </a>)}
     </nav>
    </section>
    {categories.length===0?<div style={{padding:30,borderRadius:18,background:theme.surface,border:"1px solid "+theme.border}}>{t.empty}</div>:
     categories.map(c=><section className="beger-menu-section" key={c.id} style={{marginBottom:30}} aria-labelledby={`category-${c.id}`}>
-     <div className="beger-category-heading"><h3 id={`category-${c.id}`} className="beger-guest-category-name" style={{fontSize:22,marginBottom:15,borderInlineStart:"4px solid "+theme.accent,paddingInlineStart:13}}>{localizedText(c,lang)}</h3><a href={`#category-${c.id}`}>{lang==="ar"?"عرض الكل":lang==="tr"?"Tümünü gör":"See All"} →</a></div>
+     <div className="beger-category-heading"><h3 id={`category-${c.id}`} className="beger-guest-category-name" style={{fontSize:22,marginBottom:15,borderInlineStart:"4px solid "+theme.accent,paddingInlineStart:13}}>{localizedText(c,lang)}</h3><span className="beger-category-count">{c.items.length} {t.products}</span></div>
      <div className="beger-menu-product-list">
       {c.items.length===0?<p style={{color:theme.muted,fontSize:14}}>{t.empty}</p>:
        c.items.map(i=><article className="beger-guest-product" data-search-text={`${i.name_ar} ${i.name_tr} ${i.name_en??""} ${i.description_ar} ${i.description_tr} ${i.description_en??""}`} key={i.id} style={{display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:10,minWidth:0,width:"100%",boxSizing:"border-box",background:theme.surface,border:"1px solid "+theme.border,
