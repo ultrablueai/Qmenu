@@ -42,3 +42,9 @@ test("approved mobile reference keeps meaningful hierarchy without tiny vertical
  assert.match(details,/className="beger-modifier-card"/);
  assert.match(css,/\.beger-product-add-button\{position:sticky/);
 });
+
+test("reference photo-led modal keeps real catalog pricing and no fabricated star score",()=>{
+ assert.match(details,/formatPrice\(Number\(details\.price_minor\),country,lang\)/);
+ assert.doesNotMatch(details,/1,264 Reviews|fakeRating|4\.8\s*★/);
+ assert.match(details,/Preview only\. Ordering and payment are not active yet/);
+});
