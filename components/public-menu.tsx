@@ -2,6 +2,7 @@ import Link from "next/link";
 import "./public-menu.css";
 import ProductDetails from "./product-details";
 import GuestCart from "./guest-cart";
+import GuestScreenSwitcher,{GuestOpenMenu} from "./guest-screen-switcher";
 import GuestRatingPreview from "./guest-rating-preview";
 import {formatPrice,localizedText,type G2Branch,type G2Category,type GuestAppearance,type GuestLang} from "../lib/g2-public";
 
@@ -28,6 +29,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
  return <main className="beger-guest" dir={lang==="ar"?"rtl":"ltr"} lang={lang} data-beger-theme={appearance.theme}
   style={{minHeight:"100dvh",background:theme.background,color:theme.foreground,fontFamily:"system-ui, sans-serif",padding:"0 clamp(16px,4vw,32px) 92px"}}>
   <GuestCart key={branch.branch_id} country={branch.country_code} lang={lang} accent={theme.accent}>
+  <GuestScreenSwitcher lang={lang}>
   <div className="beger-guest-container" style={{maxWidth:1120,margin:"auto"}}>
    <header className="beger-guest-header" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"22px 0",borderBottom:"1px solid "+theme.border}}>
     <strong className="beger-guest-brand" style={{fontSize:27,letterSpacing:"-1.1px"}}><span className="beger-brand-symbol" aria-hidden="true">B</span> Beger<span style={{color:"#BD7044"}}>.</span></strong>
@@ -50,7 +52,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
        <div className="beger-welcome-panel">
          <h2>{lang==="ar"?"أهلاً وسهلاً":lang==="tr"?"Hoş geldiniz":"Welcome"}</h2>
          <p>{lang==="ar"?"تصفّح قائمتنا، واختَر مكوناتك وإضافاتك بكل سهولة.":lang==="tr"?"Menümüzü keşfedin, malzemelerinizi ve eklemelerinizi seçin.":"Explore the menu and personalize ingredients and extras."}</p>
-         <a className="beger-welcome-cta" href="#beger-categories" style={{background:theme.accent,color:theme.buttonForeground}}>⌗ {t.discover} <span aria-hidden="true">←</span></a>
+         <GuestOpenMenu lang={lang}/>
        </div>
        <div className="beger-service-types" aria-label={lang==="ar"?"أنواع الخدمة — عرض توضيحي":lang==="tr"?"Servis türleri — önizleme":"Service formats — preview"}>
         <span><b>☕</b>{lang==="ar"?"داخل المقهى":lang==="tr"?"Mekânda":"Dine in"}</span>
@@ -71,7 +73,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
     </nav>
    </section>
    {categories.length===0?<div style={{padding:30,borderRadius:18,background:theme.surface,border:"1px solid "+theme.border}}>{t.empty}</div>:
-    categories.map(c=><section key={c.id} style={{marginBottom:30}} aria-labelledby={`category-${c.id}`}>
+    categories.map(c=><section className="beger-menu-section" key={c.id} style={{marginBottom:30}} aria-labelledby={`category-${c.id}`}>
      <h3 id={`category-${c.id}`} className="beger-guest-category-name" style={{fontSize:22,marginBottom:15,borderInlineStart:"4px solid "+theme.accent,paddingInlineStart:13}}>{localizedText(c,lang)}</h3>
      <div className="beger-menu-product-list">
       {c.items.length===0?<p style={{color:theme.muted,fontSize:14}}>{t.empty}</p>:
@@ -92,13 +94,9 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
        </article>)}
      </div>
     </section>)}
-   <nav className="beger-guest-bottom-nav" aria-label={lang==="ar"?"القائمة السريعة":lang==="tr"?"Hızlı menü":"Quick navigation"}>
-      <a href="#beger-categories" aria-current="page"><span aria-hidden="true">⌂</span>{lang==="ar"?"الرئيسية":lang==="tr"?"Ana sayfa":"Home"}</a>
-      <a href={`#category-${categories[0]?.id??""}`}><span aria-hidden="true">♧</span>{t.menu}</a>
-      <a href="#beger-categories"><span aria-hidden="true">☕</span>{t.products}</a>
-   </nav>
-   <footer style={{padding:"22px 0",borderTop:"1px solid "+theme.border,color:theme.muted,fontSize:12}}>{t.note}<div style={{marginTop:10}}>Beger · Smart Business OS</div></footer>
+   <footer className="beger-guest-footer" style={{padding:"22px 0",borderTop:"1px solid "+theme.border,color:theme.muted,fontSize:12}}>{t.note}<div style={{marginTop:10}}>Beger · Smart Business OS</div></footer>
   </div>
+  </GuestScreenSwitcher>
   </GuestCart>
  </main>;
 }
