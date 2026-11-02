@@ -215,3 +215,13 @@
 .beger-favorite-button{position:relative;z-index:3;pointer-events:auto}
 .beger-menu-product-list .beger-guest-product:has(.beger-product-open-trigger:focus-visible){outline:3px solid #b9814d;outline-offset:2px}
 .beger-menu-product-list .beger-guest-product:has(.beger-product-open-trigger:hover){border-color:#d5c9b9!important;box-shadow:0 5px 15px #382b1c1e!important}
+
+/* Verified QR table identity stays legible after switching from welcome to menu. */
+.beger-table-confirmation{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid #dbe5c5;background:linear-gradient(100deg,#f3f6e8,#fffaf2);color:#4d6333;padding:11px 14px;border-radius:15px;margin:8px 0 15px;box-shadow:0 4px 11px #475b3010}
+.beger-table-confirmation>span:first-child{display:grid;place-items:center;width:34px;height:34px;flex-shrink:0;border-radius:10px;background:#dde6c4;color:#57723c;font-size:20px}
+.beger-table-confirmation>div{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.beger-table-confirmation small{font-size:11px;color:#6c7853}
+.beger-table-confirmation strong{font-size:17px;font-weight:850;overflow-wrap:anywhere}
+.beger-table-confirmed{font-size:10px;font-weight:800;color:#667c44}
+.beger-screen-switcher[data-stage="welcome"] .beger-table-confirmation{display:none}
+@media(max-width:650px){.beger-table-confirmation{padding:10px;gap:8px}.beger-table-confirmation strong{font-size:15px}.beger-table-confirmed{flex-basis:100%;text-align:center}}
