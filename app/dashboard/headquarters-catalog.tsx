@@ -2,6 +2,7 @@
 import {useState} from "react";
 import MenuManager from "./branches/[branchId]/menu-manager";
 import CentralCatalog from "./central-catalog";
+import MerchantAppearance from "./merchant-appearance";
 
 type Branch = {id:string; name:string};
 type Props = {businessId:string; country:string; branches:Branch[]};
@@ -26,6 +27,7 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
         {branches.map(b=><option value={b.id} key={b.id}>{b.name}</option>)}
       </select>
     </div>
+    <MerchantAppearance businessId={businessId}/>
     <CentralCatalog businessId={businessId} country={country} branches={branches}/>
     <details style={{marginTop:22}}><summary style={{cursor:"pointer",fontWeight:700}}>إدارة القوائم القديمة الخاصة بالفرع (مرحلة انتقالية)</summary>
       <p style={{fontSize:13,color:"#60777c"}}>احتفظنا بأدوات الفرع القديمة مؤقتاً حتى لا نفقد أي منتجات أو أسعار أُدخلت قبل اعتماد الكتالوج المركزي. لا تكرر إدخال نفس المنتج في النظامين.</p>
