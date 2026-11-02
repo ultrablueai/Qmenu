@@ -15,7 +15,7 @@ export default function GuestOrderSubmission({lang,tableToken,tableLabel,items,o
  const t=words[lang];
  const [enabled,setEnabled]=useState(false),[checking,setChecking]=useState(Boolean(tableToken)),[busy,setBusy]=useState(false),[error,setError]=useState(""),[token,setToken]=useState<string|null>(null),[status,setStatus]=useState<OrderStatus|null>(null);
  const requestRef=useRef<string|null>(null);
- useEffect(()=>{let alive=true;if(!tableToken){setChecking(false);setEnabled(false);return;}client().rpc("g3_table_order_enabled",{p_table_token:tableToken}).then(({data,error})=>{if(alive)setEnabled(!error&&data===true)}).catch(()=>{if(alive)setEnabled(false)}).finally(()=>{if(alive)setChecking(false)});return()=>{alive=false};},[tableToken]);
+ useEffect(()=>{let alive=true;if(!tableToken){setChecking(false);setEnabled(false);return;}Promise.resolve(client().rpc("g3_table_order_enabled",{p_table_token:tableToken})).then(({data,error})=>{if(alive)setEnabled(!error&&data===true)}).catch(()=>{if(alive)setEnabled(false)}).finally(()=>{if(alive)setChecking(false)});return()=>{alive=false};},[tableToken]);
  useEffect(()=>{if(!tableToken)return;try{const stored=sessionStorage.getItem("beger-g3-order:"+tableToken);if(stored)setToken(stored);}catch{/* Restricted browser storage */}},[tableToken]);
  async function refresh(){if(!token)return;try{const {data,error}=await client().rpc("g3_public_order_status",{p_token:token});if(!error&&data?.status)setStatus(data.status as OrderStatus);}catch{/* transient network failure: keep last known status */}}
  useEffect(()=>{if(!token)return;void refresh();const timer=window.setInterval(()=>{void refresh()},7000);return()=>window.clearInterval(timer);},[token]);
