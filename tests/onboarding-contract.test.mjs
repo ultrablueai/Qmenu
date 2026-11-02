@@ -19,3 +19,11 @@ test("onboarding calls RPC without client-selected owner identifier",()=>{
  assert.match(ui,/supabase\.rpc\("create_first_business"/);
  assert.doesNotMatch(ui,/service_role|SERVICE_ROLE|p_user_id|p_owner_id/);
 });
+
+test("first business setup selects business sector and requests feature preferences without granting payment rights",()=>{
+ assert.match(ui,/<BegerSectorConfigurator draftKey="onboarding"/);
+ assert.match(ui,/onSelectionChange=\{\(sector,features\)=>setSelection\(\{sector,features\}\)\}/);
+ assert.match(ui,/supabase\.from\("beger_merchant_model_preferences"\)\.upsert/);
+ assert.match(ui,/updated_by:user\.id/);
+ assert.doesNotMatch(ui,/paymentIntent|checkout|activateSubscription/);
+});
