@@ -7,10 +7,10 @@ const details=readFileSync("components/product-details.tsx","utf8");
 const screens=readFileSync("components/guest-screen-switcher.tsx","utf8");
 test("approved customer flow is welcome, four-across categories, compact product rows, detail popup",()=>{
  const intro=menu.indexOf("beger-welcome-screen");
- const tiles=menu.indexOf("GuestCatalogExplorer");
+ const tiles=menu.indexOf("<GuestCatalogExplorer lang=");
  const rows=menu.indexOf("beger-menu-product-list");
  assert.ok(intro>=0&&tiles>intro&&rows>tiles,"must match mobile reference screen hierarchy");
- assert.match(css,/beger-category-tiles\{display:grid;grid-template-columns:repeat\(4/);
+ assert.match(css,/\.beger-category-filter\[aria-pressed="true"\]/);
  assert.match(css,/beger-menu-product-list\{display:grid/);
  assert.match(details,/role="dialog" aria-modal="true"/);
  assert.match(details,/beger-product-popup-hero/);
