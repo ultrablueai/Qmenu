@@ -16,14 +16,64 @@ export default function GuestQrScanner({lang}:{lang:GuestLang}){
  function stop(){runningRef.current=false;if(frameRef.current!==null)cancelAnimationFrame(frameRef.current);frameRef.current=null;streamRef.current?.getTracks().forEach(t=>t.stop());streamRef.current=null;if(videoRef.current)videoRef.current.srcObject=null;setActive(false);}
  useEffect(()=>()=>{runningRef.current=false;if(frameRef.current!==null)cancelAnimationFrame(frameRef.current);streamRef.current?.getTracks().forEach(t=>t.stop())},[]);
  function proceed(value:string){const target=targetFromQr(value);if(!target){setError(strings.invalid);return false;}stop();window.location.assign(target);return true;}
- async function camera(){setOpen(true);setError("");const Detector=(window as unknown as {BarcodeDetector?:DetectorConstructor}).BarcodeDetector;
- if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia||!Detector){setError(strings.unsupported);return;}
- try{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});streamRef.current=stream;runningRef.current=true;setActive(true);
- await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));if(!runningRef.current||!videoRef.current){stream.getTracks().forEach(t=>t.stop());return;}
- videoRef.current.srcObject=stream;await videoRef.current.play();const detector=new Detector({formats:["qr_code"]});
- const tick=async()=>{if(!runningRef.current||!videoRef.current)return;try{const codes=await detector.detect(videoRef.current);if(codes.some(c=>proceed(c.rawValue)))return;}catch{/* frame not ready */}if(runningRef.current)frameRef.current=requestAnimationFrame(()=>{void tick()})};
- frameRef.current=requestAnimationFrame(()=>{void tick()});
- }catch{stop();setError(strings.permission);}
+ async function decodeFrame(source:CanvasImageSource,width:number,height:number){
+  const canvas=document.createElement("canvas");
+  canvas.width=width;canvas.height=height;
+  const context=canvas.getContext("2d",{willReadFrequently:true});
+  if(!context)return null;
+  context.drawImage(source,0,0,width,height);
+  const pixels=context.getImageData(0,0,width,height);
+  const {default:decode}=await import("../lib/qr/decoder/jsQR");
+  return decode(pixels.data,width,height)?.data??null;
+ }
+ async function camera(){
+  setOpen(true);setError("");
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){setError(strings.unsupported);return;}
+  try{
+   const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+   streamRef.current=stream;runningRef.current=true;setActive(true);
+   await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
+   if(!videoRef.current||!runningRef.current){stream.getTracks().forEach(track=>track.stop());return;}
+   videoRef.current.srcObject=stream;
+   await videoRef.current.play();
+   const Detector=(window as unknown as {BarcodeDetector?:DetectorConstructor}).BarcodeDetector;
+   let native:Detector|null=null;
+   if(Detector){try{native=new Detector({formats:["qr_code"]});}catch{native=null;}}
+   // Decode locally even where the experimental BarcodeDetector API is unavailable (e.g. Safari).
+   let last=0;
+   const tick=async(time:number)=>{
+    if(!runningRef.current||!videoRef.current)return;
+    if(time-last>=180){
+     last=time;
+     try{
+      let decoded:string|null=null;
+      if(native){try{decoded=(await native.detect(videoRef.current))[0]?.rawValue??null;}catch{native=null;}}
+      if(!decoded&&videoRef.current.videoWidth>0){
+       const ratio=Math.min(1,480/videoRef.current.videoWidth);
+       decoded=await decodeFrame(videoRef.current,Math.round(videoRef.current.videoWidth*ratio),Math.round(videoRef.current.videoHeight*ratio));
+      }
+      if(decoded&&proceed(decoded))return;
+     }catch{/* Frames can be unavailable until the camera warms up. */}
+    }
+    if(runningRef.current)frameRef.current=requestAnimationFrame(time=>{void tick(time)});
+   };
+   frameRef.current=requestAnimationFrame(time=>{void tick(time)});
+  }catch{stop();setError(strings.permission);}
+ }
+ async function scanPhoto(file:File|null){
+  if(!file)return;
+  setError("");
+  if(!file.type.startsWith("image/")||file.size>8*1024*1024){setError(strings.invalid);return;}
+  const src=URL.createObjectURL(file);
+  try{
+   const img=new Image();
+   img.src=src;
+   await img.decode();
+   const scale=Math.min(1,1600/Math.max(img.width,img.height));
+   const code=await decodeFrame(img,Math.max(1,Math.round(img.width*scale)),Math.max(1,Math.round(img.height*scale)));
+   if(code)proceed(code);else setError(strings.invalid);
+  }catch{setError(strings.invalid);}
+  finally{URL.revokeObjectURL(src);}
  }
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();proceed(manual);}
  return <>
@@ -33,6 +83,7 @@ export default function GuestQrScanner({lang}:{lang:GuestLang}){
     <p>{strings.note}</p>
     {active?<video ref={videoRef} playsInline muted autoPlay aria-label={strings.title} className="beger-scanner-video"/>:null}
     {error?<p role="alert" className="beger-scanner-error">{error}</p>:null}
+    <label className="beger-scanner-photo-label">{lang==="ar"?"أو اختر صورة QR من المعرض":lang==="tr"?"Veya galeriden QR fotoğrafı seç":"Or scan QR from a photo"}<input type="file" accept="image/*" onChange={event=>{void scanPhoto(event.target.files?.[0]??null);event.target.value="";}}/></label>
     <form onSubmit={submit} className="beger-scanner-form"><label htmlFor="beger-qr-link">{strings.manual}</label><input id="beger-qr-link" type="text" inputMode="url" autoComplete="off" placeholder="https://..." value={manual} onChange={e=>setManual(e.target.value)}/><button type="submit" disabled={!manual.trim()}>{strings.go}</button></form>
   </section></div>:null}
  </>;
