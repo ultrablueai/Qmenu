@@ -14,9 +14,9 @@ const section:CSSProperties={background:"#fff",padding:20,borderRadius:16,border
 const line:CSSProperties={display:"flex",flexWrap:"wrap",alignItems:"center",gap:12,margin:"12px 0"};
 export default function CentralCatalog({businessId,country,branches}:{businessId:string;country:string;branches:Branch[]}){
   const [cats,setCats]=useState<Cat[]>([]),[products,setProducts]=useState<Item[]>([]),[pubs,setPubs]=useState<Publication[]>([]);
-  const [catAr,setCatAr]=useState(""),[catTr,setCatTr]=useState("");
-  const [nameAr,setNameAr]=useState(""),[nameTr,setNameTr]=useState(""),[price,setPrice]=useState(""),[category,setCategory]=useState("");
-  const [descAr,setDescAr]=useState(""),[descTr,setDescTr]=useState(""),[imageUrl,setImageUrl]=useState("");
+  const [catAr,setCatAr]=useState(""),[catTr,setCatTr]=useState(""),[catEn,setCatEn]=useState("");
+  const [nameAr,setNameAr]=useState(""),[nameTr,setNameTr]=useState(""),[nameEn,setNameEn]=useState(""),[price,setPrice]=useState(""),[category,setCategory]=useState("");
+  const [descAr,setDescAr]=useState(""),[descTr,setDescTr]=useState(""),[descEn,setDescEn]=useState(""),[imageUrl,setImageUrl]=useState("");
   const [busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[loading,setLoading]=useState(true);
   const factor=country==="TR"?100:1,currency=country==="TR"?"TRY":country==="SY"?"SYP":country;
   async function refresh(){
