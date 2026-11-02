@@ -55,7 +55,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
          <h4 style={{fontSize:17,margin:"0 0 8px"}}>{localizedText(i,lang)}</h4>
          {detailsText(i,lang)?<p style={{fontSize:13,color:theme.muted,margin:"0 0 11px",overflowWrap:"anywhere"}}>{detailsText(i,lang)}</p>:null}
          <strong style={{fontSize:17,color:theme.accent}}>{formatPrice(Number(i.price_minor),branch.country_code,lang)}</strong>
-         <ProductDetails branchId={branch.branch_id} productId={i.id} country={branch.country_code} lang={lang} accent={theme.accent}/>
+         <ProductDetails branchId={branch.branch_id} productId={i.id} country={branch.country_code} lang={lang} accent={theme.accent} dark={appearance.theme==="luxe_dark"}/>
         </div>
        </article>)}
      </div>
