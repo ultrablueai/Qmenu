@@ -63,14 +63,23 @@ export default async function BranchDashboard({ params }: Props) {
       <p className={styles.eyebrow}>BEGER / BRANCH WORKSPACE</p>
       <h1 className={styles.heading}>{branch.name}</h1>
       <p className={styles.subheading}>لوحة خاصة بفرع <strong>{branch.name}</strong> ضمن نشاط <strong>{business.name}</strong>.</p>
-      <section className={styles.hero} style={{ marginTop:24 }}>
-        <div className={styles.heroCopy}>
-          <span className={styles.heroBadge}>⌂ لوحة الفرع</span>
-          <h2 className={styles.heroTitle}>إدارة {branch.name}</h2>
-          <p className={styles.heroText}>هذه مساحة الفرع المستقلة. صفحة تشغيل الفرع: استقبال طلبات الطاولات، مراجعة الطلبات وقبولها ثم إرسالها للتحضير. هذه بيئة Staging للاختبار بدون دفع مالي.</p>
-        </div>
-        <div className={styles.heroGraphic} aria-hidden="true"><div className={styles.heroGraphicInner}><span className={styles.heroGraphicText}>B</span></div></div>
-      </section>
+      <div className={styles.branchOperationsIntro}>
+        <span>BEGER · STAGING</span>
+        <strong>تشغيل طلبات {branch.name}</strong>
+        <p>الطلبات الحقيقية الواردة من QR الطاولات تظهر في لوحة الفرع مباشرةً. القبول والتحضير والتسليم تُدار من هنا.</p>
+      </div>
+      {canManageOrders ? <>
+        <nav aria-label="تنقل تشغيل الفرع" className={styles.branchOperationsNav}>
+          <a href="#beger-merchant-orders">الطلبات الواردة والمطبخ ↓</a>
+          <a href="#beger-table-qr-title">QR الطاولات ↓</a>
+          <Link href={centralLink}>المنتجات والإضافات في المركز ←</Link>
+        </nav>
+        <MerchantOrderBoard businessId={business.id} branchId={branch.id} branchName={branch.name}/>
+        <MerchantTableQr businessId={business.id} branchId={branch.id} branchName={branch.name}/>
+      </> : <section className={styles.panel}>
+        <h2 className={styles.panelTitle}>تشغيل الطلبات</h2>
+        <p className={styles.panelSubtitle}>حسابك مسجّل لهذا الفرع، لكن إدارة قبول الطلبات وتغيير حالات المطبخ متاحة حالياً لمالك النشاط ومديره فقط. لن نعرض الطلبات بلا صلاحية.</p>
+      </section>}
       <div className={styles.twoCols}>
         <section className={styles.panel}>
           <h2 className={styles.panelTitle}>بيانات الفرع</h2>
@@ -92,18 +101,6 @@ export default async function BranchDashboard({ params }: Props) {
         <p className={styles.panelSubtitle}>الكتالوج وأسعار المنتجات والتصنيفات تُدار من لوحة المتجر المركزية. أما الطلبات التشغيلية وQR الطاولات فتجدها أدناه في نفس الفرع.</p>
         {canManageOrders ? <Link href={centralLink} className={styles.branchOpenLink}>فتح كتالوج المتجر المركزي ←</Link> : null}
       </section>
-      {canManageOrders ? <>
-        <nav aria-label="تنقل تشغيل الفرع" className={styles.branchOperationsNav}>
-          <a href="#beger-merchant-orders">الطلبات الواردة والمطبخ ↓</a>
-          <a href="#beger-table-qr-title">QR الطاولات ↓</a>
-          <Link href={centralLink}>المنتجات والإضافات في المركز ←</Link>
-        </nav>
-        <MerchantOrderBoard businessId={business.id} branchId={branch.id} branchName={branch.name}/>
-        <MerchantTableQr businessId={business.id} branchId={branch.id} branchName={branch.name}/>
-      </> : <section className={styles.panel}>
-        <h2 className={styles.panelTitle}>تشغيل الطلبات</h2>
-        <p className={styles.panelSubtitle}>حسابك مسجّل لهذا الفرع، لكن إدارة قبول الطلبات وتغيير حالات المطبخ متاحة حالياً لمالك النشاط ومديره فقط. لن نعرض الطلبات بلا صلاحية.</p>
-      </section>}
       <section className={styles.modules} aria-labelledby="branch-tools-heading">
         <h2 className={styles.panelTitle} id="branch-tools-heading">وحدات هذا الفرع</h2>
         <div className={styles.moduleGrid} style={{marginTop:15}}>
