@@ -49,3 +49,10 @@ test("subtle UI animation honors operating system reduced motion preference",()=
  assert.match(merchantCss,/@keyframes beger-ticket-appear/);
  assert.match(merchantCss,/@media\(prefers-reduced-motion:reduce\)/);
 });
+
+test("explicit test-alert buttons do not impersonate real customer orders",()=>{
+ assert.match(feedback,/onTest\?:\(\)=>void/);
+ assert.match(feedback,/onClick=\{onTest\}/);
+ assert.match(merchant,/هذا تنبيه اختبار، وليس طلباً جديداً/);
+ assert.match(guest,/This is a test alert/);
+});
