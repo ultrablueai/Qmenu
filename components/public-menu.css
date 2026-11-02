@@ -225,3 +225,12 @@
 .beger-table-confirmed{font-size:10px;font-weight:800;color:#667c44}
 .beger-screen-switcher[data-stage="welcome"] .beger-table-confirmation{display:none}
 @media(max-width:650px){.beger-table-confirmation{padding:10px;gap:8px}.beger-table-confirmation strong{font-size:15px}.beger-table-confirmed{flex-basis:100%;text-align:center}}
+
+/* G2 UX repair: show ALL categories, without shrinking labels to single letters. */
+.beger-category-tiles{display:flex!important;gap:9px!important;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;scrollbar-width:thin;padding:3px 2px 11px;align-items:stretch}
+.beger-category-tiles a{flex:0 0 clamp(94px,24%,137px);min-width:94px;max-width:150px;scroll-snap-align:start;min-height:95px}
+.beger-category-tiles a strong{font-size:12px!important;line-height:1.35!important;white-space:normal;overflow-wrap:normal;word-break:normal;hyphens:auto}
+.beger-category-count{font-size:11px;font-weight:750;color:#758253;background:#edf0e3;border:1px solid #e1e6d9;padding:6px 9px;border-radius:999px;white-space:nowrap}
+.beger-guest-languages a[aria-current="page"]{background:#657a44!important;color:#fff!important}
+.beger-guest-languages a{color:#594d40}
+@media(max-width:650px){.beger-category-tiles{grid-template-columns:none!important;gap:8px!important;overflow-x:auto}.beger-category-tiles a{flex-basis:105px}.beger-category-tiles a strong{font-size:11px!important}.beger-guest-languages a{font-size:11px}}
