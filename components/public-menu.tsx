@@ -7,6 +7,7 @@ import GuestRatingPreview from "./guest-rating-preview";
 import GuestMenuSearch from "./guest-menu-search";
 import GuestRewardsPreview from "./guest-rewards-preview";
 import GuestFavorite from "./guest-favorite";
+import GuestIcon from "./guest-icons";
 import {formatPrice,localizedText,type G2Branch,type G2Category,type GuestAppearance,type GuestLang} from "../lib/g2-public";
 
 type Props={branch:G2Branch;categories:G2Category[];lang:GuestLang;appearance:GuestAppearance;tableLabel?:string;tableToken?:string};
@@ -28,7 +29,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
  const base=tableToken?`/t/${tableToken}`:`/b/${branch.branch_id}`;
  const heroImage="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1200&q=85&fit=crop";
  const totalItems=categories.reduce((sum,category)=>sum+category.items.length,0);
- const categorySymbol=(label:string)=>/قهو|coffee|kahve|drink|مشروب|içecek/i.test(label)?"☕":/sandwich|sandviç|سندوي|burger|برغر|food|وجبة/i.test(label)?"🥪":/حلو|tatlı|dessert|cake/i.test(label)?"🍰":"✦";
+ const categorySymbol=(label:string):"coffee"|"sandwich"|"dessert"|"more"=>/قهو|coffee|kahve|drink|مشروب|içecek/i.test(label)?"coffee":/sandwich|sandviç|سندوي|burger|برغر|food|وجبة/i.test(label)?"sandwich":/حلو|tatlı|dessert|cake/i.test(label)?"dessert":"more";
  return <main className="beger-guest" dir={lang==="ar"?"rtl":"ltr"} lang={lang} data-beger-theme={appearance.theme}
   style={{minHeight:"100dvh",background:theme.background,color:theme.foreground,fontFamily:"system-ui, sans-serif",padding:"0 clamp(16px,4vw,32px) 92px"}}>
   <GuestCart key={branch.branch_id} country={branch.country_code} lang={lang} accent={theme.accent}>
@@ -58,9 +59,9 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
          <GuestOpenMenu lang={lang}/>
        </div>
        <div className="beger-service-types" aria-label={lang==="ar"?"أنواع الخدمة — عرض توضيحي":lang==="tr"?"Servis türleri — önizleme":"Service formats — preview"}>
-        <span><b>☕</b>{lang==="ar"?"داخل المقهى":lang==="tr"?"Mekânda":"Dine in"}</span>
-        <span><b>♧</b>{lang==="ar"?"استلام":lang==="tr"?"Paket":"Takeaway"}</span>
-        <span><b>♧</b>{lang==="ar"?"توصيل (لاحقاً)":lang==="tr"?"Teslimat (yakında)":"Delivery (soon)"}</span>
+        <span><b><GuestIcon name="dine"/></b>{lang==="ar"?"داخل المقهى":lang==="tr"?"Mekânda":"Dine in"}</span>
+        <span><b><GuestIcon name="bag"/></b>{lang==="ar"?"استلام":lang==="tr"?"Paket":"Takeaway"}</span>
+        <span><b><GuestIcon name="delivery"/></b>{lang==="ar"?"توصيل (لاحقاً)":lang==="tr"?"Teslimat (yakında)":"Delivery (soon)"}</span>
        </div>
      </div>
    </section>
@@ -72,7 +73,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
     <GuestMenuSearch lang={lang}/>
     <nav id="beger-categories" aria-label={t.menu} className="beger-category-tiles">
       {categories.slice(0,4).map(c=><a key={c.id} href={`#category-${c.id}`} style={{borderColor:theme.border,color:theme.foreground}}>
-        <span aria-hidden="true">{categorySymbol(localizedText(c,lang))}</span><strong>{localizedText(c,lang)}</strong>
+        <span aria-hidden="true"><GuestIcon name={categorySymbol(localizedText(c,lang))} size={25}/></span><strong>{localizedText(c,lang)}</strong>
       </a>)}
     </nav>
    </section>
