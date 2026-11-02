@@ -40,3 +40,21 @@ test("product QR points to published branch and opens product without bypassing 
  const productQr=read("components/menu-product-qr.tsx");
  assert.match(productQr,/encodeURIComponent\(productId\)/);
 });
+
+test("shop, table and product QR can be saved as independent printable SVGs",()=>{
+ const exporter=read("components/qr-export.tsx");
+ const productQr=read("components/menu-product-qr.tsx");
+ assert.match(exporter,/new XMLSerializer\(\)\.serializeToString\(copy\)/);
+ assert.match(exporter,/image\/svg\+xml/);
+ assert.match(exporter,/anchor\.download=fileName/);
+ assert.match(merchant,/<QrExport targetId=\{"beger-shop-code-"/);
+ assert.match(tables,/<QrExport targetId=\{"beger-table-code-"/);
+ assert.match(productQr,/<QrExport targetId=\{"beger-product-code-"/);
+ assert.doesNotMatch(merchant,/window\.print\(\)|api\.qrserver\.com/);
+});
+test("staging scan accepts only same origin or Beger owned preview deployments",()=>{
+ assert.match(scanner,/sameProjectPreview=preview\.test\(url\.hostname\)\&\&preview\.test\(window\.location\.hostname\)/);
+ assert.match(scanner,/url\.origin!==window\.location\.origin\&\&!sameProjectPreview/);
+ assert.match(scanner,/url\.pathname\+\(p\?/);
+ assert.doesNotMatch(scanner,/window\.location\.assign\(value\)/);
+});
