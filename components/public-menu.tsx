@@ -32,7 +32,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
  const categorySymbol=(label:string):"coffee"|"sandwich"|"dessert"|"more"=>/قهو|coffee|kahve|drink|مشروب|içecek/i.test(label)?"coffee":/sandwich|sandviç|سندوي|burger|برغر|food|وجبة/i.test(label)?"sandwich":/حلو|tatlı|dessert|cake/i.test(label)?"dessert":"more";
  return <main className="beger-guest" dir={lang==="ar"?"rtl":"ltr"} lang={lang} data-beger-theme={appearance.theme}
   style={{minHeight:"100dvh",background:theme.background,color:theme.foreground,fontFamily:"system-ui, sans-serif",padding:"0 clamp(16px,4vw,32px) 92px"}}>
-  <GuestCart key={branch.branch_id} country={branch.country_code} lang={lang} accent={theme.accent}>
+  <GuestCart key={branch.branch_id} country={branch.country_code} lang={lang} accent={theme.accent} tableToken={tableToken} tableLabel={tableLabel}>
   <GuestScreenSwitcher lang={lang}>
   <div className="beger-guest-container" style={{maxWidth:1120,margin:"auto"}}>
    <header className="beger-guest-header" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"22px 0",borderBottom:"1px solid "+theme.border}}>
