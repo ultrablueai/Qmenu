@@ -55,7 +55,7 @@ test("shop, table and product QR can be saved as independent printable SVGs",()=
 test("staging scan accepts only same origin or Beger owned preview deployments",()=>{
  assert.match(scanner,/sameProjectPreview=preview\.test\(url\.hostname\)\&\&preview\.test\(window\.location\.hostname\)/);
  assert.match(scanner,/url\.origin!==window\.location\.origin\&\&!sameProjectPreview/);
- assert.match(scanner,/url\.pathname\+\(p\?/);
+ assert.match(scanner,/return target\.pathname\+target\.search/);
  assert.doesNotMatch(scanner,/window\.location\.assign\(value\)/);
 });
 
@@ -125,4 +125,13 @@ test("shop and table QR stickers print human-readable branch and table labels",(
  assert.match(exporter,/text\.textContent=stickerTitle/);
  assert.match(tables,/stickerTitle=\{branchName\+" · "\+t\.label\}/);
  assert.match(merchant,/stickerTitle=\{branches\.find/);
+});
+
+test("QR navigation keeps supported language and deployment-scoped preview credentials",()=>{
+ assert.match(scanner,/lang==="ar"\|\|lang==="tr"\|\|lang==="en"/);
+ assert.match(scanner,/target\.searchParams\.set\("lang",lang\)/);
+ assert.match(scanner,/url\.origin===window\.location\.origin&&scannedShare/);
+ assert.match(scanner,/target\.searchParams\.set\("_vercel_share",currentShare\)/);
+ assert.match(scanner,/target\.pathname\+target\.search/);
+ assert.doesNotMatch(scanner,/target\.searchParams\.set\("_vercel_share",scannedShare\)\s*;\s*return/);
 });
