@@ -89,3 +89,21 @@ test("camera dialog mounts its video before requesting permission and explains b
  assert.match(scanner,/setError\(strings\.unsupported\)/);
  assert.match(scanner,/beger-scanner-browser-link/);
 });
+
+test("guest scanner keeps camera first, collapses photo/link alternatives and has all three languages",()=>{
+ const styles=read("app/qr-experience.css");
+ assert.match(scanner,/\[showAlternatives,setShowAlternatives\]=useState\(false\)/);
+ assert.match(scanner,/aria-expanded=\{showAlternatives\}/);
+ assert.match(scanner,/showAlternatives\?<div id="beger-qr-alternatives"/);
+ assert.match(scanner,/setShowAlternatives\(false\)/);
+ assert.match(scanner,/خيارات إضافية/);
+ assert.match(scanner,/Diğer seçenekler/);
+ assert.match(scanner,/More options/);
+ assert.match(styles,/\.beger-scanner-alternatives-toggle\{/);
+ assert.match(styles,/@media\(max-width:650px\)/);
+});
+test("QR URL validation accepts only Beger deployment hostnames with literal dots",()=>{
+ assert.match(scanner,/ultrablueais-projects\\.vercel\\.app/);
+ assert.doesNotMatch(scanner,/ultrablueais-projects\\\\.vercel\\\\.app/);
+ assert.match(scanner,/validRoute\.test\(url\.pathname\)/);
+});
