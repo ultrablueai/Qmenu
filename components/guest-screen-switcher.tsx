@@ -9,7 +9,7 @@ const ScreenContext=createContext<Journey|null>(null);
 
 export default function GuestScreenSwitcher({lang,children}:{lang:GuestLang;children:ReactNode}){
  const [stage,setStage]=useState<Stage>("welcome");
- function go(next:Stage){setStage(next);window.scrollTo({top:0,behavior:"instant"});}
+ function go(next:Stage){setStage(next);window.scrollTo({top:0,behavior:"auto"});}
  return <ScreenContext.Provider value={{stage,go}}>
   <div className="beger-screen-switcher" data-stage={stage}>{children}
    <GuestBottomNavigation lang={lang}/>
