@@ -7,14 +7,14 @@ type Ingredient={name_ar:string;name_tr:string;name_en?:string;is_optional:boole
 type Option={id:string;name_ar:string;name_tr:string;name_en?:string;price_delta_minor:number};
 type Group={id:string;name_ar:string;name_tr:string;name_en?:string;min_select:number;max_select:number;options:Option[]};
 type Details={id:string;name_ar:string;name_tr:string;name_en?:string;description_ar:string;description_tr:string;description_en?:string;price_minor:number;ingredients:Ingredient[];groups:Group[]};
-type Props={branchId:string;productId:string;country:string;lang:GuestLang;accent?:string};
+type Props={branchId:string;productId:string;country:string;lang:GuestLang;accent?:string;dark?:boolean};
 const panel:CSSProperties={padding:14,marginTop:12,border:"1px solid #d6e6e6",borderRadius:12,background:"#f6faf9"};
 function publicClient(){
  const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
  if(!url||!key)throw Error("Public configuration unavailable");
  return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 }
-export default function ProductDetails({branchId,productId,country,lang,accent="#086c66"}:Props){
+export default function ProductDetails({branchId,productId,country,lang,accent="#086c66",dark=false}:Props){
  const [open,setOpen]=useState(false),[loading,setLoading]=useState(false),[error,setError]=useState(""),[details,setDetails]=useState<Details|null>(null);
  const [selection,setSelection]=useState<Record<string,string[]>>({});
  const [removed,setRemoved]=useState<string[]>([]);
@@ -41,10 +41,10 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
  const extra=details?.groups.reduce((sum,g)=>sum+g.options.filter(o=>(selection[g.id]??[]).includes(o.id)).reduce((sub,o)=>sub+Number(o.price_delta_minor),0),0)??0;
  const valid=details?.groups.every(g=>(selection[g.id]??[]).length>=g.min_select)??false;
  return <div style={{marginTop:10}}>
-  <button type="button" aria-expanded={open} onClick={toggleDetails} style={{padding:"8px 12px",color:accent,border:"1px solid #badad6",borderRadius:10,background:"#f2faf8",cursor:"pointer"}}>
+  <button type="button" aria-expanded={open} onClick={toggleDetails} style={{padding:"8px 12px",color:dark?"#20170f": "#075a54",border:"1px solid #badad6",borderRadius:10,background:dark?accent:"#f2faf8",cursor:"pointer"}}>
    {en?"Ingredients & extras":tr?"İçindekiler ve seçenekler":"المكونات والإضافات"} {open?"−":"+"}
   </button>
-  {open?<div style={panel} aria-live="polite">
+  {open?<div style={{...panel,color:"#21383b"}} aria-live="polite">
    {loading?<p>{en?"Loading…":tr?"Yükleniyor…":"جارٍ تحميل التفاصيل…"}</p>:null}
    {error?<p role="status" style={{color:"#885d36"}}>{error}</p>:null}
    {details?<div>
@@ -59,14 +59,14 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
     </fieldset>:null}
     {details.groups.map(g=><fieldset key={g.id} style={{border:"1px solid #dbe9e5",borderRadius:10,padding:12,margin:"12px 0"}}>
      <legend><strong>{title(g)}</strong></legend>
-     <p style={{fontSize:12,color:"#667d80"}}>{en?"Selection":tr?"Seçim":"الاختيارات"}: {g.min_select}–{g.max_select}{g.min_select>0?(tr?" · Zorunlu":" · مطلوب"):""}</p>
+     <p style={{fontSize:12,color:"#667d80"}}>{en?"Selection":tr?"Seçim":"الاختيارات"}: {g.min_select}–{g.max_select}{g.min_select>0?(en?" · Required":tr?" · Zorunlu":" · مطلوب"):""}</p>
      {g.options.map(o=>{
       const checked=(selection[g.id]??[]).includes(o.id);
       const disabled=!checked&&g.max_select!==1&&(selection[g.id]??[]).length>=g.max_select;
       return <label key={o.id} style={{display:"flex",gap:8,alignItems:"center",padding:7,opacity:disabled?0.55:1}}>
        <input type={g.max_select===1?"radio":"checkbox"} name={g.id} checked={checked} disabled={disabled} onChange={()=>choose(g,o)}/>
        <span style={{flex:1}}>{title(o)}</span>
-       <span style={{fontSize:12}}>{Number(o.price_delta_minor)>0?"+"+formatPrice(Number(o.price_delta_minor),country,lang):(tr?"Ücretsiz":"مجاني")}</span>
+       <span style={{fontSize:12}}>{Number(o.price_delta_minor)>0?"+"+formatPrice(Number(o.price_delta_minor),country,lang):(en?"Free":tr?"Ücretsiz":"مجاني")}</span>
       </label>;
      })}
     </fieldset>)}
