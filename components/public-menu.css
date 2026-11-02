@@ -149,7 +149,7 @@
  .beger-product-popup-hero{height:clamp(185px,26dvh,255px)}
  .beger-product-popup-body{padding:0 13px 20px}
 }
-@media(max-width:370px){
+@media(max-width:360px){
  .beger-guest{padding-inline:10px!important}
  .beger-category-tiles{gap:4px}
  .beger-category-tiles a strong{font-size:9px}
