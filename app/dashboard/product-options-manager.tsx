@@ -7,8 +7,8 @@ type Ingredient={id:string;product_id:string;name_ar:string;name_tr:string;is_op
 type Group={id:string;product_id:string;name_ar:string;name_tr:string;min_select:number;max_select:number;active:boolean};
 type Option={id:string;group_id:string;name_ar:string;name_tr:string;price_delta_minor:number;active:boolean};
 const style={padding:10,border:"1px solid #cfdfdf",borderRadius:9,width:"100%",boxSizing:"border-box" as const};
-const button={padding:"9px 14px",background:"#116d65",color:"white",border:0,borderRadius:9,cursor:"pointer"};
-const box={border:"1px solid #deeaeb",background:"#fff",padding:18,borderRadius:14,marginTop:14};
+const button={padding:"11px 16px",background:"#637a43",color:"white",border:0,borderRadius:11,cursor:"pointer"};
+const box={border:"1px solid #eadfd2",background:"#fffefa",padding:18,borderRadius:16,marginTop:14,boxShadow:"0 4px 15px #5a413008"};
 export default function ProductOptionsManager({businessId,country,products}:{businessId:string;country:string;products:Product[]}){
  const [productId,setProductId]=useState(""),[ingredients,setIngredients]=useState<Ingredient[]>([]),[groups,setGroups]=useState<Group[]>([]),[options,setOptions]=useState<Option[]>([]);
  const [nameAr,setNameAr]=useState(""),[nameTr,setNameTr]=useState(""),[nameEn,setNameEn]=useState(""),[optional,setOptional]=useState(false);
@@ -29,6 +29,7 @@ export default function ProductOptionsManager({businessId,country,products}:{bus
   setIngredients(a.data??[]);setGroups(b.data??[]);
   const groupIds=new Set((b.data??[]).map(g=>g.id));
   setOptions((c.data??[]).filter(o=>groupIds.has(o.group_id)));
+  setOptionGroup(old=>groupIds.has(old)?old:(b.data??[])[0]?.id??"");
  }
  useEffect(()=>{refresh(selected).catch(e=>setError(e.message));},[selected,businessId]);
  async function run(write:()=>Promise<{error:{message:string}|null}>,message:string){
@@ -75,9 +76,14 @@ export default function ProductOptionsManager({businessId,country,products}:{bus
       <label>الحد الأعلى للاختيارات <input style={style} type="number" min={1} max={20} value={max} onChange={e=>setMax(Number(e.target.value))}/></label>
       <button disabled={busy} style={button}>إنشاء المجموعة</button>
     </form>
-    {groups.map(g=><p key={g.id}><strong>{g.name_ar}</strong> · {g.min_select===0?"اختياري":"مطلوب"} · {g.min_select}–{g.max_select} خيارات</p>)}
+    {groups.length===0?<p className="beger-options-hint">ما في مجموعات بعد. أنشئ مجموعة مثل «نوع الحليب» أو «درجة السكر» ثم أضف الخيارات الخاصة فيها.</p>:<div className="beger-hq-option-groups">{groups.map((g,index)=><article className="beger-hq-option-group" key={g.id}>
+  <div className="beger-hq-option-group-header"><span className="beger-hq-step">{index+1}</span><div><h4>{g.name_ar}</h4><small>{g.name_tr}</small></div><span className={g.min_select>0?"beger-hq-required":"beger-hq-optional"}>{g.min_select>0?"مطلوب":"اختياري"} · {g.min_select}–{g.max_select}</span></div>
+  <div className="beger-hq-option-list">{options.filter(o=>o.group_id===g.id).map(o=><div className="beger-hq-option-row" key={o.id}><div><strong>{o.name_ar}</strong><small>{o.name_tr}</small></div><span>{Number(o.price_delta_minor)>0?"+":""}{(Number(o.price_delta_minor)/factor).toFixed(factor===100?2:0)} {currency}</span></div>)}
+  {!options.some(o=>o.group_id===g.id)?<p className="beger-options-hint">هذه المجموعة بدون خيارات. أضف خياراتها من النموذج التالي قبل نشر المنتج.</p>:null}</div>
+  <button className="beger-hq-add-to-group" type="button" onClick={()=>{setOptionGroup(g.id);document.getElementById("beger-add-modifier-option")?.scrollIntoView({behavior:"smooth",block:"center"});}}>+ إضافة خيار إلى {g.name_ar}</button>
+ </article>)}</div>}
   </div>
-  <div style={box}><h3>خيارات وإضافات بأسعار</h3>
+  <div id="beger-add-modifier-option" style={box}><h3>إضافة خيار داخل مجموعة</h3>
     <form onSubmit={addOption} style={{display:"grid",gap:9}}>
       <select style={style} required aria-label="مجموعة الخيار" value={optionGroup} onChange={e=>setOptionGroup(e.target.value)}><option value="">اختر المجموعة</option>{groups.filter(g=>g.active).map(g=><option key={g.id} value={g.id}>{g.name_ar}</option>)}</select>
       <input style={style} required maxLength={120} placeholder="مثال: سكر زيادة، شوكولا، جبنة إضافية" aria-label="اسم الخيار بالعربية" value={optionAr} onChange={e=>setOptionAr(e.target.value)}/>
@@ -86,7 +92,7 @@ export default function ProductOptionsManager({businessId,country,products}:{bus
       <label>سعر الإضافة ({currency}) <input style={style} type="number" min="0" step={factor===100?"0.01":"1"} value={delta} onChange={e=>setDelta(e.target.value)} required/></label>
       <button disabled={busy||!groups.length} style={button}>إضافة الخيار</button>
     </form>
-    {options.map(o=><p key={o.id}>{o.name_ar} · {o.name_tr} · +{(Number(o.price_delta_minor)/factor).toFixed(factor===100?2:0)} {currency}</p>)}
+    <p className="beger-options-hint">تظهر الخيارات في المجموعة التابعة لها أعلاه، مع السعر والإلزامية والحد الأقصى.</p>
   </div>
  </section>;
 }
