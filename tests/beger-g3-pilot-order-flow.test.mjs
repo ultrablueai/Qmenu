@@ -54,3 +54,10 @@ test("Guest flows from table QR to cart submission and tracked digital pager, me
  assert.match(merchant,/g3_transition_order/);
  assert.match(hq,/MerchantOrderBoard/);
 });
+
+test("basket survives language switching without leaking between branches and table QR tokens",()=>{
+ assert.match(cart,/storageKey="beger-preview-basket:"\+branchId\+":"\+\(tableToken\?\?"shop"\)/);
+ assert.match(cart,/sessionStorage\.getItem\(storageKey\)/);
+ assert.match(cart,/sessionStorage\.setItem\(storageKey,JSON\.stringify\(items\)\)/);
+ assert.match(cart,/if\(!hydrated\)return/);
+});
