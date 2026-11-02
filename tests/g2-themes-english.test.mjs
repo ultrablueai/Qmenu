@@ -29,7 +29,7 @@ test("shop and table QR retrieve per-business theme and enabled languages",()=>{
  assert.match(shop,/safeLanguage\(search\.lang,appearance\)/);
  assert.match(table,/safeLanguage\(search\.lang,appearance\)/);
  assert.match(lib,/enabled\.includes\(lang\)/);
- assert.match(menu,/appearance\.enabled_languages\.map/);
+ assert.match(menu,/enabled=\{appearance\.enabled_languages\}/);
  assert.match(menu,/data-beger-theme=\{appearance\.theme\}/);
 });
 test("english product and modifier labels stored, publicly rendered with fallback",()=>{
