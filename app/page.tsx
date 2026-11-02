@@ -5,7 +5,7 @@ const demo = "/b/b0000000-2026-4000-8000-000000000002?lang=ar";
 export default function Home() {
   return <main dir="rtl" lang="ar" className="beger-home">
     <style>{`
-      .beger-home{--ink:#17382f;--muted:#60766d;--green:#167759;--line:#deebe4;min-height:100dvh;background:#fbfcfa;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+      .beger-home{--ink:#3A2F25;--muted:#807063;--green:#667B47;--line:#E8DDCD;min-height:100dvh;background:#FAF7F0;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
       .beger-home *{box-sizing:border-box}
       .beger-home a{text-decoration:none}
       .beger-wrap{max-width:1120px;margin:auto;padding:0 24px}
@@ -13,21 +13,21 @@ export default function Home() {
       .beger-brand{font-weight:850;font-size:30px;color:var(--ink);letter-spacing:-1.6px;direction:ltr}.beger-brand span{color:var(--green)}
       .beger-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
       .beger-btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 19px;border-radius:13px;font-size:14px;font-weight:750;color:var(--ink);border:1px solid var(--line);background:white;transition:transform .16s ease,box-shadow .16s ease}
-      .beger-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px #133d2916}
+      .beger-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px #54422620}
       .beger-btn-primary{background:var(--green);border-color:var(--green);color:white!important}
       .beger-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:55px;align-items:center;padding:75px 0 68px}
-      .beger-eyebrow{display:inline-block;border:1px solid #d6e9da;background:#edf7ef;color:#216e4d;border-radius:30px;padding:8px 13px;font-size:13px;font-weight:750}
+      .beger-eyebrow{display:inline-block;border:1px solid #e2dcc9;background:#eeeede;color:#657746;border-radius:30px;padding:8px 13px;font-size:13px;font-weight:750}
       .beger-hero h1{font-size:clamp(38px,5.5vw,66px);line-height:1.17;letter-spacing:-1.7px;margin:20px 0}
       .beger-hero h1 em{font-style:normal;color:var(--green)}
       .beger-lead{font-size:17px;color:var(--muted);line-height:1.95;max-width:590px;margin:0 0 26px}
       .beger-note{font-size:12px;color:var(--muted);margin-top:17px}
-      .beger-preview{background:#eaf3ed;border:1px solid #d8e7de;border-radius:34px;padding:22px;box-shadow:0 30px 72px #214c3420}
+      .beger-preview{background:#F0E8DB;border:1px solid #E5D7C5;border-radius:34px;padding:22px;box-shadow:0 30px 72px #654d321f}
       .beger-preview-inner{background:white;border-radius:24px;overflow:hidden;box-shadow:0 10px 40px #1f3c2512}
-      .beger-preview-header{padding:20px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eaf0eb}
-      .beger-preview-hero{background:linear-gradient(125deg,#e6f2e8,#f9f9f1);padding:26px 22px}
-      .beger-preview-hero h2{font-size:27px;margin:5px 0}.beger-preview-hero p{color:#648072;font-size:13px;margin:0}
-      .beger-mini-product{display:flex;gap:13px;align-items:center;padding:16px 22px;border-bottom:1px solid #eff2ef}
-      .beger-mini-image{flex-shrink:0;width:64px;height:64px;border-radius:15px;background:linear-gradient(145deg,#d6b48b,#765039);display:grid;place-items:center;font-size:29px}
+      .beger-preview-header{padding:20px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ede4d8}
+      .beger-preview-hero{background:linear-gradient(125deg,#F3E5D5,#FAF5EA);padding:26px 22px}
+      .beger-preview-hero h2{font-size:27px;margin:5px 0}.beger-preview-hero p{color:#857268;font-size:13px;margin:0}
+      .beger-mini-product{display:flex;gap:13px;align-items:center;padding:16px 22px;border-bottom:1px solid #ede7dd}
+      .beger-mini-image{flex-shrink:0;width:64px;height:64px;border-radius:15px;background:linear-gradient(145deg,#d6b48b,#8b603c);display:grid;place-items:center;font-size:29px}
       .beger-mini-product b{display:block;font-size:15px}.beger-mini-product small{display:block;color:#718077;margin-top:5px}.beger-mini-product strong{margin-inline-start:auto;white-space:nowrap;color:var(--green);font-size:13px}
       .beger-section{padding:10px 0 75px}.beger-section h2{font-size:clamp(26px,3vw,35px);margin:0 0 12px}.beger-section>p{color:var(--muted);margin:0 0 23px}
       .beger-features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
@@ -47,18 +47,18 @@ export default function Home() {
       </header>
       <section className="beger-hero">
         <div>
-          <span className="beger-eyebrow">Beger · Smart Business OS</span>
+          <span className="beger-eyebrow">☕ Beger · Smart Business OS</span>
           <h1>تجربة أذكى،<br/><em>لكل تفاصيل عملك.</em></h1>
-          <p className="beger-lead">قوائم رقمية بهوية متجرك، منتجات ومكونات وإضافات واضحة، وإدارة مركزية للفروع. تجربة عربية وتركية وإنجليزية مصممة للهاتف أولاً.</p>
+          <p className="beger-lead">تجربة مقهى ومتجر عصرية بهوية دافئة، قائمة رقمية بالصور، إضافات ذكية وسلة تجريبية واضحة، وإدارة مركزية للفروع. بالعربية والتركية والإنجليزية.</p>
           <div className="beger-actions">
             <Link href={demo} className="beger-btn beger-btn-primary">شاهد المنيو التجريبي ←</Link>
             <Link href="/signup" className="beger-btn">ابدأ كتاجر</Link>
           </div>
           <p className="beger-note">بيئة معاينة تجريبية؛ الطلب والدفع غير مفعّلين في هذه المرحلة.</p>
         </div>
-        <div className="beger-preview" aria-label="معاينة توضيحية للواجهة الفاتحة">
+        <div className="beger-preview" aria-label="معاينة توضيحية للهوية الكريمية والزيتونية">
           <div className="beger-preview-inner">
-            <div className="beger-preview-header"><b>Beger<span style={{color:"#167759"}}>.</span></b><span style={{fontSize:12,color:"#688172"}}>العربية · TR · EN</span></div>
+            <div className="beger-preview-header"><b>Beger<span style={{color:"#657946"}}>.</span></b><span style={{fontSize:12,color:"#847269"}}>العربية · TR · EN</span></div>
             <div className="beger-preview-hero"><small>أهلاً بك في</small><h2>Beger Demo Café</h2><p>اكتشف مشروباتنا وإضافاتك المفضلة</p></div>
             <div className="beger-mini-product"><div className="beger-mini-image" aria-hidden="true">☕</div><div><b>كابتشينو</b><small>قهوة بالحليب · إضافات حسب الرغبة</small></div><strong>تجريبي</strong></div>
             <div className="beger-mini-product"><div className="beger-mini-image" style={{background:"linear-gradient(145deg,#edd4a9,#b98e5b)"}} aria-hidden="true">🥐</div><div><b>مخبوزات طازجة</b><small>مكونات واضحة وخيارات متنوعة</small></div><strong>تجريبي</strong></div>
