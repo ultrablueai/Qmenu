@@ -10,8 +10,8 @@ export default function MenuProductQr({branchId,productId,productName}:{branchId
  return <div className="beger-product-qr">
   <button type="button" onClick={()=>setShow(v=>!v)} aria-expanded={show}>{show?"إخفاء QR":"▦ رمز QR للمنتج"}</button>
   {show?<div className="beger-product-qr-panel"><strong>{productName}</strong><p>رمز المنتج يفتح تفاصيله داخل منيو الفرع، ولا ينشئ طلباً.</p>
-    <div id={"beger-product-code-"+productId}>{origin?<QrSvg value={url} size={162} label={"QR منتج "+productName}/>:<p>جارٍ تجهيز الرمز</p>}</div>
-    {origin?<QrExport targetId={"beger-product-code-"+productId} fileName={"beger-product-"+productId}/>:null}
+    <div id={"beger-product-code-"+branchId+"-"+productId}>{origin?<QrSvg value={url} size={162} label={"QR منتج "+productName}/>:<p>جارٍ تجهيز الرمز</p>}</div>
+    {origin?<QrExport targetId={"beger-product-code-"+branchId+"-"+productId} fileName={"beger-product-"+branchId+"-"+productId}/>:null}
     <a target="_blank" rel="noopener noreferrer" href={path}>فتح صفحة المنتج ↗</a>
     <button type="button" disabled={!origin} onClick={()=>void navigator.clipboard.writeText(url).then(()=>setMessage("تم نسخ الرابط")).catch(()=>setMessage("تعذّر النسخ. افتح رابط المنتج."))}>نسخ الرابط</button>
     {message?<small role="status">{message}</small>:null}
