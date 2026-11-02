@@ -10,7 +10,7 @@ test("guest chooses product quantity before preview basket, and cart honors it",
  assert.match(detail,/\[quantity,setQuantity\]=useState\(1\)/);
  assert.match(detail,/quantity,selections:\[\.\.\.choices,\.\.\.omissions\]/);
  assert.match(detail,/Math\.min\(20,q\+1\)/);
- assert.match(cart,/quantity:Math\.min\(99,x\.quantity\+quantity\)/);
+ assert.match(cart,/quantity:Math\.min\(20,x\.quantity\+quantity\)/);
  assert.match(detail,/formatPrice\(\(Number\(details\.price_minor\)\+extra\)\*quantity,country,lang\)/);
 });
 test("merchant manages option groups with their child choices, no disconnected list",()=>{
