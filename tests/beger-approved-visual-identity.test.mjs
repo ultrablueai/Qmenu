@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 const guest=readFileSync("components/public-menu.tsx","utf8");
 const css=readFileSync("components/public-menu.css","utf8");
+const screens=readFileSync("components/guest-screen-switcher.tsx","utf8");
 const selector=readFileSync("app/dashboard/merchant-appearance.tsx","utf8");
 const hq=readFileSync("app/dashboard/dashboard.module.css","utf8");
 const home=readFileSync("app/page.tsx","utf8");
@@ -12,7 +13,7 @@ test("approved warm, responsive cafe visual identity is implemented in customer 
  assert.match(guest,/beger-category-tiles/);
  assert.match(guest,/beger-welcome-screen/);
  assert.match(guest,/beger-menu-product-list/);
- assert.match(guest,/beger-guest-bottom-nav/);
+ assert.match(screens,/beger-guest-bottom-nav/);
  assert.match(guest,/beger-guest-product/);
  assert.match(css,/@media\(max-width:650px\)/);
  assert.match(css,/prefers-reduced-motion:reduce/);
