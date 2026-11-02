@@ -8,10 +8,10 @@ type Detector={detect(source:HTMLVideoElement):Promise<Detected[]>};
 type DetectorConstructor=new (options:{formats:string[]})=>Detector;
 const validRoute=/^\/(?:b|t)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/?$/i;
 function targetFromQr(value:string):string|null{
- try{const url=new URL(value,window.location.origin);const preview=/^qmenu-staging-(?:[a-z0-9]+|git-feat-g1-foundation)-ultrablueais-projects\\.vercel\\.app$/;const sameProjectPreview=preview.test(url.hostname)&&preview.test(window.location.hostname)&&url.protocol==="https:";if((url.origin!==window.location.origin&&!sameProjectPreview)||!validRoute.test(url.pathname))return null;const p=url.searchParams.get("product");if(p&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(p))return null;return url.pathname+(p?"?product="+encodeURIComponent(p):"");}catch{return null;}
+ try{const url=new URL(value,window.location.origin);const preview=/^qmenu-staging-(?:[a-z0-9]+|git-feat-g1-foundation)-ultrablueais-projects\.vercel\.app$/;const sameProjectPreview=preview.test(url.hostname)&&preview.test(window.location.hostname)&&url.protocol==="https:";if((url.origin!==window.location.origin&&!sameProjectPreview)||!validRoute.test(url.pathname))return null;const p=url.searchParams.get("product");if(p&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(p))return null;return url.pathname+(p?"?product="+encodeURIComponent(p):"");}catch{return null;}
 }
 export default function GuestQrScanner({lang}:{lang:GuestLang}){
- const [open,setOpen]=useState(false),[active,setActive]=useState(false),[starting,setStarting]=useState(false),[error,setError]=useState(""),[manual,setManual]=useState(""),[pageUrl,setPageUrl]=useState("");
+ const [open,setOpen]=useState(false),[active,setActive]=useState(false),[starting,setStarting]=useState(false),[error,setError]=useState(""),[manual,setManual]=useState(""),[pageUrl,setPageUrl]=useState(""),[showAlternatives,setShowAlternatives]=useState(false);
  const videoRef=useRef<HTMLVideoElement>(null),streamRef=useRef<MediaStream|null>(null),frameRef=useRef<number|null>(null),runningRef=useRef(false),requestRef=useRef(0);
  useEffect(()=>{setPageUrl(window.location.href)},[]);
  const strings=lang==="ar"?{open:"افتح الكاميرا لمسح QR",close:"إغلاق الماسح",title:"امسح رمز المتجر أو الطاولة",note:"وجّه الكاميرا إلى رمز QR الخاص بـ Beger. يمكن لصق رابط المنيو أيضاً.",manual:"ألصق رابط QR هنا",go:"فتح الرابط",invalid:"هذا الرمز ليس رابط Beger موثوقاً.",unsupported:"المتصفح لا يدعم قراءة QR بالكاميرا. افتح الكاميرا العادية لمسح الرمز أو الصق رابطه هنا.",permission:"تعذّر فتح الكاميرا. تأكد من إذن الكاميرا أو استخدم الرابط."}:lang==="tr"?{open:"QR kamerayı aç",close:"Tarayıcıyı kapat",title:"Mağaza veya masa QR tara",note:"Beger QR koduna kamerayı tutun veya bağlantıyı yapıştırın.",manual:"QR bağlantısını yapıştır",go:"Bağlantıyı aç",invalid:"Bu güvenilir bir Beger QR bağlantısı değil.",unsupported:"Tarayıcınız kamera QR tanımayı desteklemiyor. Telefon kamerasını kullanın veya bağlantı yapıştırın.",permission:"Kamera açılamadı. İzin verin veya bağlantıyı yapıştırın."}:{open:"Scan shop or table QR",close:"Close scanner",title:"Scan a shop or table QR",note:"Point your camera at a Beger QR or paste a menu link.",manual:"Paste QR link",go:"Open link",invalid:"This is not a trusted Beger QR link.",unsupported:"Camera QR detection is unavailable here. Use your phone camera or paste the link.",permission:"Camera couldn't start. Check permission or paste the link."};
@@ -32,7 +32,7 @@ export default function GuestQrScanner({lang}:{lang:GuestLang}){
   // Mount the dialog/video before requesting camera access. React may delay
   // normal state updates while the browser's permission sheet is visible.
   const requestId=++requestRef.current;
-  flushSync(()=>{setOpen(true);setActive(false);setStarting(true);setError("");});
+  flushSync(()=>{setOpen(true);setActive(false);setStarting(true);setShowAlternatives(false);setError("");});
   if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){setStarting(false);setError(strings.unsupported);return;}
   try{
    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
@@ -103,9 +103,18 @@ export default function GuestQrScanner({lang}:{lang:GuestLang}){
     {starting?<p role="status" className="beger-scanner-status">{lang==="ar"?"جارٍ طلب إذن الكاميرا وبدء البث...":lang==="tr"?"Kamera izni isteniyor...":"Requesting camera permission..."}</p>:null}
     <video ref={videoRef} playsInline muted autoPlay aria-label={strings.title} className="beger-scanner-video" style={{display:active?"block":"none"}}/>
     {error?<p role="alert" className="beger-scanner-error">{error}</p>:null}
-    {!active&&!starting?<a className="beger-scanner-browser-link" href={pageUrl||"#"} target="_blank" rel="noopener noreferrer">{lang==="ar"?"فتح الصفحة في المتصفح الخارجي ↗":lang==="tr"?"Tarayıcıda aç ↗":"Open in browser ↗"}</a>:null}
-    <label className="beger-scanner-photo-label">{lang==="ar"?"أو اختر صورة QR من المعرض":lang==="tr"?"Veya galeriden QR fotoğrafı seç":"Or scan QR from a photo"}<input type="file" accept="image/*" onChange={event=>{void scanPhoto(event.target.files?.[0]??null);event.target.value="";}}/></label>
-    <form onSubmit={submit} className="beger-scanner-form"><label htmlFor="beger-qr-link">{strings.manual}</label><input id="beger-qr-link" type="text" inputMode="url" autoComplete="off" placeholder="https://..." value={manual} onChange={e=>setManual(e.target.value)}/><button type="submit" disabled={!manual.trim()}>{strings.go}</button></form>
+
+    <div className="beger-scanner-alternatives">
+      <button type="button" className="beger-scanner-alternatives-toggle" aria-controls="beger-qr-alternatives" aria-expanded={showAlternatives} onClick={()=>setShowAlternatives(v=>!v)}>
+        {lang==="ar"?"خيارات إضافية":lang==="tr"?"Diğer seçenekler":"More options"}
+        <span aria-hidden="true">{showAlternatives?"⌃":"⌄"}</span>
+      </button>
+      {showAlternatives?<div id="beger-qr-alternatives" className="beger-scanner-alternatives-content">
+        <label className="beger-scanner-photo-label">{lang==="ar"?"اختيار صورة QR من المعرض":lang==="tr"?"Galeriden QR fotoğrafı seç":"Scan QR from a photo"}<input type="file" accept="image/*" onChange={event=>{void scanPhoto(event.target.files?.[0]??null);event.target.value="";}}/></label>
+        <form onSubmit={submit} className="beger-scanner-form"><label htmlFor="beger-qr-link">{strings.manual}</label><input id="beger-qr-link" type="text" inputMode="url" autoComplete="off" placeholder="https://..." value={manual} onChange={e=>setManual(e.target.value)}/><button type="submit" disabled={!manual.trim()}>{strings.go}</button></form>
+        {!active&&!starting&&pageUrl?<a className="beger-scanner-browser-link" href={pageUrl} target="_blank" rel="noopener noreferrer">{lang==="ar"?"فتح الصفحة في المتصفح الخارجي ↗":lang==="tr"?"Tarayıcıda aç ↗":"Open in browser ↗"}</a>:null}
+      </div>:null}
+    </div>
   </section></div>:null}
  </>;
 }
