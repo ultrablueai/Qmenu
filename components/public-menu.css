@@ -196,3 +196,23 @@
  .beger-menu-product-list .beger-guest-product-photo{height:68px!important;width:68px!important}
 }
 @media(prefers-reduced-motion:reduce){.beger-category-tiles a{transition:none}.beger-category-tiles a:hover{transform:none}}
+
+/* Photo-led product detail from the approved customer reference. */
+.beger-product-popup{border:1px solid #e8dbcc}
+.beger-product-popup-hero{background:#e6d6c4}
+.beger-product-popup-hero img{object-fit:cover;object-position:center}
+.beger-product-popup-body{background:linear-gradient(180deg,#fffaf5 0%,#fffdfa 100%)}
+.beger-product-name{font-family:Georgia,"Times New Roman",serif;line-height:1.22;overflow-wrap:anywhere;color:#352a20}
+.beger-product-base-price{font-variant-numeric:tabular-nums}
+.beger-ingredients-card,.beger-modifier-card{background:#fffdf9!important;border-color:#eaded1!important}
+.beger-ingredients-card label,.beger-modifier-card label{overflow-wrap:anywhere}
+.beger-product-add-button{position:sticky;bottom:0;z-index:2;box-shadow:0 6px 20px #53633e2e}
+@media(max-width:650px){
+ .beger-product-popup{border:0;box-shadow:0 -10px 45px #231a2130}
+ .beger-product-popup-body{padding-inline:15px}
+ .beger-product-name{font-size:25px!important}
+ .beger-product-base-price{font-size:19px!important}
+ .beger-ingredients-card,.beger-modifier-card{padding:11px!important;margin:11px 0!important}
+ .beger-modifier-card label{min-height:45px!important;padding:10px 9px!important}
+ .beger-product-add-button{min-height:52px!important;border-radius:13px!important}
+}
