@@ -118,3 +118,9 @@ Preview release intent: 2026-11-02 consolidated G2 theme/language/customer UI bu
 
 ## 2026-11-02 — G2 demo deployment retry
 Manual staging-only Preview request after quota window. No deletion and no Production promotion. Verify exact commit build, public access policy, merchant/guest flow and QR before GO.
+
+## 2026-11-02 — Successful G2 build and QR runtime repair
+- Explicit Preview deployment `dpl_8qsp6jaCkxk2dnjs4feyLqhztJXT`, SHA `84f13c827f777ccc0cc2514d00b9ecec0da52129`, **READY**: 124/124 npm tests pass, staging-only verification pass, TypeScript/Next.js compiled and deployment assigned canonical feature alias. Vercel shareable guest link created without disabling SSO; protected homepage and login both responded HTTP 200 through authenticated fetch.
+- Created isolated fictional `Beger Demo Café — تجريبي` business and branch on **Supabase Staging only**, using reserved demo UUIDs; 3 bilingual/trilingual categories, 4 sample products, ingredient and priced modifier selections, Luxe Dark, languages AR/TR/EN. No user merchant or Production records altered. Branch demo ID `b0000000-2026-4000-8000-000000000002`.
+- First hosted branch guest tests returned HTTP 404 for all three languages including existing genuine branches. Root cause found in `app/b/[branchId]/page.tsx`: incorrect branch UUID regex only matched 4 groups. Fixed to proper five-group UUID; table token regex was *already* correct and not modified. Added `tests/g2-public-qr-uuid-regression.test.mjs`.
+- **Require a new READY deployment of the corrected commit** before marking actual customer branch demo served; do not reuse original READY SHA as proof that the 404 is fixed. No deletions, no Production or main changes.
