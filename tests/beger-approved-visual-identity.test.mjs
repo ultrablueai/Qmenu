@@ -50,7 +50,7 @@ test("actual merchant dashboard uses the reference hierarchy and trusted values"
 
 test("merchant HQ never misrepresents its sample theme as saved active theme",()=>{
  const overview=readFileSync("app/dashboard/hq-reference-overview.tsx","utf8");
- assert.match(overview,/name:"Theme Preview"/);
+ assert.match(overview,/theme:"Theme Preview"/);
  assert.match(overview,/not verified saved setting/);
  assert.doesNotMatch(overview,/name:"Active Theme",value:"Olive \/ Cream"/);
 });
