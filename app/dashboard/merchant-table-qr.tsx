@@ -23,7 +23,7 @@ export default function MerchantTableQr({businessId,branchId,branchName}:{busine
   <div className="beger-qr-card-heading"><strong>{t.label}</strong><span className={t.active?"beger-qr-active":"beger-qr-inactive"}>{t.active?"نشط":"متوقف"}</span></div>
   <div className="beger-qr-code" id={"beger-table-code-"+t.id}>{origin?<QrSvg value={url} size={170} label={"رمز QR للطاولة "+t.label}/>:<span>جارٍ إنشاء QR</span>}</div>
   <a href={path} target="_blank" rel="noopener noreferrer">فتح منيو الطاولة ↗</a>
-  {origin?<QrExport targetId={"beger-table-code-"+t.id} fileName={"beger-table-"+t.id} label="حفظ QR للطباعة"/>:null}
+  {origin?<QrExport targetId={"beger-table-code-"+t.id} fileName={"beger-table-"+t.id} stickerTitle={branchName+" · "+t.label} label="حفظ QR للطباعة"/>:null}
   <div className="beger-qr-card-controls"><button type="button" disabled={busy} onClick={()=>toggle(t)} style={buttonStyle}>{t.active?"إيقاف":"تفعيل"}</button><button type="button" disabled={busy} onClick={()=>rotate(t)} style={buttonStyle}>تجديد الرمز</button><button type="button" style={buttonStyle} disabled={!origin} onClick={()=>void navigator.clipboard.writeText(url).then(()=>setNotice("تم نسخ الرابط")).catch(()=>setError("تعذّر النسخ، افتح الرابط يدوياً"))}>نسخ</button></div>
  </article>})}</div>
  </section>;
