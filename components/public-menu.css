@@ -183,3 +183,22 @@
  .beger-order-item-content>div:last-child>div{gap:6px!important}
  .beger-choice-pills{grid-template-columns:repeat(auto-fit,minmax(60px,1fr))!important}
 }
+
+/* Approved first phone: logo and three-language selector float on café hero. */
+.beger-guest-container{position:relative}
+.beger-screen-switcher[data-stage="welcome"] .beger-guest-header{
+ position:absolute;top:12px;inset-inline:0;z-index:4;justify-content:center;flex-direction:column;
+ align-items:center;padding:16px 10px!important;gap:17px;background:transparent
+}
+.beger-screen-switcher[data-stage="welcome"] .beger-guest-brand{
+ background:#fffcf8d9;padding:5px 10px 5px 6px;border-radius:13px;box-shadow:0 4px 12px #3d291316
+}
+.beger-screen-switcher[data-stage="welcome"] .beger-guest-languages{background:#fff9eee5;box-shadow:0 3px 15px #45351d1c}
+.beger-guest-bottom-nav svg,.beger-service-types svg,.beger-category-tiles svg{display:block;flex-shrink:0}
+.beger-category-tiles a:first-child svg{color:#fff}
+.beger-product-actions>div:first-child{flex:0 1 auto;min-width:0}
+.beger-guest .beger-menu-search>span{color:#7c715f;font-size:20px;display:grid;place-items:center}
+@media(max-width:650px){
+ .beger-screen-switcher[data-stage="welcome"] .beger-guest-header{top:8px;gap:12px}
+ .beger-screen-switcher[data-stage="welcome"] .beger-welcome-screen{margin-top:0}
+}
