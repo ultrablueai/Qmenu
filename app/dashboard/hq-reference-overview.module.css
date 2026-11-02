@@ -84,3 +84,14 @@
  .qrLink,.editLink{font-size:10px}
  .bottomPanels{grid-column:1/-1;grid-row:5}
 }
+
+/* Merchant HQ multilingual toolbar: layout direction follows the selected language. */
+.toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.toolbar label{font-size:11px;font-weight:800;color:#66594b;white-space:nowrap}
+.toolbar select{appearance:auto;min-height:37px;max-width:160px;border-radius:10px;border:1px solid #e3dacd;background:#fffdf8;color:#51432f;font-size:12px;padding:7px 9px;cursor:pointer}
+.toolbar select:focus-visible{outline:3px solid #9ea974;outline-offset:2px}
+.root[dir="rtl"] .branchName{text-align:right}
+.root[dir="rtl"] .panelHeading,.root[dir="rtl"] .top,.root[dir="rtl"] .branchHead{direction:rtl}
+.root[dir="rtl"] .action{direction:rtl}
+.root[dir="rtl"] .banner li::before{flex:none}
+@media(max-width:740px){.toolbar{justify-content:flex-start}.toolbar .staging{width:100%;justify-content:center}.top{gap:13px}}
