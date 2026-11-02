@@ -58,6 +58,7 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
       <h3>1. التصنيفات المركزية</h3>
       <form onSubmit={addCategory} style={line}>
         <label style={{flex:"1 1 170px"}}>الاسم بالعربية<input style={input} required maxLength={100} value={catAr} onChange={e=>setCatAr(e.target.value)}/></label>
+        <label style={{flex:"1 1 170px"}}>English category (optional)<input style={input} maxLength={100} value={catEn} onChange={e=>setCatEn(e.target.value)}/></label>
         <label style={{flex:"1 1 170px"}}>Türkçe kategori<input style={input} required maxLength={100} value={catTr} onChange={e=>setCatTr(e.target.value)}/></label>
         <button style={button} disabled={busy}>إضافة تصنيف</button>
       </form>
@@ -69,11 +70,13 @@ export default function CentralCatalog({businessId,country,branches}:{businessId
         <div style={line}>
           <label style={{flex:"1 1 170px"}}>التصنيف<select style={input} required value={category} onChange={e=>setCategory(e.target.value)}><option value="">اختر تصنيفاً</option>{cats.filter(c=>c.active).map(c=><option key={c.id} value={c.id}>{c.name_ar}</option>)}</select></label>
           <label style={{flex:"1 1 170px"}}>الاسم بالعربية<input style={input} required maxLength={120} value={nameAr} onChange={e=>setNameAr(e.target.value)}/></label>
+          <label style={{flex:"1 1 170px"}}>English product name (optional)<input style={input} maxLength={120} value={nameEn} onChange={e=>setNameEn(e.target.value)}/></label>
           <label style={{flex:"1 1 170px"}}>Türkçe ürün adı<input style={input} required maxLength={120} value={nameTr} onChange={e=>setNameTr(e.target.value)}/></label>
           <label style={{flex:"1 1 120px"}}>السعر ({currency})<input style={input} type="number" required min="0" step={factor===100?"0.01":"1"} value={price} onChange={e=>setPrice(e.target.value)}/></label>
         </div>
         <div style={line}>
           <label style={{flex:"1 1 190px"}}>وصف المنتج بالعربية<textarea style={input} maxLength={1000} value={descAr} onChange={e=>setDescAr(e.target.value)}/></label>
+          <label style={{flex:"1 1 190px"}}>English description (optional)<textarea style={input} maxLength={1000} value={descEn} onChange={e=>setDescEn(e.target.value)}/></label>
           <label style={{flex:"1 1 190px"}}>Türkçe açıklama<textarea style={input} maxLength={1000} value={descTr} onChange={e=>setDescTr(e.target.value)}/></label>
           <label style={{flex:"1 1 190px"}}>رابط صورة HTTPS (اختياري)<input type="url" style={input} maxLength={2048} value={imageUrl} onChange={e=>setImageUrl(e.target.value)}/></label>
         </div>
