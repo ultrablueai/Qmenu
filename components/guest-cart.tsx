@@ -12,7 +12,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
  const [open,setOpen]=useState(false);
  const [hydrated,setHydrated]=useState(false);
  const storageKey="beger-preview-basket:"+branchId+":"+(tableToken??"shop");
- useEffect(()=>{try{const saved=window.sessionStorage.getItem(storageKey);if(saved){const parsed:unknown=JSON.parse(saved);if(Array.isArray(parsed)&&parsed.length<=25){const valid=parsed.filter((x):x is CartItem=>x&&typeof x==="object"&&typeof x.key==="string"&&typeof x.name==="string"&&Number.isSafeInteger(x.unitMinor)&&x.unitMinor>=0&&Number.isInteger(x.quantity)&&x.quantity>=1&&x.quantity<=99&&Array.isArray(x.selections));setItems(valid);}}}catch{/* storage unavailable */}setHydrated(true);},[storageKey]);
+ useEffect(()=>{try{const saved=window.sessionStorage.getItem(storageKey);if(saved){const parsed:unknown=JSON.parse(saved);if(Array.isArray(parsed)&&parsed.length<=25){const valid=parsed.filter((x):x is CartItem=>x&&typeof x==="object"&&typeof x.key==="string"&&typeof x.name==="string"&&Number.isSafeInteger(x.unitMinor)&&x.unitMinor>=0&&Number.isInteger(x.quantity)&&x.quantity>=1&&x.quantity<=20&&Array.isArray(x.selections));setItems(valid);}}}catch{/* storage unavailable */}setHydrated(true);},[storageKey]);
  useEffect(()=>{if(!hydrated)return;try{window.sessionStorage.setItem(storageKey,JSON.stringify(items))}catch{/* storage optional */}},[storageKey,items,hydrated]);
  const closeRef=useRef<HTMLButtonElement|null>(null);
  const openerRef=useRef<HTMLButtonElement|null>(null);
@@ -44,7 +44,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
   remove:en?"Remove product":tr?"Ürünü kaldır":"إزالة المنتج",
  };
  const context=useMemo(()=>({count,open:()=>setOpen(true),add(item:Omit<CartItem,"quantity"> & {quantity?:number}){
-  setItems(existing=>{const quantity=Math.max(1,Math.min(20,Math.trunc(item.quantity??1)));const idx=existing.findIndex(x=>x.key===item.key);if(idx<0)return [...existing,{...item,quantity}];return existing.map((x,i)=>i===idx?{...x,quantity:Math.min(99,x.quantity+quantity)}:x);});
+  setItems(existing=>{const quantity=Math.max(1,Math.min(20,Math.trunc(item.quantity??1)));const idx=existing.findIndex(x=>x.key===item.key);if(idx<0)return [...existing,{...item,quantity}];return existing.map((x,i)=>i===idx?{...x,quantity:Math.min(20,x.quantity+quantity)}:x);});
   setOpen(true);
  }}),[count]);
  return <CartContext.Provider value={context}>
@@ -70,7 +70,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
       <div style={{display:"flex",alignItems:"center",gap:10}}>
        <button type="button" aria-label={labels.quantity+" − "+item.name} onClick={()=>setItems(prev=>prev.flatMap(x=>x.key!==item.key?[x]:x.quantity<=1?[]:[{...x,quantity:x.quantity-1}]))} style={{border:"1px solid #dce8df",background:"#f4faf6",borderRadius:9,padding:"6px 12px",cursor:"pointer"}}>−</button>
        <span style={{minWidth:15,textAlign:"center"}}>{item.quantity}</span>
-       <button type="button" aria-label={labels.quantity+" + "+item.name} onClick={()=>setItems(prev=>prev.map(x=>x.key===item.key?{...x,quantity:Math.min(99,x.quantity+1)}:x))} style={{border:"1px solid #dce8df",background:"#f4faf6",borderRadius:9,padding:"6px 12px",cursor:"pointer"}}>+</button>
+       <button type="button" aria-label={labels.quantity+" + "+item.name} onClick={()=>setItems(prev=>prev.map(x=>x.key===item.key?{...x,quantity:Math.min(20,x.quantity+1)}:x))} style={{border:"1px solid #dce8df",background:"#f4faf6",borderRadius:9,padding:"6px 12px",cursor:"pointer"}}>+</button>
       </div>
      </div>
      </div>
