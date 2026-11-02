@@ -3,7 +3,7 @@ import {createContext,useContext,useState,type ReactNode} from "react";
 import type {GuestLang} from "../lib/g2-public";
 import {useGuestCart} from "./guest-cart";
 
-type Stage="welcome"|"menu";
+type Stage="welcome"|"menu"|"rewards";
 type Journey={stage:Stage;go:(next:Stage)=>void};
 const ScreenContext=createContext<Journey|null>(null);
 
@@ -29,12 +29,12 @@ export function GuestOpenMenu({lang}:{lang:GuestLang}){
 function GuestBottomNavigation({lang}:{lang:GuestLang}){
  const journey=useContext(ScreenContext);
  const basket=useGuestCart();
- const labels=lang==="ar"?["الرئيسية","القائمة","السلة","المكافآت قريباً"]:lang==="tr"?["Ana Sayfa","Menü","Sepet","Ödüller yakında"]:["Home","Menu","Basket","Rewards soon"];
+ const labels=lang==="ar"?["الرئيسية","المنيو","السلة","المكافآت"]:lang==="tr"?["Ana Sayfa","Menü","Sepet","Ödüller"]:["Home","Menu","Basket","Rewards"];
  if(!journey)return null;
  return <nav className="beger-guest-bottom-nav" aria-label={lang==="ar"?"التنقل الرئيسي":lang==="tr"?"Ana gezinme":"Main navigation"}>
   <button type="button" aria-current={journey.stage==="welcome"?"page":undefined} onClick={()=>journey.go("welcome")}><span aria-hidden="true">⌂</span>{labels[0]}</button>
   <button type="button" aria-current={journey.stage==="menu"?"page":undefined} onClick={()=>journey.go("menu")}><span aria-hidden="true">♜</span>{labels[1]}</button>
   <button type="button" onClick={()=>basket?.open()} aria-label={labels[2]}><span aria-hidden="true">▢</span>{labels[2]}{basket?.count? <b className="beger-nav-count">{basket.count}</b>:null}</button>
-  <span className="beger-guest-nav-future" aria-disabled="true"><span aria-hidden="true">☆</span>{labels[3]}</span>
+  <button type="button" aria-current={journey.stage==="rewards"?"page":undefined} onClick={()=>journey.go("rewards")}><span aria-hidden="true">☆</span>{labels[3]}</button>
  </nav>;
 }
