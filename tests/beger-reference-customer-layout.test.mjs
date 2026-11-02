@@ -29,3 +29,16 @@ test("reference visual does not create fictional orders or ratings",()=>{
  assert.match(details,/Preview only\. Ordering and payment are not active yet/);
  assert.doesNotMatch(menu+details,/submitOrder|fakeRating|paymentIntent/);
 });
+
+test("approved mobile reference keeps meaningful hierarchy without tiny vertical text",()=>{
+ assert.match(css,/\.beger-welcome-photo\{height:245px;min-height:245px\}/);
+ assert.match(css,/\.beger-category-tiles a strong\{font-size:clamp\(9px,2\.7vw,12px\)/);
+ assert.match(css,/\.beger-menu-product-list \.beger-guest-product-photo\{height:74px!important;width:74px!important/);
+ assert.match(css,/\.beger-guest-bottom-nav\{min-height:64px/);
+ assert.match(css,/@media\(max-width:360px\)/);
+ assert.match(details,/className="beger-product-name"/);
+ assert.match(details,/\{title\(details\)\}/);
+ assert.match(details,/className="beger-product-base-price"/);
+ assert.match(details,/className="beger-modifier-card"/);
+ assert.match(css,/\.beger-product-add-button\{position:sticky/);
+});
