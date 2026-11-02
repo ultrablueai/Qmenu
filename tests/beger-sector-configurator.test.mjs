@@ -41,6 +41,6 @@ test("merchant dashboard displays model selector only for members authorized to 
  assert.match(ui,/localStorage\.setItem\("beger-sector-draft:"\+draftKey/);
  assert.match(ui,/\.from\("beger_merchant_model_preferences"\)\.upsert/);
  assert.match(ui,/updated_by:user\.id/);
- assert.match(ui,/canSave=\{currentRole==="owner"\}/.source?dash:"",/canSave=\{currentRole==="owner"\}/);
+ assert.match(dash,/canSave=\{currentRole==="owner"\}/);
  assert.doesNotMatch(ui,/service_role|checkout|subscription\.activate/);
 });
