@@ -1,5 +1,6 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useEffect,useRef,useState} from "react";
+import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {browserSupabase} from "../../lib/supabase/browser";
 import "./merchant-order-board.css";
 type Status="pending"|"accepted"|"preparing"|"ready"|"fulfilled"|"rejected";
@@ -10,6 +11,8 @@ function formatOrderTotal(minor:number,currency:string){const factor=currency===
 function orderReference(id:string){return id.replace(/-/g,"").slice(0,8).toUpperCase();}
 const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"accepted",label:"قبول الطلب"},accepted:{value:"preparing",label:"إرسال للمطبخ"},preparing:{value:"ready",label:"جاهز للتسليم"},ready:{value:"fulfilled",label:"تأكيد التسليم"}};
 export default function MerchantOrderBoard({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
+ const feedback=useBegerFeedback();
+ const seen=useRef<Set<string>|null>(null);
  const [enabled,setEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  async function refresh(){
   const db=browserSupabase();
@@ -20,11 +23,15 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   if(cap.error)throw cap.error;
   if(list.error)throw list.error;
   setEnabled(cap.data?.enabled===true);
-  setOrders(Array.isArray(list.data)?list.data as Order[]:[]);
+  const fresh=Array.isArray(list.data)?list.data as Order[]:[];
+  const currentIds=new Set(fresh.map(o=>o.id));
+  if(seen.current!==null){const unseen=fresh.filter(o=>o.status==="pending"&&!seen.current!.has(o.id));if(unseen.length)feedback.signal("new-order",unseen.length===1?"طلب جديد من "+unseen[0].table:"وصل "+unseen.length+" طلبات جديدة");}
+  seen.current=currentIds;
+  setOrders(fresh);
   setError("");
   setLoaded(true);
  }
- useEffect(()=>{let live=true;setLoaded(false);const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);return()=>{live=false;window.clearInterval(timer)}},[branchId,businessId]);
+ useEffect(()=>{let live=true;seen.current=null;setLoaded(false);const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);return()=>{live=false;window.clearInterval(timer)}},[branchId,businessId]);
  async function toggle(){
   if(busy||!confirm(enabled?"إيقاف استقبال طلبات QR الجديدة لهذا الفرع؟ الطلبات السابقة ستبقى محفوظة.":"تفعيل استقبال طلبات الطاولات على نسخة Staging؟ هذا يعني إمكانية إرسال طلبات اختبار حقيقية إلى هذه اللوحة."))return;
   setBusy(true);setError("");setNotice("");
@@ -33,10 +40,12 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
  async function transition(order:Order,status:Status){
   if(busy)return;
   setBusy(true);setError("");setNotice("");
-  try{const {data,error}=await browserSupabase().rpc("g3_transition_order",{p_order:order.id,p_next:status});if(error||data?.status!==status)throw error??Error("Update not confirmed");await refresh();setNotice("تم تحديث طلب #"+orderReference(order.id)+" من "+order.table+" إلى "+titles[status])}catch{setError("تعذّر تحديث الطلب. لم تتغير حالته.")}finally{setBusy(false)}
+  try{const {data,error}=await browserSupabase().rpc("g3_transition_order",{p_order:order.id,p_next:status});if(error||data?.status!==status)throw error??Error("Update not confirmed");await refresh();setNotice("تم تحديث طلب #"+orderReference(order.id)+" من "+order.table+" إلى "+titles[status]);feedback.signal(status==="accepted"?"accepted":status==="preparing"?"preparing":status==="ready"?"ready":status==="fulfilled"?"fulfilled":"rejected","تم تحديث طلب #"+orderReference(order.id)+" إلى "+titles[status])}catch{setError("تعذّر تحديث الطلب. لم تتغير حالته.")}finally{setBusy(false)}
  }
  return <section id="beger-merchant-orders" className="beger-order-board" dir="rtl" aria-label="إدارة طلبات الطاولات">
   <header className="beger-order-board-header"><div><span>BEGER · G3 PILOT</span><h2>طلبات الطاولات والمطبخ</h2><p>{branchName} · استقبال الطلب ← موافقة المطعم ← التحضير ← الجاهزية</p></div><div><span className={enabled?"beger-order-enabled":"beger-order-disabled"}>{enabled?"● استقبال الطلبات مفعّل":"○ استقبال الطلبات متوقف"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void toggle()}>{enabled?"إيقاف استقبال الطلبات":"تفعيل استقبال الطلبات"}</button></div></header>
+  <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change}/>
+  {feedback.message?<p role="status" className="beger-feedback-toast">{feedback.message}</p>:null}
   {error?<p role="alert" className="beger-order-board-error">{error}</p>:null}
   {notice?<p role="status" className="beger-order-board-notice">{notice}</p>:null}
   {!loaded?<p role="status">جارٍ تحميل حالة الطلبات...</p>:null}
