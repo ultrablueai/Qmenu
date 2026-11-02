@@ -4,8 +4,8 @@ import type {GuestLang} from "../lib/g2-public";
 import GuestIcon from "./guest-icons";
 
 type Category={id:string;name:string;icon:"coffee"|"sandwich"|"dessert"|"more";count:number};
-export default function GuestCatalogExplorer({categories,lang,children}:{categories:Category[];lang:GuestLang;children:ReactNode}){
- const [selected,setSelected]=useState(categories.find(c=>c.count>0)?.id??"all"),[query,setQuery]=useState("");
+export default function GuestCatalogExplorer({categories,lang,children,initialCategoryId}:{categories:Category[];lang:GuestLang;children:ReactNode;initialCategoryId?:string}){
+ const [selected,setSelected]=useState(initialCategoryId??categories.find(c=>c.count>0)?.id??"all"),[query,setQuery]=useState("");
  const [found,setFound]=useState(true);
  const sectionsRef=useRef<HTMLDivElement>(null);
  const labels=lang==="ar"?{all:"الكل",search:"ابحث عن قهوة أو منتج",empty:"لا توجد منتجات مطابقة",count:"منتج",hint:"اختر تصنيفاً لتظهر منتجاته فقط"}:lang==="tr"?{all:"Tümü",search:"Kahve veya ürün ara",empty:"Eşleşen ürün bulunamadı",count:"ürün",hint:"Yalnızca ürünlerini görmek için bir kategori seçin"}:{all:"All",search:"Search menu products",empty:"No matching products",count:"items",hint:"Select a category to see only its products"};
