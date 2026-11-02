@@ -77,3 +77,15 @@ test("same canonical product published to two branches exports distinct QR codes
  assert.match(source,/id=\{"beger-product-code-"\+branchId\+"-"\+productId\}/);
  assert.match(source,/fileName=\{"beger-product-"\+branchId\+"-"\+productId\}/);
 });
+
+test("camera dialog mounts its video before requesting permission and explains blocked access",()=>{
+ assert.match(scanner,/flushSync\(\(\)=>\{setOpen\(true\)/);
+ assert.match(scanner,/video\.srcObject=stream/);
+ assert.match(scanner,/await video\.play\(\)/);
+ assert.match(scanner,/style=\{\{display:active\?"block":"none"\}\}/);
+ assert.match(scanner,/NotAllowedError/);
+ assert.match(scanner,/NotFoundError/);
+ assert.match(scanner,/requestId!==requestRef\.current/);
+ assert.match(scanner,/setError\(strings\.unsupported\)/);
+ assert.match(scanner,/beger-scanner-browser-link/);
+});
