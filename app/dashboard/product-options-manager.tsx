@@ -59,6 +59,7 @@ export default function ProductOptionsManager({businessId,country,products}:{bus
     <form onSubmit={addIngredient} style={{display:"grid",gap:9}}>
       <input style={style} aria-label="اسم المكوّن بالعربية" placeholder="مثال: قهوة إسبريسو، خبز، جبنة" required maxLength={120} value={nameAr} onChange={e=>setNameAr(e.target.value)}/>
       <input style={style} aria-label="اسم المكوّن بالتركية" placeholder="Türkçe malzeme" required maxLength={120} value={nameTr} onChange={e=>setNameTr(e.target.value)}/>
+      <input style={style} aria-label="English ingredient (optional)" placeholder="English ingredient name" maxLength={120} value={nameEn} onChange={e=>setNameEn(e.target.value)}/>
       <label><input type="checkbox" checked={optional} onChange={e=>setOptional(e.target.checked)}/> يمكن طلب إزالته (مثلاً بدون بصل)</label>
       <button style={button} disabled={busy}>إضافة المكوّن</button>
     </form>
@@ -69,6 +70,7 @@ export default function ProductOptionsManager({businessId,country,products}:{bus
     <form onSubmit={addGroup} style={{display:"grid",gap:9}}>
       <input style={style} placeholder="اسم المجموعة بالعربية" aria-label="اسم المجموعة بالعربية" required maxLength={120} value={groupAr} onChange={e=>setGroupAr(e.target.value)}/>
       <input style={style} placeholder="Türkçe seçenek grubu" aria-label="اسم المجموعة بالتركية" required maxLength={120} value={groupTr} onChange={e=>setGroupTr(e.target.value)}/>
+      <input style={style} aria-label="English modifier group (optional)" placeholder="English group name" maxLength={120} value={groupEn} onChange={e=>setGroupEn(e.target.value)}/>
       <label>الحد الأدنى للاختيارات <input style={style} type="number" min={0} max={20} value={min} onChange={e=>setMin(Number(e.target.value))}/></label>
       <label>الحد الأعلى للاختيارات <input style={style} type="number" min={1} max={20} value={max} onChange={e=>setMax(Number(e.target.value))}/></label>
       <button disabled={busy} style={button}>إنشاء المجموعة</button>
@@ -80,6 +82,7 @@ export default function ProductOptionsManager({businessId,country,products}:{bus
       <select style={style} required aria-label="مجموعة الخيار" value={optionGroup} onChange={e=>setOptionGroup(e.target.value)}><option value="">اختر المجموعة</option>{groups.filter(g=>g.active).map(g=><option key={g.id} value={g.id}>{g.name_ar}</option>)}</select>
       <input style={style} required maxLength={120} placeholder="مثال: سكر زيادة، شوكولا، جبنة إضافية" aria-label="اسم الخيار بالعربية" value={optionAr} onChange={e=>setOptionAr(e.target.value)}/>
       <input style={style} required maxLength={120} placeholder="Türkçe seçenek" aria-label="اسم الخيار بالتركية" value={optionTr} onChange={e=>setOptionTr(e.target.value)}/>
+      <input style={style} aria-label="English option name (optional)" placeholder="English option name" maxLength={120} value={optionEn} onChange={e=>setOptionEn(e.target.value)}/>
       <label>سعر الإضافة ({currency}) <input style={style} type="number" min="0" step={factor===100?"0.01":"1"} value={delta} onChange={e=>setDelta(e.target.value)} required/></label>
       <button disabled={busy||!groups.length} style={button}>إضافة الخيار</button>
     </form>
