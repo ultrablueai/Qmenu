@@ -1,3 +1,5 @@
+> **SCOPE OVERRIDE — Owner decision 2026-11-03:** Delivery, routing, maps, customer address books, courier accounts and delivery pricing are **DEFERRED, NOT ACTIVE ROADMAP**. This file is historical exploratory research only. Current product focus is merchant QR menu, dine-in table ordering and scheduled shop pickup (gel-al / تعال استلم), payments, and Beger merchant subscription monetization. The experimental pure calculations in lib/beger-fulfillment-planning.ts do not authorize UI, migrations, integrations or delivery work. Phone OTP can be scoped to scheduled pickup only when necessary. No new delivery work until explicit owner decision.
+
 # Beger — Global Ordering Benchmark, Architecture Decision & Delivery/Pickup Roadmap
 Date: 2026-11-03 | Project: ultrablueai/Qmenu | Staging branch: feat/g1-foundation
 Status: Research-backed IMPLEMENTATION PLAN. Does not authorize production payments, activating external delivery services, or migrations before G1/G2 and G3 pilot release gates.
