@@ -45,6 +45,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
        </Link>)}
     </nav>
    </header>
+   {tableLabel?<div className="beger-table-confirmation" role="status" aria-label={lang==="ar"?"الطاولة المحددة":lang==="tr"?"Seçilen masa":"Selected table"}><span aria-hidden="true">▦</span><div><small>{lang==="ar"?"أنت تتصفح منيو الطاولة":lang==="tr"?"Bu masanın menüsünü görüntülüyorsunuz":"You're viewing the menu for"}</small><strong>{tableLabel}</strong></div><span className="beger-table-confirmed">{lang==="ar"?"تم التعرف على الطاولة":lang==="tr"?"Masa tanındı":"Table identified"} ✓</span></div>:null}
    <section className="beger-guest-hero beger-welcome-screen" style={{background:theme.hero,border:"1px solid "+theme.border}}>
      <div className="beger-welcome-photo" aria-hidden="true">
        <img src={heroImage} alt="" loading="eager" referrerPolicy="no-referrer"/>
