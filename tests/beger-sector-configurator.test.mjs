@@ -33,11 +33,14 @@ test("pricing and activation cannot be invented by preview selection",()=>{
 });
 test("merchant dashboard displays model selector only for members authorized to manage branches",()=>{
  assert.match(dash,/canManageBranches \? <div id="business-model"/);
- assert.match(dash,/BegerSectorConfigurator key=\{primary\.id\} draftKey=\{primary\.id\}/);
+ assert.match(dash,/BegerSectorConfigurator key=\{primary\.id\} draftKey=\{primary\.id\} businessId=\{primary\.id\} canSave=\{currentRole==="owner"\}/);
  assert.match(dash,/import BegerSectorConfigurator/);
  assert.match(ui,/previewPlan\(sector,chosen\)/);
  assert.match(ui,/is-planned/);
- assert.match(ui,/ليست اشتراكاً مدفوعاً أو تفعيل صلاحيات/);
+ assert.match(ui,/اختيار ميزة لا يمنح صلاحية تشغيلها/);
  assert.match(ui,/localStorage\.setItem\("beger-sector-draft:"\+draftKey/);
- assert.doesNotMatch(ui,/\.rpc\(|service_role|checkout|subscription\.activate/);
+ assert.match(ui,/\.from\("beger_merchant_model_preferences"\)\.upsert/);
+ assert.match(ui,/updated_by:user\.id/);
+ assert.match(ui,/canSave=\{currentRole==="owner"\}/.source?dash:"",/canSave=\{currentRole==="owner"\}/);
+ assert.doesNotMatch(ui,/service_role|checkout|subscription\.activate/);
 });
