@@ -7,9 +7,13 @@ type CartItem={key:string;productId?:string;optionIds?:string[];removedIngredien
 type CartContextValue={add:(item:Omit<CartItem,"quantity"> & {quantity?:number})=>void;count:number;open:()=>void};
 const CartContext=createContext<CartContextValue|null>(null);
 export function useGuestCart(){return useContext(CartContext);}
-export default function GuestCart({children,country,lang,accent,tableToken,tableLabel}:{children:ReactNode;country:string;lang:GuestLang;accent:string;tableToken?:string;tableLabel?:string}){
+export default function GuestCart({children,country,lang,accent,branchId,tableToken,tableLabel}:{children:ReactNode;country:string;lang:GuestLang;accent:string;branchId:string;tableToken?:string;tableLabel?:string}){
  const [items,setItems]=useState<CartItem[]>([]);
  const [open,setOpen]=useState(false);
+ const [hydrated,setHydrated]=useState(false);
+ const storageKey="beger-preview-basket:"+branchId+":"+(tableToken??"shop");
+ useEffect(()=>{try{const saved=window.sessionStorage.getItem(storageKey);if(saved){const parsed:unknown=JSON.parse(saved);if(Array.isArray(parsed)&&parsed.length<=25){const valid=parsed.filter((x):x is CartItem=>x&&typeof x==="object"&&typeof x.key==="string"&&typeof x.name==="string"&&Number.isSafeInteger(x.unitMinor)&&x.unitMinor>=0&&Number.isInteger(x.quantity)&&x.quantity>=1&&x.quantity<=99&&Array.isArray(x.selections));setItems(valid);}}}catch{/* storage unavailable */}setHydrated(true);},[storageKey]);
+ useEffect(()=>{if(!hydrated)return;try{window.sessionStorage.setItem(storageKey,JSON.stringify(items))}catch{/* storage optional */}},[storageKey,items,hydrated]);
  const closeRef=useRef<HTMLButtonElement|null>(null);
  const openerRef=useRef<HTMLButtonElement|null>(null);
  useEffect(()=>{if(!open)return;
