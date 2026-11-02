@@ -65,3 +65,9 @@ test("basket survives language switching without leaking between branches and ta
 test("Supabase capability queries normalize PostgREST PromiseLike before catch/finally",()=>{
  assert.match(guest,/Promise\.resolve\(client\(\)\.rpc\("g3_table_order_enabled"/);
 });
+
+test("guest may start another table order after fulfillment or rejection, not while kitchen handles the first",()=>{
+ assert.match(guest,/status==="fulfilled"\|\|status==="rejected"/);
+ assert.match(guest,/newOrder:"بدء طلب جديد"/);
+ assert.match(guest,/sessionStorage\.removeItem\("beger-g3-order:"\+tableToken\)/);
+});
