@@ -2,6 +2,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { serverSupabase } from "../../../../lib/supabase/server";
 import styles from "../../dashboard.module.css";
+import MerchantOrderBoard from "../../merchant-order-board";
+import MerchantTableQr from "../../merchant-table-qr";
+import "../../../qr-experience.css";
 
 export const dynamic = "force-dynamic";
 
@@ -49,9 +52,11 @@ export default async function BranchDashboard({ params }: Props) {
     if (assignmentError || !assignment) notFound();
     branchRole = assignment.branch_role;
   }
+  const canManageOrders = role === "owner" || role === "manager";
+  const centralLink = "/dashboard?business="+encodeURIComponent(business.id)+"#catalog-management";
   return <div className={styles.branchPage}>
     <header className={styles.branchPageHeader}>
-      <Link href="/dashboard" className={styles.backLink}>← الرجوع إلى اللوحة الرئيسية للنشاط</Link>
+      <Link href={"/dashboard?business="+encodeURIComponent(business.id)} className={styles.backLink}>← الرجوع إلى لوحة {business.name}</Link>
       <span className={styles.previewBadge}><span className={styles.statusDot} aria-hidden="true" />فرع تجريبي</span>
     </header>
     <main className={styles.content}>
@@ -62,7 +67,7 @@ export default async function BranchDashboard({ params }: Props) {
         <div className={styles.heroCopy}>
           <span className={styles.heroBadge}>⌂ لوحة الفرع</span>
           <h2 className={styles.heroTitle}>إدارة {branch.name}</h2>
-          <p className={styles.heroText}>هذه مساحة الفرع المستقلة. خدمات QR المتجر والطلبات والانتظار ستُربط بهذا الفرع عند تفعيل وحداتها، ولا نعرض أرقام تشغيل غير موجودة.</p>
+          <p className={styles.heroText}>هذه مساحة الفرع المستقلة. صفحة تشغيل الفرع: استقبال طلبات الطاولات، مراجعة الطلبات وقبولها ثم إرسالها للتحضير. هذه بيئة Staging للاختبار بدون دفع مالي.</p>
         </div>
         <div className={styles.heroGraphic} aria-hidden="true"><div className={styles.heroGraphicInner}><span className={styles.heroGraphicText}>B</span></div></div>
       </section>
@@ -78,19 +83,31 @@ export default async function BranchDashboard({ params }: Props) {
         <section className={styles.panel}>
           <h2 className={styles.panelTitle}>QR المتجر والطاولة</h2>
           <p className={styles.panelSubtitle}>سيأخذ الرمز الزبون إلى منيو هذا الفرع مباشرةً، دون إجباره على إنشاء حساب.</p>
-          <div className={styles.empty} style={{marginTop:16}}>يمكن للزبون فتح قائمة هذا الفرع دون حساب. إدارة المنيو وQR والطاولات موجودة حصراً في لوحة المتجر الرئيسي.</div>
+          <div className={styles.empty} style={{marginTop:16}}>منيو هذا الفرع متاح للزبائن بدون حساب. رمز المتجر يفتح القائمة العامة؛ ورمز كل طاولة يربط طلب الزبون برقمها الصحيح.</div>
           <Link href={`/b/${branch.id}`} target="_blank" rel="noopener noreferrer" className={styles.branchOpenLink}>معاينة صفحة الزبون العامة ←</Link>
         </section>
       </div>
       <section className={styles.panel} aria-label="إدارة الفرع من المتجر الرئيسي">
         <h2 className={styles.panelTitle}>صلاحيات إدارة الفرع</h2>
-        <p className={styles.panelSubtitle}>المنيو والأسعار والتصنيفات وإعدادات الطاولات وQR تُدار مركزياً من لوحة المتجر الرئيسي. هذه الصفحة مخصصة للتشغيل المحلي حسب صلاحية الموظف.</p>
-        {(role === "owner" || role === "manager") ? <Link href="/dashboard#catalog-management" className={styles.branchOpenLink}>العودة إلى الإدارة المركزية ←</Link> : null}
+        <p className={styles.panelSubtitle}>الكتالوج وأسعار المنتجات والتصنيفات تُدار من لوحة المتجر المركزية. أما الطلبات التشغيلية وQR الطاولات فتجدها أدناه في نفس الفرع.</p>
+        {canManageOrders ? <Link href={centralLink} className={styles.branchOpenLink}>فتح كتالوج المتجر المركزي ←</Link> : null}
       </section>
+      {canManageOrders ? <>
+        <nav aria-label="تنقل تشغيل الفرع" className={styles.branchOperationsNav}>
+          <a href="#beger-merchant-orders">الطلبات الواردة والمطبخ ↓</a>
+          <a href="#beger-table-qr-title">QR الطاولات ↓</a>
+          <Link href={centralLink}>المنتجات والإضافات في المركز ←</Link>
+        </nav>
+        <MerchantOrderBoard businessId={business.id} branchId={branch.id} branchName={branch.name}/>
+        <MerchantTableQr businessId={business.id} branchId={branch.id} branchName={branch.name}/>
+      </> : <section className={styles.panel}>
+        <h2 className={styles.panelTitle}>تشغيل الطلبات</h2>
+        <p className={styles.panelSubtitle}>حسابك مسجّل لهذا الفرع، لكن إدارة قبول الطلبات وتغيير حالات المطبخ متاحة حالياً لمالك النشاط ومديره فقط. لن نعرض الطلبات بلا صلاحية.</p>
+      </section>}
       <section className={styles.modules} aria-labelledby="branch-tools-heading">
         <h2 className={styles.panelTitle} id="branch-tools-heading">وحدات هذا الفرع</h2>
         <div className={styles.moduleGrid} style={{marginTop:15}}>
-          {["قائمة المنتجات والخدمات","الطابور والبيجر","الطلبات والحجوزات","عملاء الفرع والولاء"].map(name=>
+          {["الحجوزات والطابور","البيجر والتنبيهات الفورية","عملاء الفرع والولاء"].map(name=>
             <div key={name} className={styles.module}><span className={styles.moduleSymbol}>◈</span><span className={styles.moduleTitle}>{name}</span><span className={styles.moduleState}>قريباً</span></div>
           )}
         </div>
