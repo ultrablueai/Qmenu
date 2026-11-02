@@ -39,17 +39,21 @@ test("delivery free threshold, fee floor and cap follow merchant policy, no borr
  assert.throws(()=>model.quoteDeliveryFromVerifiedRoute(route,policy,-1));
 });
 
-test("packaging charges charged per quantity but outer carrier bag only once",()=>{
+test("packaging charges product-specific quantities but outer bag only once per full order",()=>{
  const rules=[
-  {id:"cup-lid",unitPriceMinor:40,quantityPerProduct:1,policy:"charged",scope:"item"},
+  {id:"cup-lid",productId:"coffee",unitPriceMinor:40,quantityPerProduct:1,policy:"charged",scope:"item"},
+  {id:"cake-box",productId:"cake",unitPriceMinor:75,quantityPerProduct:1,policy:"charged",scope:"item"},
   {id:"outer-bag",unitPriceMinor:30,quantityPerProduct:1,policy:"charged",scope:"order"},
-  {id:"napkin",unitPriceMinor:20,quantityPerProduct:1,policy:"included",scope:"item"}
+  {id:"napkin",productId:"coffee",unitPriceMinor:20,quantityPerProduct:1,policy:"included",scope:"item"}
  ];
- const result=model.calculatePackaging(rules,3);
- assert.deepEqual(result.lines.map(x=>x.units),[3,1,3]);
- assert.deepEqual(result.lines.map(x=>x.totalMinor),[120,30,0]);
- assert.equal(result.totalMinor,150);
- assert.throws(()=>model.calculatePackaging([{...rules[0],unitPriceMinor:-1}],1));
+ const items=[{productId:"coffee",quantity:2},{productId:"coffee",quantity:1},{productId:"cake",quantity:1}];
+ const result=model.calculatePackaging(rules,items);
+ assert.deepEqual(result.lines.map(x=>x.units),[3,1,1,3]);
+ assert.deepEqual(result.lines.map(x=>x.totalMinor),[120,75,30,0]);
+ assert.equal(result.totalMinor,225);
+ assert.throws(()=>model.calculatePackaging([{...rules[0],unitPriceMinor:-1}],items));
+ assert.throws(()=>model.calculatePackaging([rules[0],rules[0]],items));
+ assert.throws(()=>model.calculatePackaging([{...rules[0],productId:undefined}],items));
 });
 
 test("pickup slots never promise a time before both prep lead time and kitchen readiness",()=>{
