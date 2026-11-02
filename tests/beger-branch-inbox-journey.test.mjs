@@ -36,3 +36,12 @@ test("customer cart distinguishes shop browsing and real table order with truthf
  assert.match(cart,/طلبك لن يصل للمطعم إلا بعد الضغط على/);
  assert.match(cart,/امسح QR الطاولة لإرسال طلب/);
 });
+
+test("branch inbox and table QR appear above low-priority branch metadata on mobile",()=>{
+ const nav=branch.indexOf('aria-label="تنقل تشغيل الفرع"');
+ const inbox=branch.indexOf('<MerchantOrderBoard businessId=');
+ const meta=branch.indexOf('<div className={styles.twoCols}>');
+ assert.ok(nav>=0 && inbox>nav && meta>inbox,"Merchant should see incoming orders before informational cards");
+ assert.match(branch,/branchOperationsIntro/);
+ assert.doesNotMatch(branch,/className=\{styles\.hero\} style=\{\{ marginTop:24 \}\}/);
+});
