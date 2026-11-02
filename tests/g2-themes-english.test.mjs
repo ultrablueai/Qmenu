@@ -48,3 +48,11 @@ test("themes are read-only guest preview, never customer authorization",()=>{
  assert.match(migration,/m\.role IN \('owner','manager'\)/);
  assert.doesNotMatch(migration,/m\.role IN \('owner','manager','staff'\)/);
 });
+
+test("Luxe Dark product customization remains legible and English prompts are complete",()=>{
+ assert.match(menu,/dark=\{appearance\.theme==="luxe_dark"\}/);
+ assert.match(details,/dark\?:boolean/);
+ assert.match(details,/\.\.\.panel,color:"#21383b"/);
+ assert.match(details,/en\?" · Required"/);
+ assert.match(details,/en\?"Free"/);
+});
