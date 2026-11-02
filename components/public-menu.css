@@ -234,3 +234,19 @@
 .beger-guest-languages a[aria-current="page"]{background:#657a44!important;color:#fff!important}
 .beger-guest-languages a{color:#594d40}
 @media(max-width:650px){.beger-category-tiles{grid-template-columns:none!important;gap:8px!important;overflow-x:auto}.beger-category-tiles a{flex-basis:105px}.beger-category-tiles a strong{font-size:11px!important}.beger-guest-languages a{font-size:11px}}
+
+/* Category selection is a filter, not a scroll-to-anchor jump. */
+.beger-screen-switcher[data-stage="welcome"] .beger-catalog-browser,
+.beger-screen-switcher[data-stage="rewards"] .beger-catalog-browser{display:none!important}
+.beger-category-scroller{display:flex;gap:9px;overflow-x:auto;overscroll-behavior-inline:contain;padding:5px 2px 11px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.beger-category-filter{flex:0 0 115px;min-width:115px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:104px;padding:12px 7px;border-radius:15px;border:1px solid #e8ddce;background:#fffcf8;color:#4b4135;cursor:pointer;scroll-snap-align:start;font:inherit;white-space:normal}
+.beger-category-filter strong{font-weight:850;font-size:12px;line-height:1.35;overflow-wrap:normal;word-break:normal;text-align:center}
+.beger-category-filter small{font-size:10px;color:#897a69}
+.beger-category-filter[aria-pressed="true"]{background:linear-gradient(140deg,#788b4b,#576b37);color:white;border-color:#74854b;box-shadow:0 5px 15px #61773a2b}
+.beger-category-filter[aria-pressed="true"] small{color:#f1f3e5}
+.beger-category-hint{font-size:11px;color:#8c7c6c;margin:0 0 14px;line-height:1.5}
+.beger-catalog-empty{background:#fff4ec;border:1px solid #eddfd1;border-radius:14px;padding:22px;color:#816c56;font-size:13px;text-align:center}
+.beger-catalog-browser [hidden]{display:none!important}
+.beger-category-results{min-width:0}
+.beger-catalog-browser .beger-menu-section{margin:0 0 18px!important}
+@media(max-width:650px){.beger-category-filter{flex-basis:100px;min-width:100px;min-height:90px}.beger-category-filter strong{font-size:11px}}
