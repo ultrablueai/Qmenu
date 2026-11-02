@@ -11,7 +11,7 @@ export default function HqReferenceOverview({businessName,userLabel,businessCoun
   {icon:"◈",name:"Products",value:empty,sub:"Open central catalog"},
   {icon:"▢",name:"Orders",value:empty,sub:"Not active in this phase"},
   {icon:"☆",name:"Rating",value:empty,sub:"No verified ratings"},
-  {icon:"◉",name:"Active Theme",value:"Olive / Cream",sub:"Reference visual direction"}
+  {icon:"◉",name:"Theme Preview",value:"Olive / Cream",sub:"Visual reference, not verified saved setting"}
  ];
  return <section className={s.root} aria-label="Beger HQ dashboard reference layout" dir="ltr">
   <header className={s.top}>
