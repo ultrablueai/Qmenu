@@ -33,3 +33,16 @@ test("visual redesign must not simulate operational orders or unverified ratings
  assert.match(reviews,/No verified reviews yet/);
  assert.doesNotMatch(guest+cart+reviews,/submitOrder|paymentIntent|fakeRating/);
 });
+
+test("actual merchant dashboard uses the reference hierarchy and trusted values",()=>{
+ const page=readFileSync("app/dashboard/page.tsx","utf8");
+ const overview=readFileSync("app/dashboard/hq-reference-overview.tsx","utf8");
+ const layout=readFileSync("app/dashboard/hq-reference-overview.module.css","utf8");
+ assert.match(page,/HqReferenceOverview/);
+ assert.match(page,/loadError=\{loadError\}/);
+ for(const section of ["Orders Trend","Orders by Channel","Top Products","Central Catalog","Menu Themes & Languages","Branch Management"])assert.ok(overview.includes(section),section);
+ assert.match(overview,/branches\.map\(b=>/);
+ assert.match(overview,/No real orders yet/);
+ assert.match(layout,/\.kpis\{display:grid;grid-template-columns:repeat\(6/);
+ assert.doesNotMatch(overview,/2,856|1,264 Reviews|425,300/);
+});
