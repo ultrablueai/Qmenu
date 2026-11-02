@@ -135,3 +135,15 @@ test("QR navigation keeps supported language and deployment-scoped preview crede
  assert.match(scanner,/target\.pathname\+target\.search/);
  assert.doesNotMatch(scanner,/target\.searchParams\.set\("_vercel_share",scannedShare\)\s*;\s*return/);
 });
+
+test("a verified table QR opens its own menu immediately, while the shop QR keeps welcome",()=>{
+ const tablePage=read("app/t/[token]/page.tsx");
+ const branchPage=read("app/b/[branchId]/page.tsx");
+ const menu=read("components/public-menu.tsx");
+ assert.match(tablePage,/public_table_locator/);
+ assert.match(tablePage,/tableToken=\{token\}/);
+ assert.match(menu,/<GuestScreenSwitcher lang=\{lang\} initialStage=\{tableToken\?"menu":"welcome"\}/);
+ assert.match(guest,/initialStage="welcome"/);
+ assert.match(guest,/useState<Stage>\(initialStage\)/);
+ assert.doesNotMatch(branchPage,/tableToken=\{/);
+});
