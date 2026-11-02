@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 const menu=readFileSync("components/public-menu.tsx","utf8");
 const css=readFileSync("components/public-menu.css","utf8");
 const details=readFileSync("components/product-details.tsx","utf8");
+const screens=readFileSync("components/guest-screen-switcher.tsx","utf8");
 test("approved customer flow is welcome, four-across categories, compact product rows, detail popup",()=>{
  const intro=menu.indexOf("beger-welcome-screen");
  const tiles=menu.indexOf("beger-category-tiles");
@@ -18,8 +19,11 @@ test("approved customer flow is welcome, four-across categories, compact product
 test("navigation and responsive reference layout work in AR/TR/EN",()=>{
  assert.match(menu,/aria-label="Languages"/);
  assert.match(menu,/lang==="ar"\?"rtl":"ltr"/);
- assert.match(menu,/href=\{\x60#category-\$\{categories\[0\]/);
+ assert.match(menu,/<GuestScreenSwitcher lang=\{lang\}>/);
+ assert.match(menu,/<GuestOpenMenu lang=\{lang\}/);
+ assert.match(screens,/journey\?\.go\("menu"\)/);
  assert.match(css,/@media\(max-width:650px\)/);
+ assert.match(screens,/className="beger-guest-bottom-nav"/);
  assert.match(css,/\.beger-guest-bottom-nav\{position:fixed/);
  assert.match(css,/\.beger-product-popup\{width:100%/);
  assert.match(css,/safe-area-inset-bottom/);
@@ -47,4 +51,16 @@ test("reference photo-led modal keeps real catalog pricing and no fabricated sta
  assert.match(details,/formatPrice\(Number\(details\.price_minor\),country,lang\)/);
  assert.doesNotMatch(details,/1,264 Reviews|fakeRating|4\.8\s*★/);
  assert.match(details,/Preview only\. Ordering and payment are not active yet/);
+});
+
+test("real welcome and menu are separate phone screens with functional navigation",()=>{
+ assert.match(screens,/useState<Stage>\("welcome"\)/);
+ assert.match(screens,/go\("welcome"\)/);
+ assert.match(screens,/go\("menu"\)/);
+ assert.match(screens,/basket\?\.open\(\)/);
+ assert.match(screens,/aria-disabled="true"/);
+ assert.match(css,/data-stage="welcome"\] \.beger-menu-intro/);
+ assert.match(css,/data-stage="menu"\] \.beger-welcome-screen/);
+ assert.match(menu,/className="beger-menu-section"/);
+ assert.doesNotMatch(screens,/checkout|submitOrder|paymentIntent/);
 });
