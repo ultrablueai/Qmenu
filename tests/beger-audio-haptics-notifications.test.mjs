@@ -12,7 +12,8 @@ test("sound and vibration are opt-in and use no external audio dependency or per
  assert.match(feedback,/const DEFAULT:FeedbackSettings=\{sound:false,vibration:false\}/);
  assert.match(feedback,/new C\(\)/);
  assert.match(feedback,/oscillator\.type="sine"/);
- assert.match(feedback,/navigator\.vibrate\(patterns\[kind\]\)/);
+ assert.match(feedback,/navigator\.vibrate\(vibrationSequence\(kind\)\)/);
+ assert.match(feedback,/repeatedAlerts\.has\(kind\)\?3:1/);
  assert.match(feedback,/ctx\.state!=="running"\)return/);
  assert.doesNotMatch(feedback,/Notification\.requestPermission|new Notification\(|pushManager|fetch\(|https?:\/\//);
  assert.match(feedback,/onChange=\{e=>onChange\(\{\.\.\.settings,sound:e\.target\.checked\}\)\}/);
