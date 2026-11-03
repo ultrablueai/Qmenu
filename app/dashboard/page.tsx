@@ -27,7 +27,7 @@ function initials(name: string) {
   return (name.trim()[0] || "ب").toLocaleUpperCase("ar");
 }
 
-export default async function Dashboard({searchParams}:{searchParams:Promise<{business?:string}>}) {
+export default async function Dashboard({searchParams}:{searchParams:Promise<{business?:string;setup?:string}>}) {
   const supabase = await serverSupabase();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) redirect("/login");
@@ -57,7 +57,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
   const loadError = Boolean(membershipError || businessResult.error || branchResult.error);
   const businesses = businessResult.data ?? [];
   const branches = branchResult.data ?? [];
-  const requestedBusiness = (await searchParams).business;
+  const params=await searchParams;
+  const requestedBusiness=params.business;
   // The selection is only honored if it belongs to a verified membership.
   const primary = businesses.find((b) => b.id === requestedBusiness && ids.includes(b.id)) ?? businesses.find((b) => b.id === ids[0]) ?? businesses[0];
   const currentRole = memberships?.find((m) => m.business_id === primary?.id)?.role ?? "staff";
@@ -135,6 +136,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
             <div className={styles.headBadge}><span className={styles.statusDot} aria-hidden="true" /> حسابك: <b>{roleLabel(currentRole)}</b></div>
           </div>
 
+          {params.setup==="review" && <div className={styles.error} role="alert">تم إنشاء نشاطك، لكن حفظ اختيار النموذج والميزات لم يكتمل. افتح «نموذج العمل والميزات» واحفظ اختياراتك من جديد. لم يُفعّل أي اشتراك مدفوع.</div>}
           {membershipError ? <div className={styles.error} role="alert">تعذّر التحقق من عضوية نشاطك. حاول إعادة تحميل الصفحة، ولا تنشئ نشاطاً جديداً قبل التأكد.</div> : null}
           {loadError && !membershipError ? <div className={styles.error} role="alert">تعذّر تحميل بعض بيانات نشاطك. حاول إعادة تحميل الصفحة؛ لن نعرض أرقاماً غير مؤكدة.</div> : null}
 
