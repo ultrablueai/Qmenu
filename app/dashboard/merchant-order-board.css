@@ -171,3 +171,35 @@
 .beger-order-board .beger-order-history{margin-top:9px}
 @media(max-width:1100px){.beger-order-filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.beger-order-filterbar{grid-template-columns:minmax(0,1fr);padding:10px;gap:9px}.beger-board-view-tabs button{flex:1;padding:11px 9px}.beger-board-result-count{justify-self:start}}
+
+/* Merchant archive: default compact table, optional list and visual card grid. */
+.beger-archive-toolbar{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 0}
+.beger-archive-layout{display:inline-flex;align-items:center;gap:4px;background:#f4f2eb;border:1px solid #e3dacd;border-radius:12px;padding:4px}
+.beger-archive-layout button{min-height:39px;display:flex;align-items:center;gap:7px;border:0;border-radius:9px;padding:8px 13px;color:#665c4d;font:inherit;font-size:12px;cursor:pointer;background:transparent}
+.beger-archive-layout button[aria-pressed="true"]{background:#677d4d;color:#fff;box-shadow:0 2px 8px #35472726}
+.beger-archive-layout button span{font-size:18px}
+.beger-archive-sort{display:flex;align-items:center;gap:8px;font-weight:750;font-size:11px;color:#6f6557}
+.beger-archive-sort select{min-height:40px;min-width:135px;border:1px solid #d9d2c5;border-radius:9px;background:#fff;padding:7px;font:inherit}
+.beger-archive-table-scroll{grid-column:1/-1;min-width:0;max-width:100%;overflow-x:auto;border:1px solid #e5ded2;border-radius:13px;background:#fff}
+.beger-archive-table{border-collapse:collapse;border-spacing:0;width:100%;min-width:840px;text-align:right;font-size:12px}
+.beger-archive-table th{background:#f0f3e9;color:#4c6137;font-size:11px;font-weight:850;white-space:nowrap}
+.beger-archive-table td,.beger-archive-table th{padding:12px 10px;border-bottom:1px solid #ede8e0;vertical-align:middle}
+.beger-archive-table tbody tr:hover{background:#fafbf6}
+.beger-archive-table tbody tr:last-child td{border-bottom:0}
+.beger-archive-table td strong{font-weight:900;color:#3d5131}
+.beger-archive-row-detail{max-width:260px}
+.beger-archive-row-detail summary{cursor:pointer;color:#59743d;font-weight:800;white-space:nowrap}
+.beger-archive-row-detail ul{margin:9px 0;padding-inline-start:15px}
+.beger-archive-row-actions{display:flex;flex-wrap:wrap;gap:5px;padding:9px 0}
+.beger-archive-row-actions button{min-height:36px;border:1px solid #d5dec7;background:#fff;color:#536e3a;border-radius:7px;padding:6px 9px;font-size:11px;cursor:pointer}
+.beger-archive-cards{grid-column:1/-1;min-width:0;display:grid;gap:11px}
+.beger-archive-cards.is-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.beger-archive-cards.is-list{grid-template-columns:1fr}
+.beger-archive-cards.is-list .beger-order-history-ticket{display:grid;grid-template-columns:minmax(160px,1fr) minmax(140px,1fr);align-items:center;gap:9px 18px}
+.beger-archive-cards.is-list .beger-order-history-ticket>ul{max-height:72px;overflow:auto}
+.beger-archive-cards.is-list .beger-order-ticket-print{grid-column:1/-1;display:flex;flex-wrap:wrap}
+.beger-archive-cards.is-list .beger-order-ticket-print button{flex:1;min-width:110px}
+.beger-archive-layout button:focus-visible,.beger-archive-sort select:focus-visible{outline:3px solid #9cb482;outline-offset:2px}
+@media(max-width:1190px){.beger-archive-cards.is-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.beger-archive-cards.is-grid,.beger-archive-cards.is-list{grid-template-columns:minmax(0,1fr)}.beger-archive-cards.is-list .beger-order-history-ticket{display:flex;flex-direction:column;align-items:stretch}.beger-archive-layout button{padding:8px 10px}}
+@media(max-width:380px){.beger-archive-toolbar{align-items:stretch}.beger-archive-sort{width:100%;justify-content:space-between}.beger-archive-layout{width:100%;justify-content:space-between}.beger-archive-layout button{flex:1;justify-content:center}}
