@@ -153,7 +153,10 @@ export function printOrderTicket(order:PrintableOrder,branchName:string,kind:Tic
   add("p",state,"status-line",receipt);
   // Line-item amounts, taxes, and discounts are intentionally absent until server snapshots exist.
  }
- if(kind==="pickup")add("p","احتفظ بهذه البطاقة حتى استلام الطلب","pickup-title",receipt);
+ if(kind==="pickup"){
+  add("p","احتفظ بهذه البطاقة حتى استلام الطلب","pickup-title",receipt);
+  add("p",order.paymentStatus==="paid"?"تم تسجيل التحصيل":"التحصيل غير مسجّل","status-line",receipt);
+ }
  add("p",labels[kind].note,"footnote",receipt);
  popup.focus();
  return true;
