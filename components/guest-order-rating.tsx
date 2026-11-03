@@ -22,7 +22,7 @@ export default function GuestOrderRating({token,lang}:{token:string;lang:GuestLa
  const [open,setOpen]=useState(false);
  useEffect(()=>{
   let live=true;setStars(0);setNote("");setSubmitted(false);setEligible(false);setChecking(true);setMessage("");setOpen(false);
-  publicClient().rpc("g5_order_rating_state",{p_token:token}).then(({data,error})=>{
+  Promise.resolve(publicClient().rpc("g5_order_rating_state",{p_token:token})).then(({data,error})=>{
    if(!live)return;
    if(error||!data){setMessage(t.error);return;}
    setEligible(data.eligible===true);setSubmitted(data.submitted===true);
