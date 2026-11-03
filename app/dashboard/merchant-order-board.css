@@ -69,3 +69,18 @@
  .beger-order-ticket-head time{margin-inline-start:auto}
  .beger-order-board-controls{flex-wrap:wrap}
 }
+
+/* G4 pilot — clear cash register state and hardware-neutral print controls. */
+.beger-order-payment{display:flex;flex-direction:column;gap:9px;background:#faf5ec;border:1px solid #eaded0;border-radius:12px;padding:11px;margin:12px 0}
+.beger-order-payment strong{font-size:12px;line-height:1.6}
+.beger-order-payment .is-paid{color:#496a35}
+.beger-order-payment .is-unpaid{color:#9a5b36}
+.beger-order-payment small{font-size:11px;color:#73604f}
+.beger-order-payment-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}
+.beger-order-payment-actions label{font-size:11px;font-weight:800}
+.beger-order-payment-actions select{font:inherit;min-width:0;width:100%;min-height:42px;border:1px solid #ded3be;background:#fff;border-radius:9px;padding:8px}
+.beger-order-ticket-print{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0}
+.beger-order-ticket-print button{background:#fffefb;color:#576944;border:1px solid #d5dfc7;min-height:44px;margin:0;padding:8px 5px;font-size:11px}
+.beger-order-ticket-print button:last-child{grid-column:1 / -1}
+.beger-order-ticket-print button:focus-visible,.beger-order-payment-actions button:focus-visible{outline:3px solid #a4b88d;outline-offset:2px}
+@media(max-width:420px){.beger-order-ticket-print{grid-template-columns:1fr 1fr}}
