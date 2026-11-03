@@ -13,12 +13,18 @@ test("category tiles fit in a responsive grid rather than sideways scrolling",()
  assert.match(css,/scroll-snap-type:none!important/);
  assert.match(css,/min-height:66px!important/);
 });
-test("all and named category buttons omit product counts, keeping accessible pressed state",()=>{
- assert.match(explorer,/aria-pressed=\{selected==="all"\}/);
+test("category filters remove the generic All tile, counts and horizontal scrolling",()=>{
+ assert.doesNotMatch(explorer,/aria-pressed=\{selected==="all"\}/);
+ assert.doesNotMatch(explorer,/setSelected\("all"\)/);
  assert.match(explorer,/aria-pressed=\{selected===category\.id\}/);
- assert.match(explorer,/onClick=\{\(\)=>setSelected\("all"\)\}/);
- assert.match(explorer,/onClick=\{\(\)=>setSelected\(category\.id\)\}/);
+ assert.match(explorer,/onClick=\{\(\)=>\{setSelected\(category\.id\);setQuery\(""\);\}\}/);
+ assert.match(explorer,/categories\.find\(c=>c\.count>0\)\?\.id/);
  assert.doesNotMatch(explorer,/<small>\{category\.count\}/);
- assert.doesNotMatch(explorer,/<small>\{total\}/);
  assert.doesNotMatch(menu,/<span className="beger-category-count">/);
+});
+test("search still covers every category without needing an All card",()=>{
+ assert.match(explorer,/Boolean\(normalized\)\|\|section\.dataset\.categoryId===selected/);
+ assert.match(explorer,/setFound\(visible>0/);
+ assert.match(css,/Refined category gallery: compact editorial cards/);
+ assert.match(css,/\.beger-catalog-browser \.beger-category-filter\[aria-pressed="true"\]/);
 });
