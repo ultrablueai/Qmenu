@@ -31,3 +31,15 @@ test("required product choices stay enforced before a basket preview item",()=>{
  assert.match(details,/if\(!details\|\|!valid\|\|!cart\)return/);
  assert.match(details,/disabled=\{!valid\}/);
 });
+
+test("basket dialog traps Tab and Shift+Tab without losing Escape or focus restoration",()=>{
+ assert.match(basket,/const dialogRef=useRef<HTMLElement\|null>\(null\)/);
+ assert.match(basket,/ref=\{dialogRef\} tabIndex=\{-1\}/);
+ assert.match(basket,/event\.key!=="Tab"/);
+ assert.match(basket,/dialog\.querySelectorAll<HTMLElement>/);
+ assert.match(basket,/event\.shiftKey/);
+ assert.match(basket,/last\.focus\(\)/);
+ assert.match(basket,/first\.focus\(\)/);
+ assert.match(basket,/event\.key==="Escape"/);
+ assert.match(basket,/\(prior\?\?openerRef\.current\)\?\.focus\(\)/);
+});
