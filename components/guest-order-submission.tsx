@@ -18,12 +18,11 @@ export default function GuestOrderSubmission({lang,tableToken,tableLabel,items,o
  const feedback=useBegerFeedback();
  const lastStatusRef=useRef<OrderStatus|null>(null);
  const [enabled,setEnabled]=useState(false),[checking,setChecking]=useState(Boolean(tableToken)),[busy,setBusy]=useState(false),[error,setError]=useState(""),[token,setToken]=useState<string|null>(null),[status,setStatus]=useState<OrderStatus|null>(null);
- const requestRef=useRef<string|null>(null);
+ const requestRef=useRef<{signature:string;request:string}|null>(null);
  useEffect(()=>{let alive=true;if(!tableToken){setChecking(false);setEnabled(false);return;}Promise.resolve(client().rpc("g3_table_order_enabled",{p_table_token:tableToken})).then(({data,error})=>{if(alive)setEnabled(!error&&data===true)}).catch(()=>{if(alive)setEnabled(false)}).finally(()=>{if(alive)setChecking(false)});return()=>{alive=false};},[tableToken]);
  useEffect(()=>{if(!tableToken)return;try{const stored=sessionStorage.getItem("beger-g3-order:"+tableToken);if(stored)setToken(stored);}catch{/* Restricted browser storage */}},[tableToken]);
  async function refresh(){if(!token)return;try{const {data,error}=await client().rpc("g3_public_order_status",{p_token:token});if(!error&&data?.status){const next=data.status as OrderStatus;if(lastStatusRef.current&&lastStatusRef.current!==next){const kind=next==="accepted"?"accepted":next==="preparing"?"preparing":next==="ready"?"ready":next==="rejected"?"rejected":next==="fulfilled"?"fulfilled":null;if(kind)feedback.signal(kind,t[next]);}lastStatusRef.current=next;setStatus(next);}}catch{/* transient network failure: keep last known status */}}
  useEffect(()=>{if(!token)return;void refresh();const timer=window.setInterval(()=>{void refresh()},7000);return()=>window.clearInterval(timer);},[token]);
- useEffect(()=>{requestRef.current=null;},[items]);
  async function submit(){
   if(!tableToken||!enabled||busy||items.length===0||items.some(i=>!i.productId))return;
   setBusy(true);setError("");
@@ -31,7 +30,7 @@ export default function GuestOrderSubmission({lang,tableToken,tableLabel,items,o
   const payload=items.map(i=>({productId:i.productId,quantity:i.quantity,optionIds:i.optionIds??[],removedIngredients:i.removedIngredients??[]}));
   const signature=JSON.stringify(payload);
   const pendingKey="beger-g3-pending:"+tableToken;
-  let request=requestRef.current;
+  let request=requestRef.current?.signature===signature?requestRef.current.request:null;
   if(!request){
    try{
     const saved=sessionStorage.getItem(pendingKey);
@@ -42,7 +41,7 @@ export default function GuestOrderSubmission({lang,tableToken,tableLabel,items,o
    }catch{/* Storage is optional; server-side idempotency still protects in-session retries */}
   }
   request=request??crypto.randomUUID();
-  requestRef.current=request;
+  requestRef.current={signature,request};
   try{sessionStorage.setItem(pendingKey,JSON.stringify({signature,request}));}catch{/* Optional storage */}
   try{
    const {data,error}=await client().rpc("g3_submit_table_order",{p_table_token:tableToken,p_request_id:request,p_items:payload});
