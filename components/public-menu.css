@@ -307,3 +307,15 @@
 .beger-service-context strong{font-size:14px}.beger-service-context p{margin:6px 0 0;font-size:12px;line-height:1.6}
 @media(max-width:600px){.beger-service-choice-grid{grid-template-columns:1fr}.beger-service-choice-card{flex-direction:row;align-items:center;flex-wrap:wrap}.beger-service-choice-card>span:first-child{font-size:22px}.beger-service-choice-card p{flex:1 1 100%}.beger-service-choice-card small{flex-basis:100%}}
 @media(prefers-reduced-motion:reduce){.beger-service-pickup{transition:none!important}}
+
+/* Release candidate: readable order journey on narrow RTL/LTR phones. */
+.beger-guest-order-tracking{min-width:0}
+.beger-order-steps{min-width:0;gap:7px}
+.beger-order-steps li{min-width:0;line-height:1.5;word-break:normal;overflow-wrap:normal;hyphens:none;text-align:center}
+@media(max-width:520px){
+ .beger-order-steps{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;scrollbar-width:thin;padding:6px 2px 12px}
+ .beger-order-steps li{flex:0 0 82px;min-width:82px;max-width:100px;scroll-snap-align:start;font-size:11px;white-space:normal}
+ .beger-order-steps li::before{flex-shrink:0}
+ .beger-guest-order-submit{padding:12px}
+ .beger-guest-order-tracking button{min-height:44px}
+}
