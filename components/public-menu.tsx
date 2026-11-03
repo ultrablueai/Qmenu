@@ -59,7 +59,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
 
      </div>
    </section>
-   {serviceMode==="takeaway"&&!tableToken?<div className="beger-service-context" role="status"><strong>{lang==="ar"?"سفري · استلام من المحل":lang==="tr"?"Paket · Mağazadan teslim":"Takeaway · Pick up at shop"}</strong><p>{lang==="ar"?"تصفح المنتجات واختر إضافاتك. الطلب السفري والتغليف وأسعارهما لم يُفعّلا بعد؛ لن يُرسل طلب من هذه المعاينة.":lang==="tr"?"Ürünlere göz atın. Paket sipariş ve ambalaj ücretleri henüz etkin değil; bu önizleme sipariş göndermez.":"Browse products and add-ons. Takeaway ordering and packaging charges are not active yet; this preview cannot submit an order."}</p></div>:null}
+   {serviceMode==="takeaway"&&!tableToken?<div className="beger-service-context" role="status"><strong>{lang==="ar"?"سفري · استلام من المحل":lang==="tr"?"Paket · Mağazadan teslim":"Takeaway · Pick up at shop"}</strong><p>{lang==="ar"?"تصفح المنتجات واختر إضافاتك وأرسل طلب السفري للمطعم إذا كانت الخدمة مفعّلة لهذا الفرع. الاستلام من المحل؛ رسوم التغليف المدفوعة غير مفعّلة.":lang==="tr"?"Ürünleri ve ek seçenekleri seçin. Şubenin paket servisi etkinse sipariş restorana gönderilir; ücretli ambalaj etkin değildir.":"Choose products and add-ons. If enabled for this branch, takeaway orders go to the restaurant for approval; paid packaging is not active."}</p></div>:null}
    <section className="beger-menu-intro" aria-label={t.menu}>
     <div className="beger-menu-intro-top">
       <div><span className="beger-guest-overline">BEGER · MENU</span><h2>{lang==="ar"?"قائمتنا":lang==="tr"?"Menümüz":"Our Menu"}</h2><p>{t.discover} · {totalItems} {t.products}</p></div>
@@ -89,7 +89,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
     </section>)}
    </GuestCatalogExplorer>
    <GuestRewardsPreview lang={lang}/>
-   <footer className="beger-guest-footer" style={{padding:"22px 0",borderTop:"1px solid "+theme.border,color:theme.muted,fontSize:12}}>{tableToken?(lang==="ar"?"طلب الطاولة التجريبي يحتاج موافقة المطعم؛ الدفع الإلكتروني غير مفعّل.":lang==="tr"?"Masa siparişleri restoran onayı gerektirir; online ödeme aktif değildir.":"Pilot table orders require restaurant approval; online payment is not active."):serviceMode==="takeaway"?(lang==="ar"?"وضع السفري للمعاينة فقط؛ لا يتم إرسال الطلبات.":lang==="tr"?"Paket siparişleri sadece önizlemedir; gönderilmez.":"Takeaway mode is a preview only; no order is sent."):t.note}<div style={{marginTop:10}}>Beger · Smart Business OS</div></footer>
+   <footer className="beger-guest-footer" style={{padding:"22px 0",borderTop:"1px solid "+theme.border,color:theme.muted,fontSize:12}}>{tableToken?(lang==="ar"?"طلب الطاولة التجريبي يحتاج موافقة المطعم؛ الدفع الإلكتروني غير مفعّل.":lang==="tr"?"Masa siparişleri restoran onayı gerektirir; online ödeme aktif değildir.":"Pilot table orders require restaurant approval; online payment is not active."):serviceMode==="takeaway"?(lang==="ar"?"يمكن إرسال طلب السفري للمطعم إذا كانت الخدمة مفعّلة؛ لا يوجد دفع إلكتروني.":lang==="tr"?"Şube etkinleştirdiyse paket sipariş gönderilebilir; çevrim içi ödeme yoktur.":"Takeaway orders can be submitted when enabled; online payment is not active."):t.note}<div style={{marginTop:10}}>Beger · Smart Business OS</div></footer>
   </div>
   </GuestScreenSwitcher>
   </GuestCart>
