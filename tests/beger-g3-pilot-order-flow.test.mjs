@@ -74,7 +74,7 @@ test("guest may start another table order after fulfillment or rejection, not wh
 });
 
 test("repeat-order button closes event callback properly for JSX",()=>{
- assert.match(guest,/catch\{\/\* optional storage \*\/\}\}\}>\{t\.newOrder\}/);
+ assert.match(guest,/catch\{\/\* optional storage \*\/\}window\.dispatchEvent\(new Event\("beger-order-tracking-start"\)\);\}\}>\{t\.newOrder\}/);
 });
 
 test("two orders sharing a table have independent order references and transitions",()=>{
