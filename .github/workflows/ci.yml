@@ -16,8 +16,10 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-      - name: Check schema and authorization invariants (dependency-free)
-        run: node --test tests/*.test.mjs
+      - name: Install locked dependencies for TypeScript-based source tests
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Check schema, workflows and authorization invariants
+        run: npm test
   typecheck:
     name: TypeScript validation
     runs-on: ubuntu-latest
