@@ -37,10 +37,22 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
  },[storageKey,items,hydrated,hydratedKey]);
  const closeRef=useRef<HTMLButtonElement|null>(null);
  const openerRef=useRef<HTMLButtonElement|null>(null);
+ const dialogRef=useRef<HTMLElement|null>(null);
  useEffect(()=>{if(!open)return;
    const prior=document.activeElement instanceof HTMLElement?document.activeElement:null;
    closeRef.current?.focus();
-   function handleKey(event:KeyboardEvent){if(event.key==="Escape")setOpen(false);}
+   function handleKey(event:KeyboardEvent){
+    if(event.key==="Escape"){event.preventDefault();setOpen(false);return;}
+    if(event.key!=="Tab")return;
+    const dialog=dialogRef.current;
+    if(!dialog)return;
+    const candidates=Array.from(dialog.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'));
+    const focusable=candidates.filter(element=>element.getClientRects().length>0&&!element.hasAttribute("hidden"));
+    if(!focusable.length){event.preventDefault();dialog.focus();return;}
+    const first=focusable[0],last=focusable[focusable.length-1];
+    if(event.shiftKey&&(document.activeElement===first||!dialog.contains(document.activeElement))){event.preventDefault();last.focus();}
+    else if(!event.shiftKey&&(document.activeElement===last||!dialog.contains(document.activeElement))){event.preventDefault();first.focus();}
+   }
    document.addEventListener("keydown",handleKey);
    const originalOverflow=document.body.style.overflow;document.body.style.overflow="hidden";
    return()=>{document.removeEventListener("keydown",handleKey);document.body.style.overflow=originalOverflow;(prior??openerRef.current)?.focus();};
@@ -82,7 +94,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
     🛍 {labels.cart} <span style={{background:"#ffffff2b",borderRadius:20,padding:"4px 9px",marginInlineStart:8}}>{count}</span>
   </button>
   {open?<div className="beger-basket-overlay" style={{position:"fixed",inset:0,zIndex:60,background:"#1a241e9c",display:"flex",justifyContent:"flex-end"}} onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false);}}>
-   <section className="beger-basket-sheet beger-reference-order" role="dialog" aria-modal="true" aria-label={labels.cart} style={{width:"min(100%,470px)",height:"100%",background:"#FFFCF7",color:"#352E23",padding:24,overflowY:"auto",boxShadow:"0 20px 50px #11271e33",boxSizing:"border-box",display:"flex",flexDirection:"column",gap:15}}>
+   <section ref={dialogRef} tabIndex={-1} className="beger-basket-sheet beger-reference-order" role="dialog" aria-modal="true" aria-label={labels.cart} style={{width:"min(100%,470px)",height:"100%",background:"#FFFCF7",color:"#352E23",padding:24,overflowY:"auto",boxShadow:"0 20px 50px #11271e33",boxSizing:"border-box",display:"flex",flexDirection:"column",gap:15}}>
     <div style={{display:"flex",justifyContent:"space-between",gap:15,alignItems:"center"}}>
      <div><span style={{color:"#937047",fontSize:11,fontWeight:800,letterSpacing:".05em"}}>{labels.preview}</span><h2 style={{fontSize:24,margin:"5px 0 0"}}>{labels.cart}</h2></div>
      <button ref={closeRef} type="button" onClick={()=>setOpen(false)} style={{padding:"8px 13px",background:"#edf3ef",border:0,borderRadius:11,cursor:"pointer"}}>{labels.close} ✕</button>
