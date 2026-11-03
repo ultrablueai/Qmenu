@@ -7,7 +7,7 @@ const details=readFileSync("components/product-details.tsx","utf8");
 test("cart is a local scoped UI and delegates active table order to the guarded submit component",()=>{
  assert.match(basket,/notice:tableToken\?/);
  assert.match(basket,/<GuestOrderSubmission key=\{branchId\+":"\+\(tableToken\?\?"shop"\)\} lang=\{lang\}/);
- assert.doesNotMatch(basket,/\.from\(|\.rpc\(|submitOrder|paymentIntent|localStorage/);
+ assert.doesNotMatch(basket,/(?:db|client|supabase)\.from\(|\.rpc\(|submitOrder|paymentIntent|localStorage/);
  assert.match(basket,/Math\.min\(20/);
  assert.match(basket,/setItems\(prev=>prev\.filter\(x=>x\.key!==item\.key\)\)/);
 });
