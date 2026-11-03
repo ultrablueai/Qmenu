@@ -5,6 +5,7 @@ const read=p=>readFileSync(p,"utf8");
 const feedback=read("components/beger-feedback.tsx");
 const merchant=read("app/dashboard/merchant-order-board.tsx");
 const guest=read("components/guest-order-submission.tsx");
+const watcher=read("components/guest-order-watcher.tsx");
 const basket=read("components/guest-cart.tsx");
 const guestCss=read("components/public-menu.css");
 const merchantCss=read("app/dashboard/merchant-order-board.css");
@@ -36,8 +37,10 @@ test("merchant alerts only for genuinely new pending orders, not preexisting tic
  assert.match(merchant,/feedback\.signal\(status==="accepted"/);
 });
 test("guest order tracker responds to server-confirmed transition, not speculative status",()=>{
- assert.match(guest,/lastStatusRef\.current&&lastStatusRef\.current!==next/);
- assert.match(guest,/feedback\.signal\(kind,t\[next\]\)/);
+ assert.match(watcher,/last&&last!==status/);
+ assert.match(watcher,/feedback\.signal\(kind,display\)/);
+ assert.match(watcher,/g3_public_order_status/);
+ assert.doesNotMatch(guest,/feedback\.signal\(kind,t\[next\]\)/);
  assert.match(guest,/feedback\.signal\("sent",t\.success\)/);
  assert.match(guest,/BegerFeedbackControls settings=\{feedback\.settings\}/);
  assert.match(basket,/feedback\.signal\("added"/);
