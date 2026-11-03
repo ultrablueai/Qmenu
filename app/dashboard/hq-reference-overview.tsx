@@ -37,11 +37,11 @@ export default function HqReferenceOverview({businessName,userLabel,businessCoun
   </div>
   <div className={s.banner}><div className={s.bannerCoffee} aria-hidden="true">☕</div><div><h3>{t.catalogBanner}</h3><p>{t.bannerSub}</p></div><ul>{[t.feature1,t.feature2,t.feature3,t.feature4].map(v=><li key={v}>{v}</li>)}</ul></div>
   <div className={s.bottomPanels}>
-   <section className={s.shortcut}><div className={s.shortcutTop}><span className={s.shortcutIcon}>▤</span><strong>{t.catalog}</strong></div><p>{t.catalogSub}</p><a href="#catalog-management" className={s.action}>{t.catalogGo} <span aria-hidden="true">→</span></a></section>
-   <section className={s.shortcut}><div className={s.shortcutTop}><span className={s.shortcutIcon}>◉</span><strong>{t.appearance}</strong></div><p>{t.appearanceSub}</p><a href="#customer-appearance" className={s.action}>{t.appearanceGo} <span aria-hidden="true">→</span></a></section>
+   <section className={s.shortcut}><div className={s.shortcutTop}><span className={s.shortcutIcon}>▤</span><strong>{t.catalog}</strong></div><p>{t.catalogSub}</p><a href="/dashboard?view=operations#catalog-management" className={s.action}>{t.catalogGo} <span aria-hidden="true">→</span></a></section>
+   <section className={s.shortcut}><div className={s.shortcutTop}><span className={s.shortcutIcon}>◉</span><strong>{t.appearance}</strong></div><p>{t.appearanceSub}</p><a href="/dashboard?view=operations#customer-appearance" className={s.action}>{t.appearanceGo} <span aria-hidden="true">→</span></a></section>
    <section className={s.shortcut}><div className={s.shortcutTop}><span className={s.shortcutIcon}>☆</span><strong>{t.loyalty}</strong></div><p>{t.loyaltySub}</p><span className={s.unavailable}>{t.unavailable}</span></section>
   </div>
-  <section className={s.branchPanel} aria-labelledby="hq-branches-title"><div className={s.branchHead}><div><h3 id="hq-branches-title">{t.branchTitle}</h3><p>{businessName} · {t.branchSubtitle}</p></div><a href="#branches" className={s.branchAction}>{t.branchGo}</a></div>
+  <section className={s.branchPanel} aria-labelledby="hq-branches-title"><div className={s.branchHead}><div><h3 id="hq-branches-title">{t.branchTitle}</h3><p>{businessName} · {t.branchSubtitle}</p></div><a href="/dashboard?view=branches" className={s.branchAction}>{t.branchGo}</a></div>
    <div className={s.branchRows}>{loadError?<p className={s.branchEmpty}>{t.loadError}</p>:branches.length===0?<p className={s.branchEmpty}>{t.noBranches}</p>:branches.map(b=><div className={s.branchRow} key={b.id}><div className={s.branchName}><span aria-hidden="true">⌂</span><strong>{b.name}</strong><small>{t.catalogSmall}</small></div><span className={s.branchStatus}>● {t.listed}</span><Link className={s.qrLink} href={`/b/${b.id}`}>{t.menuQr} ↗</Link><Link className={s.editLink} href={`/dashboard/branches/${b.id}`}>{t.openBranch} →</Link></div>)}</div>
   </section>
  </section>;
