@@ -99,6 +99,13 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
  }
  return <section id="beger-merchant-orders" className="beger-order-board" dir="rtl" aria-label="إدارة طلبات الطاولات">
   <header className="beger-order-board-header"><div><span>BEGER · G3 PILOT</span><h2>طلبات الطاولات والمطبخ</h2><p>{branchName} · استقبال الطلب ← موافقة المطعم ← التحضير ← الجاهزية</p></div><div><span className={enabled?"beger-order-enabled":"beger-order-disabled"}>{enabled?"● طلبات الطاولات مفعّلة":"○ طلبات الطاولات متوقفة"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void toggle()}>{enabled?"إيقاف طلبات الطاولات":"تفعيل طلبات الطاولات"}</button><span className={pickupEnabled?"beger-order-enabled":"beger-order-disabled"}>{pickupEnabled?"● طلبات السفري مفعّلة":"○ طلبات السفري متوقفة"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void togglePickup()}>{pickupEnabled?"إيقاف استقبال السفري":"تفعيل استقبال السفري"}</button></div></header>
+  <section className="beger-order-board-kpis" aria-label="ملخص بيانات الطلبات الحالية">
+   {([{label:"بانتظار الموافقة",value:orders.filter(o=>o.status==="pending").length},
+      {label:"قيد التحضير",value:orders.filter(o=>o.status==="preparing").length},
+      {label:"جاهزة للاستلام",value:orders.filter(o=>o.status==="ready").length},
+      {label:"لم يُسجّل تحصيلها",value:orders.filter(o=>o.paymentStatus!=="paid").length}
+    ]).map(stat=><div className="beger-order-board-kpi" key={stat.label}><span>{stat.label}</span><strong>{loaded?stat.value:"—"}</strong></div>)}
+  </section>
   <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("new-order","هذا تنبيه اختبار، وليس طلباً جديداً")}/>
   {feedback.message?<p role="status" className="beger-feedback-toast">{feedback.message}</p>:null}
   {error?<p role="alert" className="beger-order-board-error">{error}</p>:null}
