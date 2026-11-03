@@ -83,7 +83,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
          </div>
          <div className="beger-product-side"><GuestFavorite lang={lang}/><strong>{formatPrice(Number(i.price_minor),branch.country_code,lang)}</strong></div>
         </div>
-        <ProductDetails branchId={branch.branch_id} productId={i.id} country={branch.country_code} lang={lang} accent={theme.accent} dark={false} imageUrl={i.image_url} tableOrdering={Boolean(tableToken)}/>
+        <ProductDetails branchId={branch.branch_id} productId={i.id} country={branch.country_code} lang={lang} accent={theme.accent} dark={false} imageUrl={i.image_url} tableOrdering={Boolean(tableToken)} serviceMode={tableToken?"dine_in":serviceMode}/>
        </article>)}
      </div>
     </section>)}
