@@ -20,6 +20,8 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
  const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  const [collectionMethods,setCollectionMethods]=useState<Record<string,string>>({});
  const [activeView,setActiveView]=useState<"live"|"history">("live");
+ const [archiveLayout,setArchiveLayout]=useState<"grid"|"list"|"table">("table");
+ const [archiveSort,setArchiveSort]=useState<"newest"|"oldest">("newest");
  const [serviceFilter,setServiceFilter]=useState<"all"|"dine_in"|"takeaway">("all");
  const [paymentFilter,setPaymentFilter]=useState<"all"|"paid"|"unpaid">("all");
  const [statusFilter,setStatusFilter]=useState<"all"|Status>("all");
@@ -31,7 +33,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   (!searchQuery.trim()||orderReference(order.id).toLowerCase().includes(searchQuery.trim().replace(/^#/,"").toLowerCase())||order.table.toLowerCase().includes(searchQuery.trim().toLowerCase()))
  );
  const filteredLive=orders.filter(filterOrder);
- const filteredHistory=closedOrders.filter(filterOrder);
+ const filteredHistory=closedOrders.filter(filterOrder).sort((a,b)=>archiveSort==="newest"?Date.parse(b.createdAt)-Date.parse(a.createdAt):Date.parse(a.createdAt)-Date.parse(b.createdAt));
  async function refresh(){
   const db=browserSupabase();
   const [cap,list]=await Promise.all([
@@ -173,6 +175,28 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
    <header className="beger-order-history-heading"><div><h3>سجل الطلبات السابقة</h3><p>آخر 7 أيام · للمتابعة والتحصيل والطباعة · لا يُرسل تنبيه طلب جديد</p></div><button type="button" disabled={historyBusy} aria-expanded={historyOpen} onClick={()=>void toggleHistory()}>{historyBusy?"جارٍ التحميل…":historyOpen?"إخفاء السجل":"عرض سجل الطلبات"}</button></header>
    {historyOpen?<div className="beger-order-history-content">
     <div className="beger-order-history-tools"><span>{historyLoaded?filteredHistory.length+" طلباً مطابقاً (من آخر 50 طلب)":"جارٍ تحميل سجل الطلبات…"}</span><button type="button" disabled={historyBusy} onClick={()=>void loadHistory()}>تحديث السجل ↻</button></div>
+    <div className="beger-archive-toolbar">
+     <div className="beger-archive-layout" role="group" aria-label="طريقة عرض سجل الطلبات">
+      <button type="button" aria-pressed={archiveLayout==="table"} onClick={()=>setArchiveLayout("table")}><span aria-hidden="true">▤</span> جدول</button>
+      <button type="button" aria-pressed={archiveLayout==="list"} onClick={()=>setArchiveLayout("list")}><span aria-hidden="true">☷</span> قائمة</button>
+      <button type="button" aria-pressed={archiveLayout==="grid"} onClick={()=>setArchiveLayout("grid")}><span aria-hidden="true">▦</span> شبكة</button>
+     </div>
+     <label className="beger-archive-sort">ترتيب التاريخ<select value={archiveSort} onChange={event=>setArchiveSort(event.target.value as typeof archiveSort)}><option value="newest">الأحدث أولاً</option><option value="oldest">الأقدم أولاً</option></select></label>
+    </div>
+    {archiveLayout==="table"?<div className="beger-archive-table-scroll"><table className="beger-archive-table"><thead><tr><th>رقم الطلب</th><th>الخدمة</th><th>وقت الطلب</th><th>الحالة</th><th>التحصيل</th><th>الإجمالي</th><th>التفاصيل</th></tr></thead><tbody>{filteredHistory.map(o=><tr key={o.id}>
+     <td><strong dir="ltr">#{orderReference(o.id)}</strong></td>
+     <td>{o.serviceMode==="takeaway"?"سفري":o.table}</td>
+     <td><time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleString("ar")}</time></td>
+     <td>{titles[o.status]}</td>
+     <td>{o.paymentStatus==="paid"?"✓ مسجّل":"◯ غير مسجّل"}</td>
+     <td dir="ltr">{formatOrderTotal(o.totalMinor,o.currency)}</td>
+     <td><details className="beger-archive-row-detail"><summary>إجراءات الطلب</summary>
+      <ul>{o.items.map((item,i)=><li key={i}>{item.quantity}× {item.name}</li>)}</ul>
+      {o.status==="fulfilled"&&o.paymentStatus!=="paid"?<div className="beger-order-payment-actions"><label htmlFor={"table-collection-"+o.id}>طريقة التحصيل</label><select id={"table-collection-"+o.id} disabled={busy} value={collectionMethods[o.id]??"cash"} onChange={event=>setCollectionMethods(current=>({...current,[o.id]:event.target.value}))}><option value="cash">نقداً</option><option value="external_card">بطاقة جهاز التاجر</option><option value="external_transfer">تحويل خارجي</option></select><button type="button" disabled={busy} onClick={()=>void recordPayment(o)}>تسجيل المبلغ المستلم</button></div>:null}
+      <div className="beger-archive-row-actions"><button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"summary"))setError("اسمح بالنوافذ المنبثقة للطباعة.");}}>كشف حساب</button><button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"kitchen"))setError("اسمح بالنوافذ المنبثقة للطباعة.");}}>ورقة المطبخ</button><button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"pickup"))setError("اسمح بالنوافذ المنبثقة للطباعة.");}}>ملصق</button></div>
+     </details></td>
+    </tr>)}</tbody></table></div>:null}
+    {archiveLayout!=="table"?<div className={"beger-archive-cards "+(archiveLayout==="list"?"is-list":"is-grid")}>
     {filteredHistory.map(o=><article className="beger-order-history-ticket" key={o.id}>
      <div className="beger-order-history-top"><strong dir="ltr">#{orderReference(o.id)}</strong><span className={o.status==="fulfilled"?"is-fulfilled":"is-rejected"}>{titles[o.status]}</span></div>
      <p>{o.serviceMode==="takeaway"?"سفري · استلام من المحل":o.table} · <time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleString("ar")}</time></p>
@@ -189,6 +213,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
       <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"summary"))setError("المتصفح منع نافذة الطباعة.")}}>كشف حساب داخلي</button>
      </div>
     </article>)}
+    </div>:null}
     {historyLoaded&&filteredHistory.length===0?<p className="beger-order-board-empty">لا توجد طلبات مكتملة أو مرفوضة خلال الأيام السبعة الماضية.</p>:null}
    </div>:null}
   </section>:null}
