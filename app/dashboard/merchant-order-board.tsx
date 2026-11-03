@@ -10,7 +10,7 @@ type Item={name:string;quantity:number;selections:{options?:{name_ar?:string}[];
 type Order={id:string;table:string;serviceMode?:"dine_in"|"takeaway";paymentStatus?:"unpaid"|"paid";paymentMethod?:string|null;status:Status;totalMinor:number;currency:string;createdAt:string;items:Item[]};
 const titles:Record<Status,string>={pending:"بانتظار الموافقة",accepted:"تم قبول الطلب",preparing:"قيد التحضير",ready:"جاهز للتسليم",fulfilled:"تم التسليم",rejected:"مرفوض"};
 function formatOrderTotal(minor:number,currency:string){const factor=currency==="TRY"?100:1;return new Intl.NumberFormat("ar",{minimumFractionDigits:currency==="TRY"?2:0,maximumFractionDigits:currency==="TRY"?2:0}).format(minor/factor)+" "+currency;}
-function orderReference(id:string){return id.replace(/-/g,"").slice(0,8).toUpperCase();}
+function orderReference(id:string){return id.replace(/-/g,"").slice(0,10).toUpperCase();}
 const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"accepted",label:"قبول الطلب"},accepted:{value:"preparing",label:"إرسال للمطبخ"},preparing:{value:"ready",label:"جاهز للتسليم"},ready:{value:"fulfilled",label:"تأكيد التسليم"}};
 export default function MerchantOrderBoard({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
  const feedback=useBegerFeedback();
