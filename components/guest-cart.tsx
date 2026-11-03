@@ -73,7 +73,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
   close:en?"Close":tr?"Kapat":"إغلاق",
   clear:en?"Clear basket":tr?"Sepeti temizle":"تفريغ السلة",
   quantity:en?"Quantity":tr?"Adet":"الكمية",
-  preview:tableToken?(en?"TABLE ORDER · STAGING":tr?"MASA SİPARİŞİ · TEST":"طلب طاولة · تجريبي"):isTakeaway?(en?"TAKEAWAY · PREVIEW":tr?"PAKET · ÖNİZLEME":"سفري · معاينة"):(en?"SHOP MENU · BROWSE":tr?"MAĞAZA MENÜSÜ":"منيو المتجر · تصفح"),
+  preview:tableToken?(en?"TABLE ORDER · STAGING":tr?"MASA SİPARİŞİ · TEST":"طلب طاولة · تجريبي"):isTakeaway?(en?"TAKEAWAY · STAGING":tr?"PAKET · TEST":"سفري · تجريبي"):(en?"SHOP MENU · BROWSE":tr?"MAĞAZA MENÜSÜ":"منيو المتجر · تصفح"),
   items:en?"Items":tr?"Ürünler":"المنتجات",
   remove:en?"Remove product":tr?"Ürünü kaldır":"إزالة المنتج",
  };
