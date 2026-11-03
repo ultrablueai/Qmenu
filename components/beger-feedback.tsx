@@ -15,6 +15,19 @@ const patterns:Record<FeedbackKind,number | number[]>={
  "added":18,"sent":[35,30,45],"new-order":[90,65,90],"accepted":[35,40,45],
  "preparing":30,"ready":[85,45,85,45,130],"rejected":[90,50,90],"fulfilled":45
 };
+// Urgent order and pager events play three complete audible/haptic pulses; lightweight cart feedback stays brief.
+const repeatedAlerts=new Set<FeedbackKind>(["new-order","accepted","preparing","ready","rejected","fulfilled"]);
+const repeatCount=(kind:FeedbackKind)=>repeatedAlerts.has(kind)?3:1;
+const pulseGapSeconds=0.24;
+function vibrationSequence(kind:FeedbackKind):number[]{
+ const base=typeof patterns[kind]==="number"?[patterns[kind] as number]:patterns[kind] as number[];
+ const sequence:number[]=[];
+ for(let cycle=0;cycle<repeatCount(kind);cycle++){
+  if(cycle)sequence.push(220);
+  sequence.push(...base);
+ }
+ return sequence;
+}
 let sharedAudio:AudioContext|null=null;
 function audio(){
  if(typeof window==="undefined")return null;
@@ -25,13 +38,16 @@ function audio(){
 function play(kind:FeedbackKind){
  const ctx=audio();if(!ctx||ctx.state!=="running")return;
  const sequence=tones[kind],step=0.115;
- sequence.forEach((hz,i)=>{
-  const oscillator=ctx.createOscillator(),gain=ctx.createGain();
-  const at=ctx.currentTime+0.012+i*step;
-  oscillator.type="sine";oscillator.frequency.setValueAtTime(hz,at);
-  gain.gain.setValueAtTime(0.0001,at);gain.gain.exponentialRampToValueAtTime(0.045,at+0.016);gain.gain.exponentialRampToValueAtTime(0.0001,at+0.095);
-  oscillator.connect(gain);gain.connect(ctx.destination);oscillator.start(at);oscillator.stop(at+0.105);
- });
+ const pulseLength=sequence.length*step+pulseGapSeconds;
+ for(let cycle=0;cycle<repeatCount(kind);cycle++){
+  sequence.forEach((hz,i)=>{
+   const oscillator=ctx.createOscillator(),gain=ctx.createGain();
+   const at=ctx.currentTime+0.012+cycle*pulseLength+i*step;
+   oscillator.type="sine";oscillator.frequency.setValueAtTime(hz,at);
+   gain.gain.setValueAtTime(0.0001,at);gain.gain.exponentialRampToValueAtTime(0.045,at+0.016);gain.gain.exponentialRampToValueAtTime(0.0001,at+0.095);
+   oscillator.connect(gain);gain.connect(ctx.destination);oscillator.start(at);oscillator.stop(at+0.105);
+  });
+ }
 }
 export function useBegerFeedback(){
  const [settings,setSettings]=useState<FeedbackSettings>(DEFAULT);
@@ -56,7 +72,7 @@ export function useBegerFeedback(){
   // Web Audio requires an unlocked user gesture. If blocked we silently use the visible notice.
   if(current.sound)play(kind);
   if(current.vibration&&typeof navigator!=="undefined"&&typeof navigator.vibrate==="function"){
-   try{navigator.vibrate(patterns[kind])}catch{/* unsupported device */}
+   try{navigator.vibrate(vibrationSequence(kind))}catch{/* unsupported device */}
   }
  },[]);
  return {settings,change,signal,message,clear:()=>setMessage("")};
