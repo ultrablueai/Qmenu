@@ -78,10 +78,22 @@ export function useBegerFeedback(){
  return {settings,change,signal,message,clear:()=>setMessage("")};
 }
 export function BegerFeedbackControls({settings,onChange,onTest,labels}:{settings:FeedbackSettings;onChange:(next:FeedbackSettings)=>void;onTest?:()=>void;labels?:{sound:string;vibration:string;test?:string}}){
- return <fieldset className="beger-feedback-controls">
-  <legend>{labels?.sound==="Sound"?"Alerts":labels?.sound==="Ses"?"Bildirimler":"التنبيهات"}</legend>
-  <label><input type="checkbox" checked={settings.sound} onChange={e=>onChange({...settings,sound:e.target.checked})}/>{labels?.sound??"الصوت"}</label>
-  <label><input type="checkbox" checked={settings.vibration} onChange={e=>onChange({...settings,vibration:e.target.checked})}/>{labels?.vibration??"اهتزاز الهاتف"}</label>
-  {onTest?<button type="button" className="beger-feedback-test" onClick={onTest}>{labels?.test??"تجربة التنبيه"}</button>:null}
- </fieldset>;
+ const heading=labels?.sound==="Sound"?"Notifications":labels?.sound==="Ses"?"Bildirimler":"التنبيهات";
+ return <details className="beger-feedback-panel">
+  <summary className="beger-feedback-summary" aria-label={heading}>
+   <svg className="beger-feedback-bell" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+    <path d="M10 21h4"/>
+   </svg>
+   <strong>{heading}</strong>
+   <span className="beger-feedback-summary-status">{settings.sound||settings.vibration?(labels?.sound==="Sound"?"On":labels?.sound==="Ses"?"Açık":"مفعّلة"):(labels?.sound==="Sound"?"Off":labels?.sound==="Ses"?"Kapalı":"متوقفة")}</span>
+   <span className="beger-feedback-chevron" aria-hidden="true">⌄</span>
+  </summary>
+  <fieldset className="beger-feedback-controls">
+   <legend>{heading}</legend>
+   <label><input type="checkbox" checked={settings.sound} onChange={e=>onChange({...settings,sound:e.target.checked})}/>{labels?.sound??"الصوت"}</label>
+   <label><input type="checkbox" checked={settings.vibration} onChange={e=>onChange({...settings,vibration:e.target.checked})}/>{labels?.vibration??"اهتزاز الهاتف"}</label>
+   {onTest?<button type="button" className="beger-feedback-test" onClick={onTest}>{labels?.test??"تجربة التنبيه"}</button>:null}
+  </fieldset>
+ </details>;
 }
