@@ -27,7 +27,7 @@ function initials(name: string) {
   return (name.trim()[0] || "ب").toLocaleUpperCase("ar");
 }
 
-export default async function Dashboard({searchParams}:{searchParams:Promise<{business?:string;setup?:string}>}) {
+export default async function Dashboard({searchParams}:{searchParams:Promise<{business?:string;setup?:string;view?:string}>}) {
   const supabase = await serverSupabase();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) redirect("/login");
@@ -59,6 +59,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
   const branches = branchResult.data ?? [];
   const params=await searchParams;
   const requestedBusiness=params.business;
+  const workspaceViews=["overview","branches","operations","settings","modules"] as const;
+  const workspaceView=workspaceViews.find(view=>view===params.view)??"overview";
   // The selection is only honored if it belongs to a verified membership.
   const primary = businesses.find((b) => b.id === requestedBusiness && ids.includes(b.id)) ?? businesses.find((b) => b.id === ids[0]) ?? businesses[0];
   const currentRole = memberships?.find((m) => m.business_id === primary?.id)?.role ?? "staff";
@@ -68,6 +70,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
   const country = primary?.country_code ?? null;
   const primaryBranches = branches.filter((b) => b.business_id === primary?.id);
   const canManageBranches = currentRole === "owner" || currentRole === "manager";
+  const workspaceHref=(view:string)=>"/dashboard?business="+encodeURIComponent(primary?.id??"")+"&view="+view;
+  const workspaceTitles:Record<string,string>={overview:"نظرة عامة",branches:"الفروع والنشاط",operations:"إدارة المتجر",settings:"النموذج والإعدادات",modules:"الوحدات القادمة"};
 
   return (
     <div className={styles.shell}>
@@ -90,10 +94,10 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
         <nav aria-label="التنقل الرئيسي" className={styles.navGroup}>
           {canOpenPlatform && <Link className={styles.navItem} href="/admin" aria-label="الانتقال إلى إدارة منصة بيجر"><span className={styles.navIcon} aria-hidden="true">◇</span> إدارة منصة بيجر</Link>}
           <div className={styles.navLabel}>مساحة العمل</div>
-          <a className={`${styles.navItem} ${styles.navItemActive}`} href="/dashboard" aria-current="page">
+          <a className={`${styles.navItem} ${workspaceView==="overview"?styles.navItemActive:""}`} href={workspaceHref("overview")} aria-current={workspaceView==="overview"?"page":undefined}>
             <span className={styles.navIcon} aria-hidden="true">▦</span> نظرة عامة
           </a>
-          {canManageBranches ? <a className={styles.navItem} href="#catalog-management"><span className={styles.navIcon} aria-hidden="true">▤</span> إدارة المنيو والأسعار</a> : null}
+          {canManageBranches ? <Link className={`${styles.navItem} ${workspaceView==="operations"?styles.navItemActive:""}`} aria-current={workspaceView==="operations"?"page":undefined} href={workspaceHref("operations")}><span className={styles.navIcon} aria-hidden="true">▤</span> إدارة المتجر والطلبات</Link> : null}
           <span className={`${styles.navItem} ${styles.navItemSoon}`} aria-disabled="true">
             <span className={styles.navIcon} aria-hidden="true">◷</span> الحجوزات والطوابير <span className={styles.soon}>قريباً</span>
           </span>
@@ -101,9 +105,9 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
             <span className={styles.navIcon} aria-hidden="true">♧</span> العملاء والولاء <span className={styles.soon}>قريباً</span>
           </span>
           <div className={styles.navLabel} style={{marginTop:19}}>إدارة الأعمال</div>
-          <a className={styles.navItem} href="#branches"><span className={styles.navIcon} aria-hidden="true">⌂</span> الفروع</a>
-          {canManageBranches?<a className={styles.navItem} href="#business-model"><span className={styles.navIcon} aria-hidden="true">✧</span> نموذج العمل والميزات</a>:null}
-          <a className={styles.navItem} href="#business-details"><span className={styles.navIcon} aria-hidden="true">⚙</span> معلومات النشاط</a>
+          <Link className={`${styles.navItem} ${workspaceView==="branches"?styles.navItemActive:""}`} aria-current={workspaceView==="branches"?"page":undefined} href={workspaceHref("branches")}><span className={styles.navIcon} aria-hidden="true">⌂</span> الفروع ومعلومات النشاط</Link>
+          {canManageBranches?<Link className={`${styles.navItem} ${workspaceView==="settings"?styles.navItemActive:""}`} aria-current={workspaceView==="settings"?"page":undefined} href={workspaceHref("settings")}><span className={styles.navIcon} aria-hidden="true">✧</span> نموذج العمل والميزات</Link>:null}
+          <Link className={`${styles.navItem} ${workspaceView==="branches"?styles.navItemActive:""}`} href={workspaceHref("branches")}><span className={styles.navIcon} aria-hidden="true">⚙</span> بيانات النشاط</Link>
           <span className={`${styles.navItem} ${styles.navItemSoon}`} aria-disabled="true">
             <span className={styles.navIcon} aria-hidden="true">▥</span> التقارير <span className={styles.soon}>قريباً</span>
           </span>
@@ -116,7 +120,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
 
       <div className={styles.main}>
         <header className={styles.topbar}>
-          <div className={styles.breadcrumb}><span>مساحة العمل</span><span aria-hidden="true">/</span><strong>نظرة عامة</strong></div>
+          <div className={styles.breadcrumb}><span>مساحة العمل</span><span aria-hidden="true">/</span><strong>{workspaceTitles[workspaceView]}</strong></div>
           <div className={styles.topActions}>
             {canOpenPlatform && <Link href="/admin" style={{textDecoration:"none",color:"#165d66",background:"#eaf4f3",padding:"9px 12px",borderRadius:10,fontSize:12,fontWeight:800,whiteSpace:"nowrap"}}>إدارة المنصة ↗</Link>}
             <span className={styles.previewBadge}><span className={styles.statusDot} aria-hidden="true" />بيئة تجريبية</span>
@@ -129,9 +133,9 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
         <main className={styles.content}>
           <div className={styles.pageHead}>
             <div>
-              <p className={styles.eyebrow}>لوحة التحكم / OVERVIEW</p>
-              <h1 className={styles.heading}>أهلاً بعودتك، {firstName} 👋</h1>
-              <p className={styles.subheading}>كل ما تحتاج معرفته عن نشاطك، في مكان واحد وواضح.</p>
+              <p className={styles.eyebrow}>BEGER HQ / {workspaceView.toUpperCase()}</p>
+              <h1 className={styles.heading}>{workspaceView==="overview"?`أهلاً بعودتك، ${firstName} 👋`:workspaceTitles[workspaceView]}</h1>
+              <p className={styles.subheading}>{workspaceView==="overview"?"ملخص النشاط ومداخل الإدارة في مساحة مرتبة.":"لكل قسم مساحة عمل مستقلة، مع الحفاظ على بيانات المتجر الحقيقية."}</p>
             </div>
             <div className={styles.headBadge}><span className={styles.statusDot} aria-hidden="true" /> حسابك: <b>{roleLabel(currentRole)}</b></div>
           </div>
@@ -140,7 +144,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
           {membershipError ? <div className={styles.error} role="alert">تعذّر التحقق من عضوية نشاطك. حاول إعادة تحميل الصفحة، ولا تنشئ نشاطاً جديداً قبل التأكد.</div> : null}
           {loadError && !membershipError ? <div className={styles.error} role="alert">تعذّر تحميل بعض بيانات نشاطك. حاول إعادة تحميل الصفحة؛ لن نعرض أرقاماً غير مؤكدة.</div> : null}
 
-          {canManageBranches ? <HqReferenceOverview businessName={displayName} userLabel={firstName} businessCount={ownerCount} branches={primaryBranches.map(b=>({id:b.id,name:b.name}))} loadError={loadError}/> : <>
+          {workspaceView==="overview"&&(canManageBranches ? <HqReferenceOverview businessName={displayName} userLabel={firstName} businessCount={ownerCount} branches={primaryBranches.map(b=>({id:b.id,name:b.name}))} loadError={loadError}/> : <>
           <section className={styles.hero} aria-label="مرحباً بنشاطك">
             <div className={styles.heroCopy}>
               <span className={styles.heroBadge}>✦ بداية مساحة عملك</span>
@@ -168,9 +172,9 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
             </div>
           </section>
 
-          </>}
+          </>)}
 
-          <div className={styles.twoCols}>
+          {workspaceView==="branches"?<div className={styles.twoCols}>
             <section className={styles.panel} id="branches" aria-labelledby="branches-heading">
               <div className={styles.panelHead}>
                 <div><h2 className={styles.panelTitle} id="branches-heading">الفروع</h2><p className={styles.panelSubtitle}>الفروع المرتبطة بنشاطك الحالي</p></div>
@@ -199,12 +203,12 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
                 <div className={styles.detail}><span className={styles.detailName}>البريد المسجّل</span><span className={styles.detailValue} dir="ltr">{user.email ?? "—"}</span></div>
               </div>
             </section>
-          </div>
+          </div>:null}
 
-          {!loadError && primary && canManageBranches && <HeadquartersCatalog businessId={primary.id} country={primary.country_code} branches={primaryBranches.map(b => ({id:b.id,name:b.name}))}/>}
+          {workspaceView==="operations"&&!loadError && primary && canManageBranches && <HeadquartersCatalog businessId={primary.id} country={primary.country_code} branches={primaryBranches.map(b => ({id:b.id,name:b.name}))}/>}
 
-          {!loadError && primary && canManageBranches ? <div id="business-model" style={{margin:"26px 0"}}><BegerSectorConfigurator key={primary.id} draftKey={primary.id} businessId={primary.id} canSave={currentRole==="owner"}/></div>:null}
-          <section className={styles.modules} aria-labelledby="modules-heading">
+          {workspaceView==="settings"&&!loadError && primary && canManageBranches ? <div id="business-model" style={{margin:"26px 0"}}><BegerSectorConfigurator key={primary.id} draftKey={primary.id} businessId={primary.id} canSave={currentRole==="owner"}/></div>:null}
+          {workspaceView==="modules"?<section className={styles.modules} aria-labelledby="modules-heading">
             <div className={styles.panelHead}>
               <div><h2 className={styles.panelTitle} id="modules-heading">أدوات أعمالك</h2><p className={styles.panelSubtitle}>وحدات ستُفعّل بحسب نوع النشاط بعد استكمال البناء والاختبارات</p></div>
               <span className={styles.panelTag}>قيد التطوير</span>
@@ -218,15 +222,15 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
                 </div>
               ))}
             </div>
-          </section>
+          </section>:null}
           <footer className={styles.footer}>Beger · Smart Business OS · نسخة Staging للاختبار فقط</footer>
         </main>
       </div>
 
       <nav className={styles.mobileBar} aria-label="التنقل السريع">
-        <a href="/dashboard" className={`${styles.mobileLink} ${styles.mobileActive}`} aria-current="page"><span className={styles.mobileIcon} aria-hidden="true">▦</span>الرئيسية</a>
-        <a href="#branches" className={styles.mobileLink}><span className={styles.mobileIcon} aria-hidden="true">⌂</span>الفروع</a>
-        <a href="#business-details" className={styles.mobileLink}><span className={styles.mobileIcon} aria-hidden="true">⚙</span>النشاط</a>
+        <Link href={workspaceHref("overview")} className={`${styles.mobileLink} ${workspaceView==="overview"?styles.mobileActive:""}`} aria-current={workspaceView==="overview"?"page":undefined}><span className={styles.mobileIcon} aria-hidden="true">▦</span>الرئيسية</Link>
+        <Link href={workspaceHref("branches")} className={`${styles.mobileLink} ${workspaceView==="branches"?styles.mobileActive:""}`}><span className={styles.mobileIcon} aria-hidden="true">⌂</span>الفروع</Link>
+        {canManageBranches?<Link href={workspaceHref("operations")} className={`${styles.mobileLink} ${workspaceView==="operations"?styles.mobileActive:""}`}><span className={styles.mobileIcon} aria-hidden="true">▤</span>المتجر</Link>:null}
         <form action="/auth/signout" method="post"><button type="submit" className={styles.signout} aria-label="تسجيل الخروج">↪<span style={{display:"block",fontSize:10}}>خروج</span></button></form>
       </nav>
     </div>
