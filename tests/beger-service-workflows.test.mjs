@@ -43,3 +43,12 @@ test("public pager maps each service status to a non-sensitive signal with Arabi
  assert.equal(core.publicSignalLabels.none.en,"Status unavailable");
  assert.equal(core.isGuestVisibleSignal("none"),false);
 });
+
+test("existing G3 merchant order board uses the shared pager projection without taking over server authority",()=>{
+ const board=readFileSync("app/dashboard/merchant-order-board.tsx","utf8");
+ assert.match(board,/from "\.\.\/\.\.\/lib\/beger-service-workflows"/);
+ assert.match(board,/publicServiceSignal\("table_order",o\.status\)/);
+ assert.match(board,/publicSignalLabels\[publicServiceSignal/);
+ assert.match(board,/rpc\("g3_transition_order",\{p_order:order\.id,p_next:status\}\)/);
+ assert.doesNotMatch(board,/paymentProvider|paid=true|medicalHistory/);
+});
