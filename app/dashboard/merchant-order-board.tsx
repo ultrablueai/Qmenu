@@ -16,6 +16,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
  const feedback=useBegerFeedback();
  const seen=useRef<Set<string>|null>(null);
  const [collectionMethods,setCollectionMethods]=useState<Record<string,string>>({});
+ const [historyOpen,setHistoryOpen]=useState(false),[historyBusy,setHistoryBusy]=useState(false),[closedOrders,setClosedOrders]=useState<Order[]>([]),[historyLoaded,setHistoryLoaded]=useState(false);
  const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  async function refresh(){
   const db=browserSupabase();
@@ -35,6 +36,21 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   setLoaded(true);
  }
  useEffect(()=>{let live=true;seen.current=null;setLoaded(false);const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
+ async function loadHistory(){
+  setHistoryBusy(true);
+  try{
+   const {data,error}=await browserSupabase().rpc("g4_recent_closed_orders",{p_branch:branchId});
+   if(error)throw error;
+   setClosedOrders(Array.isArray(data)?data as Order[]:[]);
+   setHistoryLoaded(true);
+  }catch{setError("تعذّر تحميل سجل الطلبات السابقة. تحقق من الاتصال والصلاحيات.")}
+  finally{setHistoryBusy(false)}
+ }
+ async function toggleHistory(){
+  if(historyOpen){setHistoryOpen(false);return;}
+  setHistoryOpen(true);
+  await loadHistory();
+ }
  async function toggle(){
   if(busy||!confirm(enabled?"إيقاف استقبال طلبات QR الجديدة لهذا الفرع؟ الطلبات السابقة ستبقى محفوظة.":"تفعيل استقبال طلبات الطاولات على نسخة Staging؟ هذا يعني إمكانية إرسال طلبات اختبار حقيقية إلى هذه اللوحة."))return;
   setBusy(true);setError("");setNotice("");
@@ -61,8 +77,9 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
    const {data,error}=await browserSupabase().rpc("g3_record_external_payment",{p_order:order.id,p_method:method});
    if(error||data?.paymentStatus!=="paid")throw error??Error("Collection not confirmed");
    setOrders(current=>current.map(item=>item.id===order.id?{...item,paymentStatus:"paid",paymentMethod:method}:item));
+   setClosedOrders(current=>current.map(item=>item.id===order.id?{...item,paymentStatus:"paid",paymentMethod:method}:item));
    setNotice("تم تسجيل تحصيل الطلب #"+orderReference(order.id)+" لدى التاجر. العملية ليست دفعاً إلكترونياً عبر Beger.");
-   try{await refresh()}catch{setError("تم تسجيل التحصيل لكن فشل تحديث القائمة. حدّث الطلبات للتحقق.");}
+   try{await refresh();if(historyOpen)await loadHistory()}catch{setError("تم تسجيل التحصيل لكن فشل تحديث القائمة. حدّث الطلبات للتحقق.");}
   }catch{setError("تعذّر تأكيد تسجيل التحصيل. حدّث الطلبات أولاً قبل إعادة المحاولة.")}
   finally{setBusy(false)}
  }
@@ -115,5 +132,28 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
     </article>)}
     {!orders.some(o=>o.status===stage)?<p className="beger-order-board-empty">لا توجد طلبات بهذه الحالة</p>:null}
    </section>)}</div>
+  <section className="beger-order-history" aria-label="سجل الطلبات المكتملة والمرفوضة">
+   <header className="beger-order-history-heading"><div><h3>سجل الطلبات السابقة</h3><p>آخر 7 أيام · للمتابعة والتحصيل والطباعة · لا يُرسل تنبيه طلب جديد</p></div><button type="button" disabled={historyBusy} aria-expanded={historyOpen} onClick={()=>void toggleHistory()}>{historyBusy?"جارٍ التحميل…":historyOpen?"إخفاء السجل":"عرض سجل الطلبات"}</button></header>
+   {historyOpen?<div className="beger-order-history-content">
+    <div className="beger-order-history-tools"><span>{historyLoaded?closedOrders.length+" طلباً (بحد أقصى 50)":"جارٍ تحميل سجل الطلبات…"}</span><button type="button" disabled={historyBusy} onClick={()=>void loadHistory()}>تحديث السجل ↻</button></div>
+    {closedOrders.map(o=><article className="beger-order-history-ticket" key={o.id}>
+     <div className="beger-order-history-top"><strong dir="ltr">#{orderReference(o.id)}</strong><span className={o.status==="fulfilled"?"is-fulfilled":"is-rejected"}>{titles[o.status]}</span></div>
+     <p>{o.serviceMode==="takeaway"?"سفري · استلام من المحل":o.table} · <time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleString("ar")}</time></p>
+     <ul>{o.items.map((item,i)=><li key={i}>{item.quantity}× {item.name}</li>)}</ul>
+     <div className="beger-order-history-total"><strong>{formatOrderTotal(o.totalMinor,o.currency)}</strong><span>{o.paymentStatus==="paid"?"✓ تم تسجيل التحصيل":"◯ لم يُسجّل التحصيل"}</span></div>
+     {o.status==="fulfilled"&&o.paymentStatus!=="paid"?<div className="beger-order-payment-actions">
+      <label htmlFor={"archive-collection-"+o.id}>طريقة تحصيل الطلب المكتمل</label>
+      <select id={"archive-collection-"+o.id} disabled={busy} value={collectionMethods[o.id]??"cash"} onChange={event=>setCollectionMethods(current=>({...current,[o.id]:event.target.value}))}><option value="cash">نقداً</option><option value="external_card">بطاقة على جهاز التاجر</option><option value="external_transfer">تحويل خارجي</option></select>
+      <button type="button" disabled={busy} onClick={()=>void recordPayment(o)}>تأكيد مبلغ تم استلامه</button>
+     </div>:null}
+     <div className="beger-order-ticket-print" role="group" aria-label={"إعادة طباعة الطلب "+orderReference(o.id)}>
+      <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"kitchen"))setError("المتصفح منع نافذة الطباعة.")}}>طباعة المطبخ</button>
+      <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"pickup"))setError("المتصفح منع نافذة الطباعة.")}}>ملصق الاستلام</button>
+      <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"summary"))setError("المتصفح منع نافذة الطباعة.")}}>كشف حساب داخلي</button>
+     </div>
+    </article>)}
+    {historyLoaded&&closedOrders.length===0?<p className="beger-order-board-empty">لا توجد طلبات مكتملة أو مرفوضة خلال الأيام السبعة الماضية.</p>:null}
+   </div>:null}
+  </section>
  </section>;
 }
