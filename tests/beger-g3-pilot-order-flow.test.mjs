@@ -13,7 +13,7 @@ test("G3 is explicitly disabled per branch until an authorized manager opts in",
  assert.match(sql,/g3_table_order_enabled\(p_table_token uuid\)/);
  assert.match(merchant,/confirm\(enabled\?/);
  assert.match(guest,/g3_table_order_enabled/);
- assert.match(guest,/enabled&&tableToken/);
+ assert.match(guest,/enabled&&\(tableToken\|\|isTakeaway\)/);
 });
 test("G3 unauthenticated orders are priced from published products and active options on server",()=>{
  assert.match(sql,/join public\.catalog_branch_publications pub/);
@@ -69,7 +69,8 @@ test("Supabase capability queries normalize PostgREST PromiseLike before catch/f
 test("guest may start another table order after fulfillment or rejection, not while kitchen handles the first",()=>{
  assert.match(guest,/status==="fulfilled"\|\|status==="rejected"/);
  assert.match(guest,/newOrder:"بدء طلب جديد"/);
- assert.match(guest,/sessionStorage\.removeItem\("beger-g3-order:"\+tableToken\)/);
+ assert.match(guest,/sessionStorage\.removeItem\(trackingKey\)/);
+ assert.match(guest,/trackingKey=isTakeaway\?/);
 });
 
 test("repeat-order button closes event callback properly for JSX",()=>{
