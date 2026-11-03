@@ -495,3 +495,15 @@
 .beger-rating-form>button:disabled{opacity:.55;cursor:not-allowed}
 .beger-rating-done{margin:0;font-size:12px;line-height:1.7;color:#4a7138}
 .beger-rating-form button:focus-visible,.beger-rating-toggle:focus-visible{outline:3px solid #aac78c;outline-offset:2px}
+
+/* Non-monetary pilot loyalty card only; no checkout or pricing side effects. */
+.beger-loyalty-customer{width:min(100%,330px);max-width:100%;display:grid;gap:8px;border:1px solid #e3dcc7;border-radius:16px;background:#fff9ed;color:#645037;padding:13px;box-shadow:0 8px 24px #56401b18}
+.beger-loyalty-customer>strong{font-size:13px;color:#64543f}
+.beger-loyalty-customer-stamps{display:flex;flex-wrap:wrap;gap:5px}
+.beger-loyalty-customer-stamps>span{display:grid;place-items:center;width:30px;height:30px;background:#f0ebe0;border:1px solid #e7dccb;border-radius:50%;color:#b4aa93;font-size:16px}
+.beger-loyalty-customer-stamps>span.is-earned{color:#a77b27;background:#fff0c6;border-color:#d4b87d}
+.beger-loyalty-customer p{font-size:11px;line-height:1.65;margin:0}
+.beger-loyalty-customer>button{min-height:42px;padding:8px 13px;border:0;border-radius:10px;background:#677d4e;color:#fff;font-weight:800;cursor:pointer}
+.beger-loyalty-customer>button:disabled{opacity:.55}
+.beger-loyalty-customer small{color:#7b7267;font-size:10px;line-height:1.6}
+.beger-loyalty-customer .beger-loyalty-customer-notice{color:#486a39;font-weight:800}
