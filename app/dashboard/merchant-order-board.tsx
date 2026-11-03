@@ -5,6 +5,7 @@ import {browserSupabase} from "../../lib/supabase/browser";
 import {publicServiceSignal,publicSignalLabels} from "../../lib/beger-service-workflows";
 import {printOrderTicket} from "../../lib/beger-print-ticket";
 import {printFilteredOrderList} from "../../lib/beger-print-order-list";
+import {downloadOrderCsv} from "../../lib/beger-order-csv";
 import "./merchant-order-board.css";
 type Status="pending"|"accepted"|"preparing"|"ready"|"fulfilled"|"rejected";
 type Item={name:string;quantity:number;selections:{options?:{name_ar?:string}[];removedIngredients?:string[]}};
@@ -129,6 +130,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
    <label>حالة الطلب<select value={statusFilter} onChange={event=>setStatusFilter(event.target.value as typeof statusFilter)}><option value="all">كل الحالات</option>{(activeView==="live"?(["pending","accepted","preparing","ready"] as const):(["fulfilled","rejected"] as const)).map(status=><option key={status} value={status}>{titles[status]}</option>)}</select></label>
    <button type="button" className="beger-board-filter-reset" onClick={()=>{setServiceFilter("all");setPaymentFilter("all");setStatusFilter("all");setSearchQuery("");}}>مسح الفلاتر</button>
    <button type="button" className="beger-board-filter-print" disabled={activeView==="live"?!loaded:!historyLoaded} onClick={()=>{if(!printFilteredOrderList(activeView==="live"?filteredLive:filteredHistory,branchName,activeView))setError("المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة للموقع.");}}>طباعة النتائج المفلترة</button>
+   <button type="button" className="beger-board-filter-export" disabled={activeView==="live"?!loaded||filteredLive.length===0:!historyLoaded||filteredHistory.length===0} onClick={()=>{downloadOrderCsv(activeView==="live"?filteredLive:filteredHistory,activeView);}}>تصدير CSV</button>
    <span className="beger-board-result-count" role="status">المعروض: {activeView==="live"?filteredLive.length:filteredHistory.length} طلب</span>
   </section>
   {activeView==="live"?<section className="beger-order-board-kpis" aria-label="ملخص بيانات الطلبات الحالية">
