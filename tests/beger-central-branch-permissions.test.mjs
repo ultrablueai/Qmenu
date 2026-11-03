@@ -12,7 +12,7 @@ test("catalog administration is mounted only in merchant HQ",()=>{
  assert.match(dashboard,/canManageBranches && <HeadquartersCatalog/);
  assert.match(dashboard,/country=\{primary\.country_code\}/);
  assert.match(hq,/<MenuManager key=\{activeId\}/);
- assert.match(hq,/branches\.some\(b=>b\.id===selectedBranch\)/);
+ assert.match(hq,/branches\.some\(branch=>branch\.id===selectedBranch\)/);
  assert.doesNotMatch(branch,/import MenuManager|<MenuManager|menu-manager/);
  assert.doesNotMatch(branch,/<HeadquartersCatalog|browserSupabase/);
  assert.match(branch,/<MerchantOrderBoard/);
