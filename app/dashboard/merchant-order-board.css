@@ -203,3 +203,6 @@
 @media(max-width:1190px){.beger-archive-cards.is-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.beger-archive-cards.is-grid,.beger-archive-cards.is-list{grid-template-columns:minmax(0,1fr)}.beger-archive-cards.is-list .beger-order-history-ticket{display:flex;flex-direction:column;align-items:stretch}.beger-archive-layout button{padding:8px 10px}}
 @media(max-width:380px){.beger-archive-toolbar{align-items:stretch}.beger-archive-sort{width:100%;justify-content:space-between}.beger-archive-layout{width:100%;justify-content:space-between}.beger-archive-layout button{flex:1;justify-content:center}}
+
+.beger-board-filter-export{border:1px solid #cab695;background:#fff8ee;color:#7f5b36}
+.beger-board-filter-export:disabled{opacity:.55;cursor:not-allowed}
