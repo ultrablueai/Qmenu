@@ -3,10 +3,11 @@ import {useEffect,useRef,useState} from "react";
 import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {browserSupabase} from "../../lib/supabase/browser";
 import {publicServiceSignal,publicSignalLabels} from "../../lib/beger-service-workflows";
+import {printOrderTicket} from "../../lib/beger-print-ticket";
 import "./merchant-order-board.css";
 type Status="pending"|"accepted"|"preparing"|"ready"|"fulfilled"|"rejected";
 type Item={name:string;quantity:number;selections:{options?:{name_ar?:string}[];removedIngredients?:string[]}};
-type Order={id:string;table:string;serviceMode?:"dine_in"|"takeaway";status:Status;totalMinor:number;currency:string;createdAt:string;items:Item[]};
+type Order={id:string;table:string;serviceMode?:"dine_in"|"takeaway";paymentStatus?:"unpaid"|"paid";paymentMethod?:string|null;status:Status;totalMinor:number;currency:string;createdAt:string;items:Item[]};
 const titles:Record<Status,string>={pending:"بانتظار الموافقة",accepted:"تم قبول الطلب",preparing:"قيد التحضير",ready:"جاهز للتسليم",fulfilled:"تم التسليم",rejected:"مرفوض"};
 function formatOrderTotal(minor:number,currency:string){const factor=currency==="TRY"?100:1;return new Intl.NumberFormat("ar",{minimumFractionDigits:currency==="TRY"?2:0,maximumFractionDigits:currency==="TRY"?2:0}).format(minor/factor)+" "+currency;}
 function orderReference(id:string){return id.replace(/-/g,"").slice(0,8).toUpperCase();}
@@ -14,6 +15,7 @@ const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"
 export default function MerchantOrderBoard({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
  const feedback=useBegerFeedback();
  const seen=useRef<Set<string>|null>(null);
+ const [collectionMethods,setCollectionMethods]=useState<Record<string,string>>({});
  const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  async function refresh(){
   const db=browserSupabase();
@@ -49,6 +51,21 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   }catch{setError("لم يتغير إعداد طلبات السفري. تأكد من صلاحيات الإدارة.")}
   finally{setBusy(false)}
  }
+ async function recordPayment(order:Order){
+  if(busy||order.paymentStatus==="paid")return;
+  const method=collectionMethods[order.id]??"cash";
+  const methodLabel=method==="cash"?"نقداً":method==="external_card"?"بطاقة على جهاز التاجر":"تحويل خارجي";
+  if(!confirm("تأكيد استلام كامل المبلغ "+formatOrderTotal(order.totalMinor,order.currency)+" عبر "+methodLabel+"؟ هذا لا يجري أي خصم إلكتروني."))return;
+  setBusy(true);setError("");setNotice("");
+  try{
+   const {data,error}=await browserSupabase().rpc("g3_record_external_payment",{p_order:order.id,p_method:method});
+   if(error||data?.paymentStatus!=="paid")throw error??Error("Collection not confirmed");
+   setOrders(current=>current.map(item=>item.id===order.id?{...item,paymentStatus:"paid",paymentMethod:method}:item));
+   setNotice("تم تسجيل تحصيل الطلب #"+orderReference(order.id)+" لدى التاجر. العملية ليست دفعاً إلكترونياً عبر Beger.");
+   try{await refresh()}catch{setError("تم تسجيل التحصيل لكن فشل تحديث القائمة. حدّث الطلبات للتحقق.");}
+  }catch{setError("تعذّر تأكيد تسجيل التحصيل. حدّث الطلبات أولاً قبل إعادة المحاولة.")}
+  finally{setBusy(false)}
+ }
  async function transition(order:Order,status:Status){
   if(busy)return;
   setBusy(true);setError("");setNotice("");
@@ -77,6 +94,21 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
       <div className="beger-order-ticket-head"><strong>⌗ {o.serviceMode==="takeaway"?"سفري · استلام من المحل":o.table}</strong><span className="beger-order-reference" aria-label={"رقم الطلب "+orderReference(o.id)}>طلب #{orderReference(o.id)}</span><time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</time></div>
       <ul>{o.items.map((item,index)=><li key={index}><strong>{item.quantity}× {item.name}</strong><small>{(item.selections?.options??[]).map(opt=>opt.name_ar).filter(Boolean).join(" · ")}{(item.selections?.removedIngredients??[]).length?" · بدون "+(item.selections?.removedIngredients??[]).join("، "):""}</small></li>)}</ul>
       <div className="beger-order-ticket-price">{formatOrderTotal(o.totalMinor,o.currency)}</div>
+      <div className="beger-order-payment" aria-label="حالة تحصيل الطلب">
+       <strong className={o.paymentStatus==="paid"?"is-paid":"is-unpaid"}>{o.paymentStatus==="paid"?"✓ تم تسجيل التحصيل":"◯ لم يُسجّل التحصيل"}</strong>
+       {o.paymentStatus==="paid"?<small>{o.paymentMethod==="cash"?"نقداً":o.paymentMethod==="external_card"?"بطاقة التاجر":o.paymentMethod==="external_transfer"?"تحويل خارجي":""}</small>:<div className="beger-order-payment-actions">
+        <label htmlFor={"collection-"+o.id}>طريقة التحصيل</label>
+        <select id={"collection-"+o.id} disabled={busy} value={collectionMethods[o.id]??"cash"} onChange={event=>setCollectionMethods(current=>({...current,[o.id]:event.target.value}))}>
+         <option value="cash">نقداً</option><option value="external_card">بطاقة على جهاز التاجر</option><option value="external_transfer">تحويل خارجي</option>
+        </select>
+        <button type="button" disabled={busy} onClick={()=>void recordPayment(o)}>تأكيد المبلغ المستلم</button>
+       </div>}
+      </div>
+      <div className="beger-order-ticket-print" role="group" aria-label={"طباعة مستندات الطلب "+orderReference(o.id)}>
+       <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"kitchen"))setError("المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة للموقع.")}}>طباعة المطبخ</button>
+       <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"pickup"))setError("المتصفح منع نافذة الطباعة.")}}>ملصق الاستلام</button>
+       <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"summary"))setError("المتصفح منع نافذة الطباعة.")}}>كشف حساب داخلي</button>
+      </div>
       <div className="beger-order-pager-signal" aria-label="حالة المتابعة العامة">متابعة الزبون: {publicSignalLabels[publicServiceSignal("table_order",o.status)].ar}</div>
       {next[o.status]?<button disabled={busy} type="button" onClick={()=>void transition(o,next[o.status]!.value)}>{next[o.status]!.label}</button>:null}
       {(o.status==="pending"||o.status==="accepted")?<button className="beger-order-reject" disabled={busy} type="button" onClick={()=>{if(confirm("رفض الطلب؟ سيتم إبلاغ الزبون بحالة الرفض."))void transition(o,"rejected")}}>رفض الطلب</button>:null}
