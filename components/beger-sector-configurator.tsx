@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useEffect,useRef,useState} from "react";
 import {browserSupabase} from "../lib/supabase/browser";
 import {capabilities,previewPlan,sectorById,sectors,type BusinessSector,type Capability} from "../lib/beger-sector-catalog";
 
@@ -10,13 +10,14 @@ export default function BegerSectorConfigurator({onSelectionChange,draftKey,busi
  const [saving,setSaving]=useState(false);
  const [synced,setSynced]=useState(false);
  const [notice,setNotice]=useState("");
+ const editedRef=useRef(false);
  useEffect(()=>{try{if(draftKey){const raw=localStorage.getItem("beger-sector-draft:"+draftKey);if(raw){const saved=JSON.parse(raw) as {sector?:BusinessSector;features?:string[]};if(sectors.some(x=>x.id===saved.sector)&&Array.isArray(saved.features)){const valid=previewPlan(saved.sector!,saved.features).enabled;setSector(saved.sector!);setChosen(valid);onSelectionChange?.(saved.sector!,valid);}}}}catch{/* local drafts optional */}setLoaded(true);},[draftKey]);
  useEffect(()=>{if(!loaded||!draftKey)return;try{localStorage.setItem("beger-sector-draft:"+draftKey,JSON.stringify({sector,features:chosen}))}catch{/* local drafts optional */}},[sector,chosen,loaded,draftKey]);
  useEffect(()=>{if(!businessId)return;let alive=true;const db=browserSupabase();
   void db.from("beger_merchant_model_preferences").select("sector,requested_capabilities").eq("business_id",businessId).maybeSingle().then(({data,error})=>{
    if(!alive)return;
    if(error){setNotice("تعذّر قراءة الإعدادات المحفوظة من الخادم؛ المعروض مسودة محلية.");return;}
-   if(data&&sectors.some(x=>x.id===data.sector)){
+   if(data&&sectors.some(x=>x.id===data.sector)&&!editedRef.current){
     const next=data.sector as BusinessSector,features=previewPlan(next,Array.isArray(data.requested_capabilities)?data.requested_capabilities:[]).enabled;
     setSector(next);setChosen(features);onSelectionChange?.(next,features);setSynced(true);
    }
@@ -35,19 +36,19 @@ export default function BegerSectorConfigurator({onSelectionChange,draftKey,busi
     updated_by:user.id,updated_at:new Date().toISOString()
    },{onConflict:"business_id"});
    if(error)throw error;
-   setSynced(true);setNotice("تم حفظ نموذج النشاط والميزات المطلوبة في مساحة عملك. الميزات قيد التطوير والاشتراكات المدفوعة لا تُفعّل تلقائياً.");
+   editedRef.current=false;setSynced(true);setNotice("تم حفظ نموذج النشاط والميزات المطلوبة في مساحة عملك. الميزات قيد التطوير والاشتراكات المدفوعة لا تُفعّل تلقائياً.");
   }catch{setNotice("تعذّر حفظ الاختيارات على الخادم. تحقّق من اتصالك وصلاحية المالك؛ المسودة المحلية لا تفعّل ميزات.");}
   finally{setSaving(false)}
  }
  const definition=sectorById(sector),plan=previewPlan(sector,chosen);
  function selectSector(next:BusinessSector){
   const defaults=sectorById(next).defaultCapabilities;
-  setSector(next);setChosen(defaults);setSynced(false);onSelectionChange?.(next,defaults);
+  editedRef.current=true;setSector(next);setChosen(defaults);setSynced(false);onSelectionChange?.(next,defaults);
  }
  function changeCapability(id:Capability,checked:boolean){
   const next=checked?[...chosen,id]:chosen.filter(x=>x!==id);
   const sanitized=previewPlan(sector,next).enabled;
-  setChosen(sanitized);setSynced(false);onSelectionChange?.(sector,sanitized);
+  editedRef.current=true;setChosen(sanitized);setSynced(false);onSelectionChange?.(sector,sanitized);
  }
  return <section className="beger-sector-picker" aria-labelledby="beger-sector-heading">
   <div className="beger-sector-picker-head"><span>BEGER · BUSINESS MODEL</span><h2 id="beger-sector-heading">اختَر نموذج عملك وميزاته</h2><p>نفس نظام Beger يتكيف مع طبيعة نشاطك. اختر الخدمات التي تريدها، وسنوضح الجاهز للتجربة وما يحتاج تطويراً قبل تفعيله.</p></div>
