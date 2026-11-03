@@ -41,7 +41,16 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
  async function transition(order:Order,status:Status){
   if(busy)return;
   setBusy(true);setError("");setNotice("");
-  try{const {data,error}=await browserSupabase().rpc("g3_transition_order",{p_order:order.id,p_next:status});if(error||data?.status!==status)throw error??Error("Update not confirmed");await refresh();setNotice("تم تحديث طلب #"+orderReference(order.id)+" من "+order.table+" إلى "+titles[status]);feedback.signal(status==="accepted"?"accepted":status==="preparing"?"preparing":status==="ready"?"ready":status==="fulfilled"?"fulfilled":"rejected","تم تحديث طلب #"+orderReference(order.id)+" إلى "+titles[status])}catch{setError("تعذّر تحديث الطلب. لم تتغير حالته.")}finally{setBusy(false)}
+  try{
+   const {data,error}=await browserSupabase().rpc("g3_transition_order",{p_order:order.id,p_next:status});
+   if(error||data?.status!==status)throw error??Error("Update not confirmed");
+   // Server has confirmed the transition; a later refresh failure must never tell staff it was undone.
+   setOrders(current=>current.map(item=>item.id===order.id?{...item,status}:item));
+   setNotice("تم تحديث طلب #"+orderReference(order.id)+" من "+order.table+" إلى "+titles[status]);
+   feedback.signal(status==="accepted"?"accepted":status==="preparing"?"preparing":status==="ready"?"ready":status==="fulfilled"?"fulfilled":"rejected","تم تحديث طلب #"+orderReference(order.id)+" إلى "+titles[status]);
+   try{await refresh()}catch{setError("تم تغيير حالة الطلب بنجاح، لكن تعذّر تحديث القائمة. أعد تحميل الطلبات للتحقق من أحدث البيانات.");}
+  }catch{setError("تعذّر تأكيد تغيير حالة الطلب. حدّث القائمة قبل إعادة المحاولة لتجنّب إجراء مكرر.");}
+  finally{setBusy(false)}
  }
  return <section id="beger-merchant-orders" className="beger-order-board" dir="rtl" aria-label="إدارة طلبات الطاولات">
   <header className="beger-order-board-header"><div><span>BEGER · G3 PILOT</span><h2>طلبات الطاولات والمطبخ</h2><p>{branchName} · استقبال الطلب ← موافقة المطعم ← التحضير ← الجاهزية</p></div><div><span className={enabled?"beger-order-enabled":"beger-order-disabled"}>{enabled?"● استقبال الطلبات مفعّل":"○ استقبال الطلبات متوقف"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void toggle()}>{enabled?"إيقاف استقبال الطلبات":"تفعيل استقبال الطلبات"}</button></div></header>
