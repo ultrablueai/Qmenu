@@ -444,3 +444,20 @@
 .beger-customer-order-card>span{font-size:12px;font-weight:750}
 .beger-customer-order-card>strong{font-size:clamp(25px,7vw,37px);line-height:1.2;letter-spacing:1px;overflow-wrap:anywhere}
 .beger-customer-order-card>small{font-size:12px;line-height:1.6;color:#667654;text-align:center}
+
+/* Compact, accessible in-page notification bell; no OS push permission is requested. */
+.beger-feedback-panel{border:1px solid #e0e5d7;background:#f8f9f1;border-radius:14px;margin:9px 0;min-width:0;color:#51653d}
+.beger-feedback-panel .beger-feedback-summary{display:flex;align-items:center;gap:9px;min-height:48px;padding:9px 13px;cursor:pointer;list-style:none}
+.beger-feedback-panel .beger-feedback-summary::-webkit-details-marker{display:none}
+.beger-feedback-panel .beger-feedback-summary:focus-visible{outline:3px solid #9ab37b;outline-offset:2px;border-radius:12px}
+.beger-feedback-bell{width:20px;height:20px;flex:none;stroke:#647d49}
+.beger-feedback-summary strong{font-size:13px;font-weight:800}
+.beger-feedback-summary-status{margin-inline-start:auto;color:#677a54;background:#ebf0e2;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:750}
+.beger-feedback-chevron{font-size:20px;line-height:1;transition:transform .15s ease}
+.beger-feedback-panel[open] .beger-feedback-chevron{transform:rotate(180deg)}
+.beger-feedback-panel .beger-feedback-controls{border:0;border-top:1px solid #e0e5d7;background:transparent;border-radius:0;margin:0;padding:12px 14px;gap:12px}
+.beger-feedback-panel .beger-feedback-controls legend{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.beger-feedback-panel .beger-feedback-controls label{font-size:12px;white-space:nowrap}
+.beger-feedback-panel .beger-feedback-test{margin-inline-start:auto}
+@media(max-width:360px){.beger-feedback-panel .beger-feedback-controls{gap:9px}.beger-feedback-panel .beger-feedback-test{width:100%;margin:2px 0 0}}
+@media(prefers-reduced-motion:reduce){.beger-feedback-chevron{transition:none}}
