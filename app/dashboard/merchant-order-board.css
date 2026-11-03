@@ -44,3 +44,28 @@
 .beger-feedback-test:focus-visible{outline:3px solid #a1b77c;outline-offset:2px}
 
 .beger-order-pager-signal{font-size:12px;color:#46604c;background:#edf4e9;border-radius:8px;padding:8px 10px;margin:9px 0;line-height:1.6;overflow-wrap:break-word}
+
+/* Release candidate: readable Kanban at desktop size, touch-friendly stacked stages on phones. */
+.beger-order-board{min-width:0;overflow:hidden}
+.beger-order-board-columns{min-width:0;overflow-x:visible;grid-template-columns:repeat(4,minmax(0,1fr))}
+.beger-order-board-column,.beger-order-ticket{min-width:0}
+.beger-order-ticket :is(strong,small),.beger-order-board-column h3{overflow-wrap:normal;word-break:normal;hyphens:none}
+.beger-order-ticket-head{gap:8px 10px}
+.beger-order-ticket-head .beger-order-reference{flex-shrink:0}
+.beger-order-ticket button{min-height:44px}
+@media(max-width:1180px){
+ .beger-order-board-columns{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+ .beger-order-board{padding:12px;border-radius:16px}
+ .beger-order-board-header{gap:12px}
+ .beger-order-board-header>div{min-width:0;max-width:100%}
+ .beger-order-board-columns{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;overflow-x:visible}
+ .beger-order-board-column{min-height:0;padding:12px;border-radius:14px}
+ .beger-order-ticket{padding:13px;border-radius:12px}
+ .beger-order-ticket li strong{font-size:13px;line-height:1.55}
+ .beger-order-ticket li small{font-size:12px;line-height:1.55}
+ .beger-order-ticket-head{justify-content:flex-start}
+ .beger-order-ticket-head time{margin-inline-start:auto}
+ .beger-order-board-controls{flex-wrap:wrap}
+}
