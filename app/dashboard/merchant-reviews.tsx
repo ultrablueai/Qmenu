@@ -13,7 +13,7 @@ export default function MerchantReviews({branchId,branchName}:{branchId:string;b
  useEffect(()=>{
   let live=true;
   setLoading(true);setError("");setReport(null);
-  browserSupabase().rpc("g5_branch_ratings",{p_branch:branchId})
+  Promise.resolve(browserSupabase().rpc("g5_branch_ratings",{p_branch:branchId}))
    .then(({data,error})=>{if(!live)return;if(error||!data||!Array.isArray(data.recent))throw Error("Bad rating report");setReport(data as Summary)})
    .catch(()=>{if(live)setError("تعذّر جلب التقييمات. تحقق من صلاحيات مدير الفرع.")})
    .finally(()=>{if(live)setLoading(false)});
