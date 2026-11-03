@@ -2,6 +2,7 @@
 import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNode} from "react";
 import {formatPrice,type GuestLang} from "../lib/g2-public";
 import GuestOrderSubmission from "./guest-order-submission";
+import GuestOrderWatcher from "./guest-order-watcher";
 import {useBegerFeedback} from "./beger-feedback";
 
 type CartItem={key:string;productId?:string;optionIds?:string[];removedIngredients?:string[];name:string;unitMinor:number;baseMinor?:number;extraMinor?:number;imageUrl?:string;quantity:number;selections:string[]};
@@ -90,6 +91,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
  }}),[count,feedback.signal,lang,items]);
  return <CartContext.Provider value={context}>
   {children}
+  <GuestOrderWatcher branchId={branchId} tableToken={tableToken} lang={lang} openCart={()=>setOpen(true)}/>
   <button ref={openerRef} className="beger-basket-trigger" type="button" onClick={()=>setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label={labels.cart} style={{position:"fixed",bottom:20,insetInlineEnd:20,zIndex:40,background:accent,color:"#fff",border:0,borderRadius:19,padding:"14px 20px",fontWeight:800,boxShadow:"0 13px 35px #183b3250",cursor:"pointer",fontSize:14}}>
     🛍 {labels.cart} <span style={{background:"#ffffff2b",borderRadius:20,padding:"4px 9px",marginInlineStart:8}}>{count}</span>
   </button>
