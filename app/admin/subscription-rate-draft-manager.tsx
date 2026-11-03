@@ -1,8 +1,8 @@
 "use client";
-import {useState} from "react";
+import {useState,type FormEvent} from "react";
 import {useRouter} from "next/navigation";
 import {browserSupabase} from "../../lib/supabase/browser";
-import {capabilities,type Capability} from "../../lib/beger-sector-catalog";
+import {capabilities} from "../../lib/beger-sector-catalog";
 import styles from "./admin.module.css";
 
 export type RateDraft={country:string;rate_key:string;monthly_minor:number|string;updated_at:string};
@@ -19,10 +19,10 @@ export default function SubscriptionRateDraftManager({rates,canManage,loadFailed
  const currency=country==="TR"?"TRY":"SYP";
  const minorFactor=country==="TR"?100:1;
  const selectedRate=rates.find(x=>x.country===country&&x.rate_key===feature);
- async function save(event:React.FormEvent<HTMLFormElement>){
+ async function save(event:FormEvent<HTMLFormElement>){
   event.preventDefault();
   if(!canManage||loadFailed||busy||!allowed.has(feature))return;
-  if(!/^\d+(?:\.\d{1,2})?$/.test(amount))return;
+  if(!(country==="TR"?/^\d+(?:\.\d{1,2})?$/:/^\d+$/).test(amount))return;
   const [whole,decimal=""]=amount.split(".");
   const result=Number(whole)*minorFactor+(minorFactor===100?Number(decimal.padEnd(2,"0")):0);
   if(!Number.isSafeInteger(result)||result<0||result>10000000000||(minorFactor===1&&decimal!==""))return;
