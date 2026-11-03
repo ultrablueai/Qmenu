@@ -86,6 +86,12 @@ export function printOrderTicket(order:PrintableOrder,branchName:string,kind:Tic
  }
  `;
  d.head.appendChild(stylesheet);
+ const paperStyle=d.createElement("style");
+ d.head.appendChild(paperStyle);
+ const updatePaper=(paper:Paper)=>{
+  d.body.dataset.paper=paper;
+  paperStyle.textContent=paper==="a4"?"@page{size:A4;margin:12mm}":paper==="58mm"?"@page{size:58mm auto;margin:3mm}":"@page{size:80mm auto;margin:4mm}";
+ };
  const add=(tag:string,value:string,className?:string,parent:HTMLElement=d.body)=>{
   const node=d.createElement(tag);node.textContent=value;if(className)node.className=className;parent.appendChild(node);return node;
  };
@@ -97,8 +103,8 @@ export function printOrderTicket(order:PrintableOrder,branchName:string,kind:Tic
  }
  const defaultPaper:Paper=kind==="summary"?"a4":"80mm";
  selector.value=defaultPaper;
- d.body.dataset.paper=defaultPaper;
- selector.addEventListener("change",()=>{d.body.dataset.paper=selector.value;});
+ updatePaper(defaultPaper);
+ selector.addEventListener("change",()=>{updatePaper(selector.value as Paper);});
  const printButton=add("button","طباعة المستند",undefined,toolbar);
  printButton.addEventListener("click",()=>popup.print());
  add("span","اختر قياس الورق نفسه من إعدادات الطابعة عند الطباعة","print-help",toolbar);
