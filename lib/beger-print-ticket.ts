@@ -43,7 +43,7 @@ export function printOrderTicket(order:PrintableOrder,branchName:string,kind:Tic
    add("p",order.paymentStatus==="paid"?"التحصيل مسجّل لدى التاجر":"لم يُسجّل التحصيل");
   }
  }
- add("p",kind==="summary"?"كشف حساب داخلي — ليس فاتورة ضريبية أو فيش ÖKC":kind==="pickup"?"طابق رقم الاستلام قبل التسليم":"ورقة تجهيز فقط — ليست إيصالاً ضريبياً","notice");
+ add("p",kind==="summary"?"كشف حساب داخلي — هذه الورقة ليست فاتورة ضريبية أو فيش ÖKC":kind==="pickup"?"طابق رقم الاستلام قبل التسليم":"ورقة تجهيز فقط — ليست إيصالاً ضريبياً","notice");
  const button=add("button","طباعة");
  button.addEventListener("click",()=>popup.print());
  // Keep the print view open when printing is blocked or cancelled.
