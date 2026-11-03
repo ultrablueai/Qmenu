@@ -16,6 +16,8 @@ const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"
 export default function MerchantOrderBoard({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
  const feedback=useBegerFeedback();
  const seen=useRef<Set<string>|null>(null);
+ const [historyOpen,setHistoryOpen]=useState(false),[historyBusy,setHistoryBusy]=useState(false),[closedOrders,setClosedOrders]=useState<Order[]>([]),[historyLoaded,setHistoryLoaded]=useState(false);
+ const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  const [collectionMethods,setCollectionMethods]=useState<Record<string,string>>({});
  const [activeView,setActiveView]=useState<"live"|"history">("live");
  const [serviceFilter,setServiceFilter]=useState<"all"|"dine_in"|"takeaway">("all");
@@ -30,8 +32,6 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
  );
  const filteredLive=orders.filter(filterOrder);
  const filteredHistory=closedOrders.filter(filterOrder);
- const [historyOpen,setHistoryOpen]=useState(false),[historyBusy,setHistoryBusy]=useState(false),[closedOrders,setClosedOrders]=useState<Order[]>([]),[historyLoaded,setHistoryLoaded]=useState(false);
- const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  async function refresh(){
   const db=browserSupabase();
   const [cap,list]=await Promise.all([
