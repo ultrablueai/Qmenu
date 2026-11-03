@@ -8,34 +8,59 @@ import QrExport from "../../components/qr-export";
 import MerchantTableQr from "./merchant-table-qr";
 import MerchantOrderBoard from "./merchant-order-board";
 import "../qr-experience.css";
+import "./merchant-workspace.css";
 
-type Branch = {id:string; name:string};
-type Props = {businessId:string; country:string; branches:Branch[]};
-
-/** Headquarters-only entry point. The server renders this only for verified
- * business owner/manager memberships; database RLS remains authoritative. */
-export default function HeadquartersCatalog({businessId,country,branches}:Props) {
-  const [selectedBranch,setSelectedBranch]=useState(branches[0]?.id ?? "");
-  const [copyNotice,setCopyNotice]=useState("");
-  const [origin,setOrigin]=useState("");
-  useEffect(()=>{setOrigin(window.location.origin);},[]);
-  if (branches.length===0) return <section id="catalog-management" aria-label="الإدارة المركزية للمنيو">
-    <h2>إدارة المنيو والطاولات</h2>
-    <p>أضف أول فرع من لوحة الإدارة الرئيسية لتبدأ إعداد قائمته.</p>
-  </section>;
-  const valid=branches.some(b=>b.id===selectedBranch);
-  const activeId=valid?selectedBranch:branches[0].id;
-  const guestPath=`/b/${activeId}`;
-  return <section id="catalog-management" aria-label="الإدارة المركزية للمنيو" dir="rtl" style={{marginTop:26}}>
-    <div style={{background:"#eaf5f3",border:"1px solid #cce3df",padding:18,borderRadius:14}}>
-      <h2 style={{fontSize:22,margin:"0 0 8px"}}>إدارة الفروع والمنيو من المركز</h2>
-      <p style={{fontSize:13,color:"#386c68",margin:"0 0 16px"}}>هذه الأدوات مخصصة لإدارة المؤسسة. حدد الفرع الذي تريد تعديل قائمته وأسعاره وQR الخاص به. موظفو الفرع لا يملكون صلاحيات إدارة المنيو.</p>
-      <label htmlFor="headquarters-branch" style={{fontWeight:700,fontSize:14}}>اختيار الفرع</label>
-      <select id="headquarters-branch" value={activeId} onChange={e=>setSelectedBranch(e.target.value)}
-        style={{display:"block",marginTop:8,width:"100%",maxWidth:420,padding:"11px",border:"1px solid #a2c4c0",borderRadius:10,background:"white",font:"inherit"}}>
-        {branches.map(b=><option value={b.id} key={b.id}>{b.name}</option>)}
-      </select>
-    </div>
+type Branch={id:string;name:string};
+type Props={businessId:string;country:string;branches:Branch[]};
+type Workspace="orders"|"catalog"|"qr"|"appearance"|"legacy";
+const workspaceSections:{id:Workspace;icon:string;name:string;help:string}[]=[
+ {id:"orders",icon:"▣",name:"الطلبات والمطبخ",help:"طلبات مباشرة · تحصيل · طباعة"},
+ {id:"catalog",icon:"▤",name:"المنتجات والكتالوج",help:"الأصناف · الإضافات · الأسعار"},
+ {id:"qr",icon:"▦",name:"رموز QR والطاولات",help:"QR المتجر والطاولات"},
+ {id:"appearance",icon:"◉",name:"الثيمات واللغات",help:"التصميم · الألوان · اللغات"},
+ {id:"legacy",icon:"⚙",name:"الأدوات القديمة",help:"أدوات الانتقال المحفوظة"}
+];
+/** The merchant chooses a single workspace; no stacked editors or unrelated forms. */
+export default function HeadquartersCatalog({businessId,country,branches}:Props){
+ const [selectedBranch,setSelectedBranch]=useState(branches[0]?.id??"");
+ const [workspace,setWorkspace]=useState<Workspace>("orders");
+ const [copyNotice,setCopyNotice]=useState("");
+ const [origin,setOrigin]=useState("");
+ useEffect(()=>{setOrigin(window.location.origin);},[]);
+ useEffect(()=>{
+  const showHash=()=>{
+   const h=window.location.hash;
+   if(h==="#catalog-management"||h==="#central-catalog")setWorkspace("catalog");
+   else if(h==="#customer-appearance")setWorkspace("appearance");
+   else if(h==="#qr-management")setWorkspace("qr");
+   else if(h==="#merchant-orders")setWorkspace("orders");
+  };
+  showHash();window.addEventListener("hashchange",showHash);
+  return()=>window.removeEventListener("hashchange",showHash);
+ },[]);
+ if(!branches.length)return <section id="catalog-management" className="beger-merchant-workspace" dir="rtl"><h2>إدارة المتجر</h2><p>أضف فرعك الأول لتبدأ.</p></section>;
+ const valid=branches.some(branch=>branch.id===selectedBranch);
+ const activeId=valid?selectedBranch:branches[0].id;
+ const activeName=branches.find(branch=>branch.id===activeId)?.name??"";
+ const guestPath="/b/"+activeId;
+ const current=workspaceSections.find(section=>section.id===workspace)!;
+ return <section id="catalog-management" className="beger-merchant-workspace" aria-label="مساحة إدارة المتجر" dir="rtl">
+  <header className="beger-merchant-workspace-top">
+   <div><span className="beger-merchant-workspace-eyebrow">BEGER / MERCHANT HQ</span><h2>إدارة المتجر</h2><p>كل قسم في مساحة مستقلة. أدوات الطلبات والكتالوج والرموز والمظهر محفوظة.</p></div>
+   <label className="beger-workspace-branch-select" htmlFor="headquarters-branch">الفرع النشط
+    <select id="headquarters-branch" value={activeId} onChange={event=>setSelectedBranch(event.target.value)}>
+     {branches.map(branch=><option value={branch.id} key={branch.id}>{branch.name}</option>)}
+    </select>
+   </label>
+  </header>
+  <nav className="beger-workspace-tabs" aria-label="أقسام إدارة المتجر">
+   {workspaceSections.map(section=><button type="button" key={section.id} onClick={()=>setWorkspace(section.id)} className={"beger-workspace-tab"+(workspace===section.id?" is-current":"")} aria-current={workspace===section.id?"page":undefined}>
+    <span aria-hidden="true" className="beger-workspace-tab-symbol">{section.icon}</span><strong>{section.name}</strong><small>{section.help}</small>
+   </button>)}
+  </nav>
+  <div className="beger-merchant-workspace-card">
+   <header className="beger-merchant-workspace-card-header"><div><span>WORKSPACE / {workspace.toUpperCase()}</span><h3>{current.name}</h3><p>{current.help}</p></div><span className="beger-merchant-workspace-branch-chip">{activeName}</span></header>
+   {workspace==="qr"?<div id="qr-management">
     <div style={{background:"#fff",border:"1px solid #dcebe2",borderRadius:18,padding:20,marginTop:18}}>
       <h3 style={{margin:"0 0 8px",fontSize:20,color:"#193d32"}}>رمز QR للمنيو — جاهز للزبائن</h3>
       <p style={{fontSize:13,color:"#64776c",margin:"0 0 17px",lineHeight:1.8}}>رمز الفرع المحدد يفتح القائمة مباشرةً من دون تسجيل دخول. لا تحتاج إلى إنشاء طاولة للحصول على رمز الفرع العام.</p>
@@ -53,13 +78,13 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
         </div>
       </div>
     </div>
-    <MerchantTableQr key={activeId} businessId={businessId} branchId={activeId} branchName={branches.find(b=>b.id===activeId)?.name??""}/>
-    <MerchantOrderBoard key={"orders-"+activeId} businessId={businessId} branchId={activeId} branchName={branches.find(b=>b.id===activeId)?.name??""}/>
-    <MerchantAppearance businessId={businessId}/>
-    <CentralCatalog businessId={businessId} country={country} branches={branches}/>
-    <details style={{marginTop:22}}><summary style={{cursor:"pointer",fontWeight:700}}>إدارة القوائم القديمة الخاصة بالفرع (مرحلة انتقالية)</summary>
-      <p style={{fontSize:13,color:"#60777c"}}>احتفظنا بأدوات الفرع القديمة مؤقتاً حتى لا نفقد أي منتجات أو أسعار أُدخلت قبل اعتماد الكتالوج المركزي. لا تكرر إدخال نفس المنتج في النظامين.</p>
-      <MenuManager key={activeId} businessId={businessId} branchId={activeId} country={country}/>
-    </details>
-  </section>;
+
+    <MerchantTableQr key={activeId} businessId={businessId} branchId={activeId} branchName={activeName}/>
+   </div>:null}
+   {workspace==="orders"?<div id="merchant-orders"><MerchantOrderBoard key={"orders-"+activeId} businessId={businessId} branchId={activeId} branchName={activeName}/></div>:null}
+   {workspace==="appearance"?<div id="customer-appearance"><MerchantAppearance businessId={businessId}/></div>:null}
+   {workspace==="catalog"?<div id="central-catalog"><CentralCatalog businessId={businessId} country={country} branches={branches}/></div>:null}
+   {workspace==="legacy"?<details open><summary>إدارة القوائم القديمة الخاصة بالفرع (مرحلة انتقالية)</summary><p>احتفظنا بالأدوات القديمة للحفاظ على المنتجات السابقة. لا تدخل المنتج في النظامين معاً.</p><MenuManager key={activeId} businessId={businessId} branchId={activeId} country={country}/></details>:null}
+  </div>
+ </section>;
 }
