@@ -110,7 +110,7 @@ test("language changes keep customer view and shopping context",()=>{
 
 test("menu starts with one product category, not a giant all-products list",()=>{
  const explorer=readFileSync("components/guest-catalog-explorer.tsx","utf8");
- assert.match(explorer,/useState\(initialCategoryId\?\?categories\.find\(c=>c\.count>0\)\?\.id\?\?"all"\)/);
+ assert.match(explorer,/useState\(initialCategoryId\?\?categories\.find\(c=>c\.count>0\)\?\.id\?\?categories\[0\]\?\.id\?\?""\)/);
  assert.match(explorer,/aria-pressed=\{selected===category\.id\}/);
  assert.match(explorer,/section\.hidden=!inCategory\|\|sectionProducts===0/);
 });
