@@ -24,3 +24,8 @@ Tenant and branch schema; role-based staff membership; restrictive RLS; verified
 - Verify real QR > menu > cart > order > merchant > ready > pager flows, branch isolation, and role-specific access before pilot approval.
 - Keep commercial production deployment and database migrations blocked until security, backup/restore, and acceptance evidence are recorded.
 - Planned limited-pilot gate: 2026-11-16, conditional on evidence, not a promise of readiness.
+
+## Product reference: Pager and customer journeys
+
+- [Beger Pager — 20 reference images, implementation priorities and no-clutter principles](docs/beger-pager-reference-20-images.md).
+- This reference is a product plan, **not** a declaration that independent Pager, lock-screen push, Wallet, or broadcast messaging are deployed.
