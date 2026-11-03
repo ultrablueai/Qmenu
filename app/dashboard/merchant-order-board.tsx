@@ -141,7 +141,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   {error?<p role="alert" className="beger-order-board-error">{error}</p>:null}
   {notice?<p role="status" className="beger-order-board-notice">{notice}</p>:null}
   {!loaded?<p role="status">جارٍ تحميل حالة الطلبات...</p>:null}
-  {activeView==="live"?<div className="beger-order-board-controls"><button type="button" disabled={busy} onClick={()=>void refresh().catch(()=>setError("تعذّر تحديث الطلبات. تحقق من الاتصال والصلاحية."))}>تحديث الطلبات الآن ↻</button><span>تُحدَّث الطلبات تلقائياً كل 7 ثوانٍ</span></div>
+  {activeView==="live"?<><div className="beger-order-board-controls"><button type="button" disabled={busy} onClick={()=>void refresh().catch(()=>setError("تعذّر تحديث الطلبات. تحقق من الاتصال والصلاحية."))}>تحديث الطلبات الآن ↻</button><span>تُحدَّث الطلبات تلقائياً كل 7 ثوانٍ</span></div>
   <div className="beger-order-board-columns">{(["pending","accepted","preparing","ready"] as const).map(stage=><section key={stage} className="beger-order-board-column" aria-label={titles[stage]}>
     <h3>{titles[stage]} <span>{orders.filter(o=>o.status===stage).length}</span></h3>
     {filteredLive.filter(o=>o.status===stage).map(o=><article className="beger-order-ticket" key={o.id}>
