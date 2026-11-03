@@ -13,9 +13,28 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
  const [items,setItems]=useState<CartItem[]>([]);
  const [open,setOpen]=useState(false);
  const [hydrated,setHydrated]=useState(false);
+ const [hydratedKey,setHydratedKey]=useState<string|null>(null);
  const storageKey="beger-preview-basket:"+branchId+":"+(tableToken??(serviceMode==="takeaway"?"takeaway":"shop"));
- useEffect(()=>{try{const saved=window.sessionStorage.getItem(storageKey);if(saved){const parsed:unknown=JSON.parse(saved);if(Array.isArray(parsed)&&parsed.length<=25){const valid=parsed.filter((x):x is CartItem=>x&&typeof x==="object"&&typeof x.key==="string"&&typeof x.name==="string"&&Number.isSafeInteger(x.unitMinor)&&x.unitMinor>=0&&Number.isInteger(x.quantity)&&x.quantity>=1&&x.quantity<=20&&Array.isArray(x.selections));setItems(valid);}}}catch{/* storage unavailable */}setHydrated(true);},[storageKey]);
- useEffect(()=>{if(!hydrated)return;try{window.sessionStorage.setItem(storageKey,JSON.stringify(items))}catch{/* storage optional */}},[storageKey,items,hydrated]);
+ // A new branch/table must never reuse the previous basket or overwrite its stored draft.
+ useEffect(()=>{
+  setHydrated(false);
+  let restored:CartItem[]=[];
+  try{
+   const saved=window.sessionStorage.getItem(storageKey);
+   if(saved){
+    const parsed:unknown=JSON.parse(saved);
+    if(Array.isArray(parsed)&&parsed.length<=25)restored=parsed.filter((x):x is CartItem=>x&&typeof x==="object"&&typeof x.key==="string"&&typeof x.name==="string"&&Number.isSafeInteger(x.unitMinor)&&x.unitMinor>=0&&Number.isInteger(x.quantity)&&x.quantity>=1&&x.quantity<=20&&Array.isArray(x.selections));
+   }
+  }catch{/* storage unavailable; use an empty isolated basket */}
+  setItems(restored);
+  setHydratedKey(storageKey);
+  setHydrated(true);
+ },[storageKey]);
+ useEffect(()=>{
+  if(!hydrated)return;
+  if(hydratedKey!==storageKey)return;
+  try{window.sessionStorage.setItem(storageKey,JSON.stringify(items))}catch{/* storage optional */}
+ },[storageKey,items,hydrated,hydratedKey]);
  const closeRef=useRef<HTMLButtonElement|null>(null);
  const openerRef=useRef<HTMLButtonElement|null>(null);
  useEffect(()=>{if(!open)return;
@@ -84,7 +103,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
      <div className="beger-order-total-line"><span>{labels.subtotal}</span><strong>{formatPrice(subtotal,country,lang)}</strong></div>
      <div className="beger-order-total-line"><span>{labels.additions}</span><strong>{formatPrice(additions,country,lang)}</strong></div>
      <div style={{display:"flex",justifyContent:"space-between",gap:15,fontSize:19,marginBottom:13}}><strong>{labels.total}</strong><strong>{formatPrice(total,country,lang)}</strong></div>
-     <GuestOrderSubmission lang={lang} tableToken={tableToken} tableLabel={tableLabel} items={items} onSent={()=>setItems([])}/>
+     <GuestOrderSubmission key={branchId+":"+(tableToken??"shop")} lang={lang} tableToken={tableToken} tableLabel={tableLabel} items={items} onSent={()=>setItems([])}/>
      {items.length>0?<button type="button" onClick={()=>setItems([])} style={{width:"100%",padding:12,border:"1px solid #dce6dd",color:"#5d6e62",background:"#fff",borderRadius:12,cursor:"pointer"}}>{labels.clear}</button>:null}
     </div>
    </section>
