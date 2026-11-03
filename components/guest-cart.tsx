@@ -66,10 +66,16 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
   remove:en?"Remove product":tr?"Ürünü kaldır":"إزالة المنتج",
  };
  const context=useMemo(()=>({count,open:()=>setOpen(true),add(item:Omit<CartItem,"quantity"> & {quantity?:number}){
-  setItems(existing=>{const quantity=Math.max(1,Math.min(20,Math.trunc(item.quantity??1)));const idx=existing.findIndex(x=>x.key===item.key);if(idx<0)return [...existing,{...item,quantity}];return existing.map((x,i)=>i===idx?{...x,quantity:Math.min(20,x.quantity+quantity)}:x);});
+  // Keep the same 25-distinct-product limit as basket restoration; otherwise a refresh discards the entire draft.
+  if(items.length>=25&&!items.some(x=>x.key===item.key)){
+   feedback.signal("added",lang==="ar"?"السلة ممتلئة. احذف منتجاً قبل إضافة منتج جديد.":lang==="tr"?"Sepet dolu. Yeni ürün eklemek için önce bir ürünü kaldırın.":"Basket is full. Remove a product before adding another.");
+   setOpen(true);
+   return;
+  }
+  setItems(existing=>{const quantity=Math.max(1,Math.min(20,Math.trunc(item.quantity??1)));const idx=existing.findIndex(x=>x.key===item.key);if(idx<0)return existing.length>=25?existing:[...existing,{...item,quantity}];return existing.map((x,i)=>i===idx?{...x,quantity:Math.min(20,x.quantity+quantity)}:x);});
   feedback.signal("added",lang==="ar"?"تمت إضافة المنتج إلى السلة":lang==="tr"?"Ürün sepete eklendi":"Product added to basket");
   setOpen(true);
- }}),[count,feedback.signal,lang]);
+ }}),[count,feedback.signal,lang,items]);
  return <CartContext.Provider value={context}>
   {children}
   <button ref={openerRef} className="beger-basket-trigger" type="button" onClick={()=>setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label={labels.cart} style={{position:"fixed",bottom:20,insetInlineEnd:20,zIndex:40,background:accent,color:"#fff",border:0,borderRadius:19,padding:"14px 20px",fontWeight:800,boxShadow:"0 13px 35px #183b3250",cursor:"pointer",fontSize:14}}>
