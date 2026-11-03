@@ -154,3 +154,20 @@
 .beger-order-board-kpi strong{font-size:29px;line-height:1.1;color:#526a39;font-weight:850;font-variant-numeric:tabular-nums}
 @media(max-width:950px){.beger-order-board-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
 @media(max-width:480px){.beger-order-board-kpi{padding:12px}.beger-order-board-kpi strong{font-size:25px}}
+
+/* Separate live orders and archive as tabs; compact filters never stack both working lists. */
+.beger-board-view-tabs{display:flex;gap:9px;flex-wrap:wrap;margin:22px 0 13px;padding-bottom:12px;border-bottom:1px solid #e6ddce}
+.beger-board-view-tabs button{border:1px solid #dedbcc;border-radius:13px;min-height:45px;padding:11px 19px;background:#fff;color:#736951;font-size:13px;font-weight:800;cursor:pointer}
+.beger-board-view-tabs button.is-active{background:#637c46;color:#fff;border-color:#637c46}
+.beger-board-view-tabs button:focus-visible,.beger-order-filterbar button:focus-visible,.beger-order-filterbar :is(select,input):focus-visible{outline:3px solid #a4bb8c;outline-offset:2px}
+.beger-order-filterbar{display:grid;grid-template-columns:minmax(180px,2fr) repeat(3,minmax(115px,1fr));gap:10px;margin:14px 0;padding:13px;background:#f8f6f0;border:1px solid #e8e0d3;border-radius:14px;align-items:end}
+.beger-order-filterbar label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:800;color:#635a4b;min-width:0}
+.beger-order-filterbar :is(input,select){font:inherit;font-size:12px;min-height:43px;max-width:100%;width:100%;border-radius:10px;border:1px solid #d9d5c7;background:#fff;color:#413a30;padding:9px 10px}
+.beger-order-filterbar button{min-height:43px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:800;padding:9px 12px}
+.beger-board-filter-reset{background:#fff;color:#62724b;border:1px solid #d6dfca}
+.beger-board-filter-print{background:#627b46;color:white;border:1px solid #627b46}
+.beger-board-filter-print:disabled{opacity:.55;cursor:not-allowed}
+.beger-board-result-count{justify-self:end;align-self:center;color:#6e6656;font-size:12px;font-weight:800}
+.beger-order-board .beger-order-history{margin-top:9px}
+@media(max-width:1100px){.beger-order-filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.beger-order-filterbar{grid-template-columns:minmax(0,1fr);padding:10px;gap:9px}.beger-board-view-tabs button{flex:1;padding:11px 9px}.beger-board-result-count{justify-self:start}}
