@@ -461,3 +461,18 @@
 .beger-feedback-panel .beger-feedback-test{margin-inline-start:auto}
 @media(max-width:360px){.beger-feedback-panel .beger-feedback-controls{gap:9px}.beger-feedback-panel .beger-feedback-test{width:100%;margin:2px 0 0}}
 @media(prefers-reduced-motion:reduce){.beger-feedback-chevron{transition:none}}
+
+/* Persistent customer pager alerts remain visible across home, menu and basket screens. */
+.beger-order-watcher{position:fixed;z-index:55;inset-inline-start:12px;bottom:94px;display:flex;flex-direction:column;gap:9px;width:min(calc(100vw - 24px),360px);pointer-events:none}
+.beger-order-watcher>*{pointer-events:auto}
+.beger-order-watcher-chip{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid #cdddb8;border-radius:16px;background:#f2f6e9;box-shadow:0 8px 30px #1d351a20;color:#455f31;text-align:start;cursor:pointer;min-height:58px;max-width:100%;width:max-content}
+.beger-order-watcher-chip>span:first-child{font-size:19px}
+.beger-order-watcher-chip>span:nth-child(2){display:flex;flex-direction:column;gap:2px;min-width:0}
+.beger-order-watcher-chip strong{font-size:14px;letter-spacing:.04em}
+.beger-order-watcher-chip small{font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.beger-order-watcher-chip:focus-visible,.beger-order-watcher-alert button:focus-visible{outline:3px solid #97b57a;outline-offset:3px}
+.beger-order-watcher-alert{display:flex;align-items:flex-start;gap:10px;background:#fffdf6;border:1px solid #b4cc91;border-radius:17px;padding:13px;box-shadow:0 12px 38px #23391b33;color:#415b2e;max-width:100%}
+.beger-order-watcher-alert strong{flex:1;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.beger-order-watcher-alert button{flex-shrink:0;border:0;background:transparent;color:inherit;min-width:36px;min-height:36px;border-radius:9px;cursor:pointer}
+@media(max-width:540px){.beger-order-watcher{bottom:94px;inset-inline-start:10px;width:min(calc(100vw - 20px),330px)}.beger-order-watcher-chip{padding:9px 11px;min-height:52px}}
+@media(prefers-reduced-motion:reduce){.beger-order-watcher-alert{animation:none!important}}
