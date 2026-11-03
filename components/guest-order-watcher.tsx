@@ -24,7 +24,6 @@ export default function GuestOrderWatcher({branchId,tableToken,lang,openCart}:{b
  const [notice,setNotice]=useState("");
  const [openNotice,setOpenNotice]=useState(false);
  const lastStatus=useRef<Record<string,Status>>({});
- const clientRef=useRef<ReturnType<typeof createClient>|null>(null);
  const storageKeys=["beger-g3-pickup-order:"+branchId,...(tableToken?["beger-g3-order:"+tableToken]:[])];
  const keys=storageKeys.join("|");
  const check=useCallback(async()=>{
@@ -32,10 +31,10 @@ export default function GuestOrderWatcher({branchId,tableToken,lang,openCart}:{b
   if(!active.length){setOrder(null);return;}
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL,publishable=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if(!url||!publishable)return;
-  clientRef.current??=createClient(url,publishable,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  const db=createClient(url,publishable,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
   for(const {key,token} of active){
    try{
-    const {data,error}=await clientRef.current.rpc("g3_public_order_status",{p_token:token});
+    const {data,error}=await db.rpc("g3_public_order_status",{p_token:token});
     if(error||!data||!trackedStatuses.has(data.status as Status))continue;
     const status=data.status as Status;
     const mode=data.serviceMode==="takeaway"?"takeaway":"dine_in";
