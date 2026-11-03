@@ -12,7 +12,8 @@ test("table orders cannot exceed the same 20 distinct lines on the client and se
  assert.match(sql,/v_item_count>20/);
 });
 test("uncertain order response reuses the same table-scoped idempotency key after reload",()=>{
- assert.match(guest,/pendingKey="beger-g3-pending:"\+tableToken/);
+ assert.match(guest,/pendingKey=isTakeaway\?/);
+ assert.match(guest,/"beger-g3-pending:"\+tableToken/);
  assert.match(guest,/requestRef\.current\?\.signature===signature\?requestRef\.current\.request:null/);
  assert.match(guest,/requestRef\.current=\{signature,request\}/);
  assert.doesNotMatch(guest,/useEffect\(\(\)=>\{requestRef\.current=null;\},\[items\]\)/);
