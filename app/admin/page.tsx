@@ -4,6 +4,7 @@ import { serverSupabase } from "../../lib/supabase/server";
 import styles from "./admin.module.css";
 import PlanManager from "./plan-manager";
 import TrialManager from "./trial-manager";
+import SubscriptionRateDraftManager,{type RateDraft} from "./subscription-rate-draft-manager";
 
 export const dynamic = "force-dynamic";
 
@@ -49,19 +50,21 @@ export default async function PlatformAdminDashboard() {
   .select("business_id").eq("user_id",user.id).limit(1);
  const canOpenBusiness = !merchantMembershipError && Boolean(merchantMembership?.length);
 
- const [summaryResult,directoryResult,plansResult,trialsResult,auditResult,rosterResult] = await Promise.all([
+ const [summaryResult,directoryResult,plansResult,trialsResult,auditResult,rosterResult,rateResult] = await Promise.all([
   supabase.rpc("platform_admin_overview"),
   supabase.rpc("platform_admin_business_directory"),
   supabase.from("plans").select("id,code,name,active").order("code",{ascending:true}),
   supabase.rpc("platform_admin_trial_overview"),
   supabase.rpc("platform_admin_audit_overview"),
-  account.role==="platform_owner" ? supabase.rpc("platform_owner_access_roster") : Promise.resolve({data:[],error:null})
+  account.role==="platform_owner" ? supabase.rpc("platform_owner_access_roster") : Promise.resolve({data:[],error:null}),
+  supabase.from("beger_subscription_rate_drafts").select("country,rate_key,monthly_minor,updated_at").order("country").order("rate_key")
  ]);
  const summary = (summaryResult.data?.[0] ?? null) as
   {merchant_count: number | string;branch_count:number | string;account_memberships:number | string} | null;
  const directory = (directoryResult.data ?? []) as DirectoryEntry[];
  const failed = Boolean(summaryResult.error || directoryResult.error || !summary);
  const owner = account.role === "platform_owner";
+ const rateDrafts=(rateResult.data??[]) as RateDraft[];
  const plans = (plansResult.data ?? []) as {id:string;code:string;name:string;active:boolean}[];
  const trials = (trialsResult.data ?? []) as {business_id:string;plan_code:string;starts_at:string;ends_at:string|null;effective_status:string}[];
  const auditEvents = (auditResult.data ?? []) as {event_id:number;event_action:string;target_kind:string;event_at:string}[];
@@ -79,6 +82,7 @@ export default async function PlatformAdminDashboard() {
     <a className={`${styles.navLink} ${styles.navActive}`} href="#overview" aria-current="page"><span className={styles.navGlyph} aria-hidden="true">▦</span>نظرة عامة</a>
     <a className={styles.navLink} href="#merchants"><span className={styles.navGlyph} aria-hidden="true">⌂</span>الأنشطة والتجار</a>
     <a className={styles.navLink} href="#plans"><span className={styles.navGlyph} aria-hidden="true">▤</span>الباقات</a>
+    <a className={styles.navLink} href="#subscription-rates"><span className={styles.navGlyph} aria-hidden="true">✧</span> أسعار الميزات</a>
     <a className={styles.navLink} href="#trials"><span className={styles.navGlyph} aria-hidden="true">◷</span>التجارب</a>
     <a className={styles.navLink} href="#security"><span className={styles.navGlyph} aria-hidden="true">♧</span>الصلاحيات والتدقيق</a>
     <a className={styles.navLink} href="#operations"><span className={styles.navGlyph} aria-hidden="true">◈</span>جاهزية المنصة</a>
@@ -128,6 +132,7 @@ export default async function PlatformAdminDashboard() {
       </table></div>}
     </section>
     {plansResult.error ? <p className={styles.error} role="alert">تعذّر تحميل الباقات. لا يمكن إدارة الباقات في هذه الحالة.</p> : <PlanManager plans={plans} canManage={owner} />}
+    <SubscriptionRateDraftManager rates={rateDrafts} canManage={owner} loadFailed={Boolean(rateResult.error)}/>
     {(plansResult.error || directoryResult.error || trialsResult.error) ? <p role="alert" className={styles.error}>لا يمكن إدارة التجارب حتى يتم تحميل الأنشطة والباقات والاشتراكات بشكل موثوق.</p> : <TrialManager businesses={directory} plans={plans} trials={trials} canManage={owner} />}
     <section id="security" className={styles.panel} aria-labelledby="security-heading">
      <div className={styles.panelHead}>
