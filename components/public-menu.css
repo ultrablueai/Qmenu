@@ -319,3 +319,10 @@
  .beger-guest-order-submit{padding:12px}
  .beger-guest-order-tracking button{min-height:44px}
 }
+
+/* User-tested order tracker: five compact steps always side by side, no horizontal swipe. */
+@media(max-width:520px){
+ .beger-guest-order-tracking .beger-order-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;overflow-x:visible;scroll-snap-type:none;padding:6px 0 12px;width:100%}
+ .beger-guest-order-tracking .beger-order-steps li{flex:none;min-width:0;max-width:none;width:auto;scroll-snap-align:none;font-size:clamp(8px,2.35vw,11px);line-height:1.55;overflow-wrap:normal;word-break:normal;hyphens:none}
+ .beger-guest-order-tracking .beger-order-steps li::before{width:17px;height:17px}
+}
