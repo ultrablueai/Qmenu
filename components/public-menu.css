@@ -369,3 +369,72 @@
 @media(max-width:350px){
  .beger-catalog-browser .beger-category-scroller{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
+
+/* Refined category gallery: compact editorial cards, no generic All tile or side scrolling. */
+.beger-catalog-browser .beger-category-scroller{
+ gap:10px!important;
+ margin-block:4px 10px;
+}
+.beger-catalog-browser .beger-category-filter{
+ position:relative;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:8px!important;
+ min-height:92px!important;
+ padding:12px 9px!important;
+ background:#fffdf9!important;
+ color:#483e34!important;
+ border:1px solid #e5ddd0!important;
+ border-radius:18px!important;
+ box-shadow:0 2px 10px rgba(65,46,24,.035);
+ transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease!important;
+}
+.beger-catalog-browser .beger-category-filter>span:first-child{
+ display:grid;place-items:center;
+ width:39px;height:39px;
+ color:#7b885c;
+ background:#f1f2e8;
+ border-radius:13px;
+}
+.beger-catalog-browser .beger-category-filter strong{
+ color:inherit!important;
+ font-size:12px!important;
+ line-height:1.45!important;
+ font-weight:750!important;
+ letter-spacing:0;
+ text-align:center;
+ max-width:100%;
+}
+.beger-catalog-browser .beger-category-filter[aria-pressed="true"]{
+ background:#edf1e5!important;
+ color:#455d32!important;
+ border-color:#8fa578!important;
+ box-shadow:inset 0 0 0 1px #8fa578,0 4px 13px rgba(67,94,43,.1)!important;
+}
+.beger-catalog-browser .beger-category-filter[aria-pressed="true"]>span:first-child{
+ background:#718750;
+ color:white;
+}
+.beger-catalog-browser .beger-category-filter:focus-visible{
+ outline:3px solid #b0c497!important;
+ outline-offset:3px!important;
+}
+@media(hover:hover){
+ .beger-catalog-browser .beger-category-filter:hover{
+  border-color:#a7b794!important;
+  box-shadow:0 6px 18px rgba(65,72,35,.1);
+  transform:translateY(-2px);
+ }
+}
+@media(max-width:540px){
+ .beger-catalog-browser .beger-category-scroller{gap:8px!important}
+ .beger-catalog-browser .beger-category-filter{min-height:82px!important;padding:10px 6px!important;border-radius:15px!important;gap:6px!important}
+ .beger-catalog-browser .beger-category-filter>span:first-child{width:32px;height:32px;border-radius:10px}
+ .beger-catalog-browser .beger-category-filter strong{font-size:11px!important;line-height:1.35!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .beger-catalog-browser .beger-category-filter{transition:none!important}
+ .beger-catalog-browser .beger-category-filter:hover{transform:none!important}
+}
