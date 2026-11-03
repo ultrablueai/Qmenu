@@ -45,7 +45,7 @@ test("G3 order submission is idempotent, rate-limited and state transitions are 
 test("Guest flows from table QR to cart submission and tracked digital pager, merchant accepts and prepares",()=>{
  const menu=read("components/public-menu.tsx");
  assert.match(menu,/tableToken=\{tableToken\} tableLabel=\{tableLabel\}/);
- assert.match(cart,/<GuestOrderSubmission lang=\{lang\}/);
+ assert.match(cart,/<GuestOrderSubmission key=\{branchId\+":"\+\(tableToken\?\?"shop"\)\} lang=\{lang\}/);
  assert.match(guest,/g3_submit_table_order/);
  assert.match(guest,/g3_public_order_status/);
  assert.match(guest,/sessionStorage\.setItem/);
@@ -97,4 +97,12 @@ test("merchant table and shop product copy accurately reflects the G3 staging ca
  assert.match(product,/Scan your table QR to submit an order/);
  assert.match(product,/إذا كان استقبال طلبات الطاولة مفعّلاً/);
  assert.match(product,/أضف إلى السلة"/);
+});
+
+test("switching QR table or branch cannot write the old basket into a new table draft",()=>{
+ assert.match(cart,/setItems\(restored\)/);
+ assert.match(cart,/setHydratedKey\(storageKey\)/);
+ assert.match(cart,/if\(hydratedKey!==storageKey\)return/);
+ assert.match(cart,/key=\{branchId\+":"\+\(tableToken\?\?"shop"\)\}/);
+ assert.match(cart,/let restored:CartItem\[\]=\[\]/);
 });
