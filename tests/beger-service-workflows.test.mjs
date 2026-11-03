@@ -52,3 +52,12 @@ test("existing G3 merchant order board uses the shared pager projection without 
  assert.match(board,/rpc\("g3_transition_order",\{p_order:order\.id,p_next:status\}\)/);
  assert.doesNotMatch(board,/paymentProvider|paid=true|medicalHistory/);
 });
+
+test("public guest pager shares the same three-language domain status without activating paid or medical workflows",()=>{
+ const guest=readFileSync("components/guest-order-submission.tsx","utf8");
+ assert.match(guest,/publicServiceSignal\("table_order",status\?\?"pending"\)/);
+ assert.match(guest,/publicSignalLabels\[publicServiceSignal/);
+ assert.match(guest,/\[lang\]/);
+ assert.match(guest,/g3_public_order_status/);
+ assert.match(guest,/setInterval\(\(\)=>\{void refresh\(\)\},7000\)/);
+});
