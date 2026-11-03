@@ -23,7 +23,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
    const saved=window.sessionStorage.getItem(storageKey);
    if(saved){
     const parsed:unknown=JSON.parse(saved);
-    if(Array.isArray(parsed)&&parsed.length<=25)restored=parsed.filter((x):x is CartItem=>x&&typeof x==="object"&&typeof x.key==="string"&&typeof x.name==="string"&&Number.isSafeInteger(x.unitMinor)&&x.unitMinor>=0&&Number.isInteger(x.quantity)&&x.quantity>=1&&x.quantity<=20&&Array.isArray(x.selections));
+    if(Array.isArray(parsed)&&parsed.length<=20)restored=parsed.filter((x):x is CartItem=>x&&typeof x==="object"&&typeof x.key==="string"&&typeof x.name==="string"&&Number.isSafeInteger(x.unitMinor)&&x.unitMinor>=0&&Number.isInteger(x.quantity)&&x.quantity>=1&&x.quantity<=20&&Array.isArray(x.selections));
    }
   }catch{/* storage unavailable; use an empty isolated basket */}
   setItems(restored);
@@ -78,13 +78,13 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
   remove:en?"Remove product":tr?"Ürünü kaldır":"إزالة المنتج",
  };
  const context=useMemo(()=>({count,open:()=>setOpen(true),add(item:Omit<CartItem,"quantity"> & {quantity?:number}){
-  // Keep the same 25-distinct-product limit as basket restoration; otherwise a refresh discards the entire draft.
-  if(items.length>=25&&!items.some(x=>x.key===item.key)){
+  // Keep the same 20-distinct-product limit as basket restoration; otherwise a refresh discards the entire draft.
+  if(items.length>=20&&!items.some(x=>x.key===item.key)){
    feedback.signal("added",lang==="ar"?"السلة ممتلئة. احذف منتجاً قبل إضافة منتج جديد.":lang==="tr"?"Sepet dolu. Yeni ürün eklemek için önce bir ürünü kaldırın.":"Basket is full. Remove a product before adding another.");
    setOpen(true);
    return;
   }
-  setItems(existing=>{const quantity=Math.max(1,Math.min(20,Math.trunc(item.quantity??1)));const idx=existing.findIndex(x=>x.key===item.key);if(idx<0)return existing.length>=25?existing:[...existing,{...item,quantity}];return existing.map((x,i)=>i===idx?{...x,quantity:Math.min(20,x.quantity+quantity)}:x);});
+  setItems(existing=>{const quantity=Math.max(1,Math.min(20,Math.trunc(item.quantity??1)));const idx=existing.findIndex(x=>x.key===item.key);if(idx<0)return existing.length>=20?existing:[...existing,{...item,quantity}];return existing.map((x,i)=>i===idx?{...x,quantity:Math.min(20,x.quantity+quantity)}:x);});
   feedback.signal("added",lang==="ar"?"تمت إضافة المنتج إلى السلة":lang==="tr"?"Ürün sepete eklendi":"Product added to basket");
   setOpen(true);
  }}),[count,feedback.signal,lang,items]);
