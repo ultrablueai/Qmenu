@@ -2,6 +2,7 @@
 import {useEffect,useRef,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
 import type {GuestLang} from "../lib/g2-public";
+import {publicServiceSignal,publicSignalLabels} from "../lib/beger-service-workflows";
 import {BegerFeedbackControls,useBegerFeedback} from "./beger-feedback";
 
 export type OrderLine={productId?:string;quantity:number;optionIds?:string[];removedIngredients?:string[]};
@@ -45,6 +46,7 @@ export default function GuestOrderSubmission({lang,tableToken,tableLabel,items,o
   {feedback.message?<p className="beger-feedback-toast" role="status">{feedback.message}</p>:null}
   {tableToken&&tableLabel?<p className="beger-order-table-label">⌗ {t.table}: <strong>{tableLabel}</strong></p>:null}
   {token?<div className="beger-guest-order-tracking" role="status"><h3>{t.success}</h3><strong>{status?t[status]:t.pending}</strong>
+    <p aria-label={t.status} className="beger-public-pager-signal">{publicSignalLabels[publicServiceSignal("table_order",status??"pending")][lang]}</p>
     {status!=="rejected"?<ol className="beger-order-steps">{statuses.map((label,index)=><li className={index<=current?"is-current":""} key={label}>{label}</li>)}</ol>:null}
     <p>{t.saved}</p><button type="button" onClick={()=>void refresh()}>{t.retry}</button>{(status==="fulfilled"||status==="rejected")?<button type="button" onClick={()=>{setToken(null);setStatus(null);lastStatusRef.current=null;requestRef.current=null;try{if(tableToken)sessionStorage.removeItem("beger-g3-order:"+tableToken)}catch{/* optional storage */}}}>{t.newOrder}</button>:null}
    </div>:items.length>0?<>
