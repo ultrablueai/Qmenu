@@ -17,11 +17,12 @@ test("shop visitor can deliberately choose a separate pickup preview while table
  assert.match(choices,/داخل المحل/);
  assert.match(choices,/Delivery/);
 });
-test("pickup remains non-ordering until a server-authoritative pickup RPC and packaging charges exist",()=>{
+test("pickup ordering requires a server-authoritative RPC and opt-in; paid packaging remains disabled",()=>{
  assert.match(cart,/isTakeaway=serviceMode==="takeaway"/);
- assert.match(cart,/Takeaway preview only/);
- assert.match(cart,/لن يُرسل أي طلب/);
- assert.match(menu,/لن يُرسل طلب من هذه المعاينة/);
+ assert.match(cart,/Takeaway orders can be sent for restaurant approval when pickup is enabled/);
+ assert.match(menu,/تصفح المنتجات واختر إضافاتك وأرسل طلب السفري/);
+ assert.match(read("components/guest-order-submission.tsx"),/g3_submit_pickup_order/);
+ assert.match(read("supabase/migrations/20261103231000_g3_pilot_takeaway_orders.sql"),/pickup_enabled boolean not null default false/);
  assert.match(sql,/g3_submit_table_order\(p_table_token uuid/);
  assert.doesNotMatch(sql,/g3_submit_takeaway_order/);
  assert.match(rules,/No client-only order submission/);
