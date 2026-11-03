@@ -166,3 +166,21 @@ Engineering priority remains G1/G2/G3 staging pilot for cafés as the lowest-ris
 **Architecture requirements:** separate platform_billing from merchant_operations schemas/modules/contracts; trusted server-side entitlement checks; append-only audit for changes; payment processor webhooks with signature/amount/currency/idempotency validation for Beger subscription invoices; no browser-authoritative paid flags, no leaked keys. Review Turkish invoicing/e-Fatura/e-Arşiv and country-specific regulatory treatment before commercial billing; do not claim compliance solely because a PDF receipt is generated.
 
 **Status as of adoption:** approved *product decision*, not implementation completion. Staging currently includes internal rate drafts, sector/capability preferences and limited trial logic. Production paid invoicing, approved published subscription price book and entitlement enforcement are not commercially operational.
+
+
+## OWNER-APPROVED PRODUCT & BUILD PRIORITIES — 2026-11-03
+After competitor benchmarking and reviewing the original Beger Smart Business OS vision, the owner approved continuation without a product reset.
+
+**Product promise:** Sell time savings, organized service, reliable queue/booking/order workflows and easy launch for real merchants — not QR alone or maximum feature count. Keep one configurable cross-sector engine with focused templates. Beger never handles merchant-customer settlements. Merchant SaaS subscriptions + optional modules/branches remain the revenue model.
+
+**Prioritized engineering sequence:**
+1. Restore reproducible automated checks and prove the first café QR -> independent table cart -> server-validated order -> branch staff acceptance -> preparation -> ready -> fulfilled flow on real devices and separate roles. Fix branch/table guest-state leaks before release.
+2. Reuse verified service lifecycle primitives across counter queue and pager with secure scoped ticket IDs, monotonic/idempotent state, honest notification fallbacks, and tested reconnect.
+3. Extend pickup time slots/capacity and then barber/salon resource-aware booking and walk-in; do not treat a booking as a food order.
+4. Publish versioned merchant subscription rates only after authorization, then enforce entitlements server-side; never infer access from requested capabilities, rates or client UI alone.
+5. Complete optional customer identity/loyalty and merchant reporting at the approved phase, without mandatory customer registration. Keep AR/TR/EN and three premium light themes responsive.
+6. Pilot and measure time to first operation, lost/duplicate order rate, successful pickup/queue calls, weekly active merchants, renewal intent, and support costs before entering new verticals; clinic requires separate privacy readiness.
+
+**Non-negotiable quality gates:** actual phone screenshots and 320/360/390px RTL/LTR visual checks; separate tenant and branch negative-role E2E; restore/rollback proof; trusted server commands for pricing, entitlements and status; no release claim from a GitHub commit or Vercel preview alone. Shipping criteria include owner visual sign-off and an operations pilot, not just completing code.
+
+**Status:** approval of these priorities is a governance record, not evidence of a commercially deployed feature. Existing GitHub Actions no-start failures remain a blocker until independently diagnosed.
