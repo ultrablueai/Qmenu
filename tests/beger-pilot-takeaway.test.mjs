@@ -59,3 +59,15 @@ test("both service modes show accurate copy and all five statuses without scroll
  assert.match(css,/User-tested order tracker: five compact steps always side by side, no horizontal swipe/);
  assert.match(css,/\.beger-guest-order-tracking \.beger-order-steps\{display:grid;grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
 });
+
+test("takeaway UI labels never pretend pickup is preview-only while delivery stays disabled",()=>{
+ const choices=read("components/guest-service-choice.tsx");
+ const detail=read("components/product-details.tsx");
+ assert.match(choices,/pickupPilot:"استلام من المحل · بموافقة المطعم"/);
+ assert.match(choices,/pickupPilot:"Shop pickup · restaurant approval required"/);
+ assert.match(choices,/<small>\{t\.pickupPilot\}<\/small>/);
+ assert.match(choices,/deliveryNote/);
+ assert.match(detail,/serviceMode==="takeaway"/);
+ assert.match(detail,/أضف اختياراتك ثم أرسل طلب السفري/);
+ assert.match(menu,/tableOrdering=\{Boolean\(tableToken\)\} serviceMode=\{tableToken\?"dine_in":serviceMode\}/);
+});
