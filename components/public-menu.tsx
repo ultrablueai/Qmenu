@@ -69,7 +69,7 @@ export default function PublicMenu({branch,categories,lang,appearance,tableLabel
    <GuestCatalogExplorer lang={lang} initialCategoryId={initialCategoryId} categories={categories.map(c=>({id:c.id,name:localizedText(c,lang),icon:categorySymbol(localizedText(c,lang)),count:c.items.length}))}>
    {categories.length===0?<div style={{padding:30,borderRadius:18,background:theme.surface,border:"1px solid "+theme.border}}>{t.empty}</div>:
     categories.map(c=><section className="beger-menu-section" data-category-id={c.id} key={c.id} style={{marginBottom:30}} aria-labelledby={`category-${c.id}`}>
-     <div className="beger-category-heading"><h3 id={`category-${c.id}`} className="beger-guest-category-name" style={{fontSize:22,marginBottom:15,borderInlineStart:"4px solid "+theme.accent,paddingInlineStart:13}}>{localizedText(c,lang)}</h3><span className="beger-category-count">{c.items.length} {t.products}</span></div>
+     <div className="beger-category-heading"><h3 id={`category-${c.id}`} className="beger-guest-category-name" style={{fontSize:22,marginBottom:15,borderInlineStart:"4px solid "+theme.accent,paddingInlineStart:13}}>{localizedText(c,lang)}</h3></div>
      <div className="beger-menu-product-list">
       {c.items.length===0?<p style={{color:theme.muted,fontSize:14}}>{t.empty}</p>:
        c.items.map(i=><article className="beger-guest-product" data-search-text={`${i.name_ar} ${i.name_tr} ${i.name_en??""} ${i.description_ar} ${i.description_tr} ${i.description_en??""}`} key={i.id} style={{display:"grid",gridTemplateColumns:"minmax(0,1fr)",gap:10,minWidth:0,width:"100%",boxSizing:"border-box",background:theme.surface,border:"1px solid "+theme.border,
