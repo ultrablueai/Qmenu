@@ -40,7 +40,7 @@ export function printFilteredOrderList(rows:PrintableListOrder[],branchName:stri
   add("td",order.paymentStatus==="paid"?"مسجّل":"غير مسجّل",tr);
   add("td",currencyTotal(order.totalMinor,order.currency),tr);
  }
- if(!rows.length){const tr=d.createElement("tr");tbody.appendChild(tr);const cell=add("td","لا توجد طلبات مطابقة للفلاتر",tr);cell.colSpan=5;}
+ if(!rows.length){const tr=d.createElement("tr");tbody.appendChild(tr);const cell=add("td","لا توجد طلبات مطابقة للفلاتر",tr);cell.setAttribute("colspan","5");}
  add("footer","تقرير تشغيلي داخلي — ليس فاتورة ضريبية أو إثبات تحصيل مصرفي.",page);
  popup.focus();return true;
 }
