@@ -66,7 +66,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
  const labels={
   cart:en?"Your Order":tr?"Siparişin":"طلبك",
   empty:en?"Your basket is empty":tr?"Sepetiniz boş":"السلة فارغة",
-  notice:tableToken?(en?"Your order will be submitted to the restaurant only when you tap Send. Prices and available options are verified by the restaurant system.":tr?"Sipariş, yalnızca Gönder butonuna bastığınızda restorana ulaşır. Fiyatlar ve ürün seçenekleri sunucuda doğrulanır.":"طلبك لن يصل للمطعم إلا بعد الضغط على «إرسال الطلب». يتحقق النظام من الأسعار والإضافات المتاحة قبل التسجيل."):isTakeaway?(en?"Takeaway preview only: your shop has not enabled pickup checkout or packaging fees. No order will be sent.":tr?"Paket sipariş önizlemesi: mağaza henüz paket sipariş ve ambalaj ücretlerini etkinleştirmedi. Sipariş gönderilmez.":"معاينة السفري فقط: لم تُفعّل طلبات الاستلام ورسوم التغليف بعد. لن يُرسل أي طلب. "):(en?"Shop menu preview. Scan your table QR to send an order.":tr?"Mağaza menüsü. Sipariş göndermek için masanızdaki QR kodunu tarayın.":"هذه قائمة المتجر العامة. امسح QR الطاولة لإرسال طلب."),
+  notice:tableToken?(en?"Your order will be submitted to the restaurant only when you tap Send. Prices and available options are verified by the restaurant system.":tr?"Sipariş, yalnızca Gönder butonuna bastığınızda restorana ulaşır. Fiyatlar ve ürün seçenekleri sunucuda doğrulanır.":"طلبك لن يصل للمطعم إلا بعد الضغط على «إرسال الطلب». يتحقق النظام من الأسعار والإضافات المتاحة قبل التسجيل."):isTakeaway?(en?"Takeaway orders can be sent for restaurant approval when pickup is enabled for this branch. Online payment and paid packaging are not active.":tr?"Şubede paket sipariş etkinse siparişiniz restoran onayına gönderilir. Çevrim içi ödeme ve ücretli ambalaj aktif değil.":"يمكنك إرسال طلب السفري للمطعم بعد تفعيل الخدمة لهذا الفرع. الدفع الإلكتروني ورسوم التغليف المدفوعة غير مفعّلة."):(en?"Shop menu preview. Scan your table QR to send an order.":tr?"Mağaza menüsü. Sipariş göndermek için masanızdaki QR kodunu tarayın.":"هذه قائمة المتجر العامة. امسح QR الطاولة لإرسال طلب."),
   total:en?"Estimated total":tr?"Tahmini toplam":"المجموع التقديري",
   subtotal:en?"Subtotal":tr?"Ara Toplam":"المجموع الفرعي",
   additions:en?"Add-ons":tr?"Ekstralar":"الإضافات",
@@ -121,7 +121,7 @@ export default function GuestCart({children,country,lang,accent,branchId,tableTo
      <div className="beger-order-total-line"><span>{labels.subtotal}</span><strong>{formatPrice(subtotal,country,lang)}</strong></div>
      <div className="beger-order-total-line"><span>{labels.additions}</span><strong>{formatPrice(additions,country,lang)}</strong></div>
      <div style={{display:"flex",justifyContent:"space-between",gap:15,fontSize:19,marginBottom:13}}><strong>{labels.total}</strong><strong>{formatPrice(total,country,lang)}</strong></div>
-     <GuestOrderSubmission key={branchId+":"+(tableToken??"shop")} lang={lang} tableToken={tableToken} tableLabel={tableLabel} items={items} onSent={()=>setItems([])}/>
+     <GuestOrderSubmission key={branchId+":"+(tableToken??"shop")} lang={lang} branchId={branchId} serviceMode={serviceMode} tableToken={tableToken} tableLabel={tableLabel} items={items} onSent={()=>setItems([])}/>
      {items.length>0?<button type="button" onClick={()=>setItems([])} style={{width:"100%",padding:12,border:"1px solid #dce6dd",color:"#5d6e62",background:"#fff",borderRadius:12,cursor:"pointer"}}>{labels.clear}</button>:null}
     </div>
    </section>
