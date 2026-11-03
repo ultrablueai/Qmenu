@@ -4,6 +4,7 @@ import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-fee
 import {browserSupabase} from "../../lib/supabase/browser";
 import {publicServiceSignal,publicSignalLabels} from "../../lib/beger-service-workflows";
 import {printOrderTicket} from "../../lib/beger-print-ticket";
+import {printFilteredOrderList} from "../../lib/beger-print-order-list";
 import "./merchant-order-board.css";
 type Status="pending"|"accepted"|"preparing"|"ready"|"fulfilled"|"rejected";
 type Item={name:string;quantity:number;selections:{options?:{name_ar?:string}[];removedIngredients?:string[]}};
@@ -125,6 +126,8 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
    <label>التحصيل<select value={paymentFilter} onChange={event=>setPaymentFilter(event.target.value as typeof paymentFilter)}><option value="all">الكل</option><option value="paid">محصّل</option><option value="unpaid">غير محصّل</option></select></label>
    <label>حالة الطلب<select value={statusFilter} onChange={event=>setStatusFilter(event.target.value as typeof statusFilter)}><option value="all">كل الحالات</option>{(activeView==="live"?(["pending","accepted","preparing","ready"] as const):(["fulfilled","rejected"] as const)).map(status=><option key={status} value={status}>{titles[status]}</option>)}</select></label>
    <button type="button" className="beger-board-filter-reset" onClick={()=>{setServiceFilter("all");setPaymentFilter("all");setStatusFilter("all");setSearchQuery("");}}>مسح الفلاتر</button>
+   <button type="button" className="beger-board-filter-print" disabled={activeView==="live"?!loaded:!historyLoaded} onClick={()=>{if(!printFilteredOrderList(activeView==="live"?filteredLive:filteredHistory,branchName,activeView))setError("المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة للموقع.");}}>طباعة النتائج المفلترة</button>
+   <span className="beger-board-result-count" role="status">المعروض: {activeView==="live"?filteredLive.length:filteredHistory.length} طلب</span>
   </section>
   {activeView==="live"?<section className="beger-order-board-kpis" aria-label="ملخص بيانات الطلبات الحالية">
    {([{label:"بانتظار الموافقة",value:orders.filter(o=>o.status==="pending").length},
@@ -169,7 +172,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   {activeView==="history"?<section className="beger-order-history" aria-label="سجل الطلبات المكتملة والمرفوضة">
    <header className="beger-order-history-heading"><div><h3>سجل الطلبات السابقة</h3><p>آخر 7 أيام · للمتابعة والتحصيل والطباعة · لا يُرسل تنبيه طلب جديد</p></div><button type="button" disabled={historyBusy} aria-expanded={historyOpen} onClick={()=>void toggleHistory()}>{historyBusy?"جارٍ التحميل…":historyOpen?"إخفاء السجل":"عرض سجل الطلبات"}</button></header>
    {historyOpen?<div className="beger-order-history-content">
-    <div className="beger-order-history-tools"><span>{historyLoaded?closedOrders.length+" طلباً (بحد أقصى 50)":"جارٍ تحميل سجل الطلبات…"}</span><button type="button" disabled={historyBusy} onClick={()=>void loadHistory()}>تحديث السجل ↻</button></div>
+    <div className="beger-order-history-tools"><span>{historyLoaded?filteredHistory.length+" طلباً مطابقاً (من آخر 50 طلب)":"جارٍ تحميل سجل الطلبات…"}</span><button type="button" disabled={historyBusy} onClick={()=>void loadHistory()}>تحديث السجل ↻</button></div>
     {filteredHistory.map(o=><article className="beger-order-history-ticket" key={o.id}>
      <div className="beger-order-history-top"><strong dir="ltr">#{orderReference(o.id)}</strong><span className={o.status==="fulfilled"?"is-fulfilled":"is-rejected"}>{titles[o.status]}</span></div>
      <p>{o.serviceMode==="takeaway"?"سفري · استلام من المحل":o.table} · <time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleString("ar")}</time></p>
