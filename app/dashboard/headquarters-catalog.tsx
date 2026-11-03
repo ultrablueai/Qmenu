@@ -8,18 +8,20 @@ import QrExport from "../../components/qr-export";
 import MerchantTableQr from "./merchant-table-qr";
 import MerchantOrderBoard from "./merchant-order-board";
 import MerchantReport from "./merchant-report";
+import MerchantReviews from "./merchant-reviews";
 import "../qr-experience.css";
 import "./merchant-workspace.css";
 
 type Branch={id:string;name:string};
 type Props={businessId:string;country:string;branches:Branch[]};
-type Workspace="orders"|"reports"|"catalog"|"qr"|"appearance"|"legacy";
+type Workspace="orders"|"reports"|"catalog"|"qr"|"appearance"|"reviews"|"legacy";
 const workspaceSections:{id:Workspace;icon:string;name:string;help:string}[]=[
  {id:"orders",icon:"▣",name:"الطلبات والمطبخ",help:"طلبات مباشرة · تحصيل · طباعة"},
  {id:"reports",icon:"▥",name:"التقارير والكاشير",help:"قيمة الطلبات · التحصيل المسجّل · القنوات"},
  {id:"catalog",icon:"▤",name:"المنتجات والكتالوج",help:"الأصناف · الإضافات · الأسعار"},
  {id:"qr",icon:"▦",name:"رموز QR والطاولات",help:"QR المتجر والطاولات"},
  {id:"appearance",icon:"◉",name:"الثيمات واللغات",help:"التصميم · الألوان · اللغات"},
+ {id:"reviews",icon:"★",name:"التقييمات",help:"تقييمات الطلبات المكتملة · تعليقات خاصة"},
  {id:"legacy",icon:"⚙",name:"الأدوات القديمة",help:"أدوات الانتقال المحفوظة"}
 ];
 /** The merchant chooses a single workspace; no stacked editors or unrelated forms. */
@@ -37,6 +39,7 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
    else if(h==="#qr-management")setWorkspace("qr");
    else if(h==="#merchant-orders")setWorkspace("orders");
    else if(h==="#merchant-reports")setWorkspace("reports");
+   else if(h==="#merchant-reviews")setWorkspace("reviews");
   };
   showHash();window.addEventListener("hashchange",showHash);
   return()=>window.removeEventListener("hashchange",showHash);
@@ -87,6 +90,7 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
    {workspace==="orders"?<div id="merchant-orders"><MerchantOrderBoard key={"orders-"+activeId} businessId={businessId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="reports"?<div id="merchant-reports"><MerchantReport key={"reports-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="appearance"?<div id="customer-appearance"><MerchantAppearance businessId={businessId}/></div>:null}
+   {workspace==="reviews"?<div id="merchant-reviews"><MerchantReviews key={"reviews-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="catalog"?<div id="central-catalog"><CentralCatalog businessId={businessId} country={country} branches={branches}/></div>:null}
    {workspace==="legacy"?<details open><summary>إدارة القوائم القديمة الخاصة بالفرع (مرحلة انتقالية)</summary><p>احتفظنا بالأدوات القديمة للحفاظ على المنتجات السابقة. لا تدخل المنتج في النظامين معاً.</p><MenuManager key={activeId} businessId={businessId} branchId={activeId} country={country}/></details>:null}
   </div>
