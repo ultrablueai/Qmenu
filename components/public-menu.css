@@ -476,3 +476,22 @@
 .beger-order-watcher-alert button{flex-shrink:0;border:0;background:transparent;color:inherit;min-width:36px;min-height:36px;border-radius:9px;cursor:pointer}
 @media(max-width:540px){.beger-order-watcher{bottom:94px;inset-inline-start:10px;width:min(calc(100vw - 20px),330px)}.beger-order-watcher-chip{padding:9px 11px;min-height:52px}}
 @media(prefers-reduced-motion:reduce){.beger-order-watcher-alert{animation:none!important}}
+
+/* Compact private rating request, shown only for delivered orders. */
+.beger-order-rating{width:min(100%,330px);max-width:100%;background:#fffef9;border:1px solid #dce5ca;border-radius:15px;box-shadow:0 8px 23px #3b43151a;padding:9px 12px;line-height:1.6;color:#51683b}
+.beger-rating-toggle{display:flex;width:100%;gap:9px;align-items:center;justify-content:space-between;min-height:42px;border:0;background:transparent;color:inherit;cursor:pointer;font:inherit;text-align:start}
+.beger-rating-toggle>span:first-child{font-size:23px;line-height:1;color:#987a3f}
+.beger-rating-toggle strong{font-size:13px;flex:1}
+.beger-rating-form{display:grid;gap:10px;padding:10px 2px}
+.beger-rating-form p{margin:0;font-size:11px;line-height:1.65;color:#716b61}
+.beger-rating-form fieldset{border:0;margin:0;padding:0}
+.beger-rating-form legend{font-size:11px;font-weight:800}
+.beger-rating-stars{display:flex;gap:4px;justify-content:space-between}
+.beger-rating-stars button{min-height:43px;min-width:42px;flex:1;font-size:25px;line-height:1;color:#c8c9b9;border:1px solid #e9e4d8;background:#fff;border-radius:9px;cursor:pointer}
+.beger-rating-stars button.is-picked{color:#b47c29;background:#fff4de;border-color:#f0d9a3}
+.beger-rating-form label{display:grid;gap:6px;font-size:11px;font-weight:750}
+.beger-rating-form textarea{box-sizing:border-box;resize:vertical;min-width:0;width:100%;font:inherit;font-size:12px;border-radius:9px;padding:9px;border:1px solid #dddacb}
+.beger-rating-form>button[type=submit]{background:#677e4b;color:#fff;border:0;border-radius:10px;min-height:42px;font-weight:800;cursor:pointer}
+.beger-rating-form>button:disabled{opacity:.55;cursor:not-allowed}
+.beger-rating-done{margin:0;font-size:12px;line-height:1.7;color:#4a7138}
+.beger-rating-form button:focus-visible,.beger-rating-toggle:focus-visible{outline:3px solid #aac78c;outline-offset:2px}
