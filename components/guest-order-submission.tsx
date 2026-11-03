@@ -7,9 +7,9 @@ import {BegerFeedbackControls,useBegerFeedback} from "./beger-feedback";
 
 export type OrderLine={productId?:string;quantity:number;optionIds?:string[];removedIngredients?:string[]};
 const words={
- ar:{send:"إرسال الطلب للمطعم",sending:"جارٍ إرسال الطلب...",table:"طاولة",notice:"الطلب يُرسل للمطعم أولاً، ولا يبدأ التحضير إلا بعد موافقة الموظف.",notEnabled:"الطلبات الفعلية غير مفعّلة لهذا الفرع بعد. السلة حالياً للمعاينة.",needTable:"لإرسال طلب، امسح رمز طاولتك. QR المتجر لعرض المنيو فقط.",error:"تعذّر إرسال الطلب. لم يُسجّل الطلب؛ جرّب مجدداً.",success:"تم إرسال طلبك للمطعم",retry:"تحديث حالة الطلب",status:"حالة الطلب",pending:"بانتظار موافقة المطعم",accepted:"وافق المطعم على الطلب",preparing:"جاري التحضير في المطبخ",ready:"طلبك جاهز!",fulfilled:"تم تسليم الطلب",rejected:"تعذّر قبول الطلب",saved:"احتفظ بهذه الصفحة لمتابعة حالة الطلب",newOrder:"بدء طلب جديد"},
- tr:{send:"Siparişi restorana gönder",sending:"Sipariş gönderiliyor...",table:"Masa",notice:"Restoran siparişi onayladıktan sonra hazırlanır.",notEnabled:"Bu şubede gerçek sipariş henüz aktif değil. Sepet önizlemedir.",needTable:"Sipariş için masanızın QR kodunu tarayın. Mağaza QR yalnızca menü içindir.",error:"Sipariş gönderilemedi. Lütfen tekrar deneyin.",success:"Sipariş restorana gönderildi",retry:"Sipariş durumunu güncelle",status:"Sipariş durumu",pending:"Restoran onayı bekleniyor",accepted:"Restoran siparişi kabul etti",preparing:"Mutfakta hazırlanıyor",ready:"Siparişiniz hazır!",fulfilled:"Teslim edildi",rejected:"Sipariş reddedildi",saved:"Siparişinizi takip etmek için bu sayfayı açık tutun",newOrder:"Yeni sipariş"},
- en:{send:"Send order to restaurant",sending:"Sending order...",table:"Table",notice:"The restaurant must accept your order before the kitchen starts preparing it.",notEnabled:"Real ordering is not enabled for this branch yet. Your basket is a preview.",needTable:"Scan your table QR to order. A shop QR is for browsing only.",error:"Order could not be sent. Please retry.",success:"Order sent to the restaurant",retry:"Refresh order status",status:"Order status",pending:"Waiting for restaurant approval",accepted:"Restaurant accepted your order",preparing:"Preparing in kitchen",ready:"Your order is ready!",fulfilled:"Order delivered",rejected:"Restaurant declined the order",saved:"Keep this page to follow your order",newOrder:"Start another order"}
+ ar:{send:"إرسال الطلب للمطعم",sending:"جارٍ إرسال الطلب...",table:"طاولة",notice:"الطلب يُرسل للمطعم أولاً، ولا يبدأ التحضير إلا بعد موافقة الموظف.",notEnabled:"الطلبات الفعلية غير مفعّلة لهذا الفرع بعد. السلة حالياً للمعاينة.",needTable:"لإرسال طلب، امسح رمز طاولتك. QR المتجر لعرض المنيو فقط.",error:"تعذّر تأكيد نتيجة الإرسال. ربما وصل الطلب بالفعل؛ أعد المحاولة دون تغيير السلة لتجنّب تكراره.",success:"تم إرسال طلبك للمطعم",retry:"تحديث حالة الطلب",status:"حالة الطلب",pending:"بانتظار موافقة المطعم",accepted:"وافق المطعم على الطلب",preparing:"جاري التحضير في المطبخ",ready:"طلبك جاهز!",fulfilled:"تم تسليم الطلب",rejected:"تعذّر قبول الطلب",saved:"احتفظ بهذه الصفحة لمتابعة حالة الطلب",newOrder:"بدء طلب جديد"},
+ tr:{send:"Siparişi restorana gönder",sending:"Sipariş gönderiliyor...",table:"Masa",notice:"Restoran siparişi onayladıktan sonra hazırlanır.",notEnabled:"Bu şubede gerçek sipariş henüz aktif değil. Sepet önizlemedir.",needTable:"Sipariş için masanızın QR kodunu tarayın. Mağaza QR yalnızca menü içindir.",error:"Siparişin ulaştığı doğrulanamadı. Sipariş zaten alınmış olabilir; aynı sepetle tekrar deneyin.",success:"Sipariş restorana gönderildi",retry:"Sipariş durumunu güncelle",status:"Sipariş durumu",pending:"Restoran onayı bekleniyor",accepted:"Restoran siparişi kabul etti",preparing:"Mutfakta hazırlanıyor",ready:"Siparişiniz hazır!",fulfilled:"Teslim edildi",rejected:"Sipariş reddedildi",saved:"Siparişinizi takip etmek için bu sayfayı açık tutun",newOrder:"Yeni sipariş"},
+ en:{send:"Send order to restaurant",sending:"Sending order...",table:"Table",notice:"The restaurant must accept your order before the kitchen starts preparing it.",notEnabled:"Real ordering is not enabled for this branch yet. Your basket is a preview.",needTable:"Scan your table QR to order. A shop QR is for browsing only.",error:"Could not confirm the order result. It may already have arrived; retry with the same basket to avoid duplicates.",success:"Order sent to the restaurant",retry:"Refresh order status",status:"Order status",pending:"Waiting for restaurant approval",accepted:"Restaurant accepted your order",preparing:"Preparing in kitchen",ready:"Your order is ready!",fulfilled:"Order delivered",rejected:"Restaurant declined the order",saved:"Keep this page to follow your order",newOrder:"Start another order"}
 } as const;
 type OrderStatus="pending"|"accepted"|"preparing"|"ready"|"fulfilled"|"rejected";
 function client(){const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;if(!url||!key)throw Error("Public Supabase config unavailable");return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});}
@@ -27,13 +27,29 @@ export default function GuestOrderSubmission({lang,tableToken,tableLabel,items,o
  async function submit(){
   if(!tableToken||!enabled||busy||items.length===0||items.some(i=>!i.productId))return;
   setBusy(true);setError("");
-  const request=requestRef.current??crypto.randomUUID();requestRef.current=request;
+  // Preserve the same idempotency key across a refresh if the server accepted the request but the response was lost.
+  const payload=items.map(i=>({productId:i.productId,quantity:i.quantity,optionIds:i.optionIds??[],removedIngredients:i.removedIngredients??[]}));
+  const signature=JSON.stringify(payload);
+  const pendingKey="beger-g3-pending:"+tableToken;
+  let request=requestRef.current;
+  if(!request){
+   try{
+    const saved=sessionStorage.getItem(pendingKey);
+    if(saved){
+     const pending=JSON.parse(saved) as {signature?:string;request?:string};
+     if(pending?.signature===signature&&typeof pending.request==="string"&&/^[0-9a-f-]{36}$/i.test(pending.request))request=pending.request;
+    }
+   }catch{/* Storage is optional; server-side idempotency still protects in-session retries */}
+  }
+  request=request??crypto.randomUUID();
+  requestRef.current=request;
+  try{sessionStorage.setItem(pendingKey,JSON.stringify({signature,request}));}catch{/* Optional storage */}
   try{
-   const payload=items.map(i=>({productId:i.productId,quantity:i.quantity,optionIds:i.optionIds??[],removedIngredients:i.removedIngredients??[]}));
    const {data,error}=await client().rpc("g3_submit_table_order",{p_table_token:tableToken,p_request_id:request,p_items:payload});
    if(error||!data?.token)throw Error("Order could not be submitted");
    setToken(data.token);setStatus("pending");lastStatusRef.current="pending";feedback.signal("sent",t.success);
    try{sessionStorage.setItem("beger-g3-order:"+tableToken,data.token)}catch{/* Session storage optional */}
+   try{sessionStorage.removeItem(pendingKey)}catch{/* Optional storage */}
    onSent();requestRef.current=null;
   }catch{setError(t.error);}
   finally{setBusy(false);}
