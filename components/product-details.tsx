@@ -9,7 +9,7 @@ type Ingredient={name_ar:string;name_tr:string;name_en?:string;is_optional:boole
 type Option={id:string;name_ar:string;name_tr:string;name_en?:string;price_delta_minor:number};
 type Group={id:string;name_ar:string;name_tr:string;name_en?:string;min_select:number;max_select:number;options:Option[]};
 type Details={id:string;name_ar:string;name_tr:string;name_en?:string;description_ar:string;description_tr:string;description_en?:string;price_minor:number;ingredients:Ingredient[];groups:Group[]};
-type Props={branchId:string;productId:string;country:string;lang:GuestLang;accent?:string;dark?:boolean;imageUrl?:string|null;tableOrdering?:boolean};
+type Props={branchId:string;productId:string;country:string;lang:GuestLang;accent?:string;dark?:boolean;imageUrl?:string|null;tableOrdering?:boolean;serviceMode?:"browse"|"dine_in"|"takeaway"};
 const panel:CSSProperties={padding:18,marginTop:12,border:"1px solid #DCE9E1",borderRadius:20,background:"#FAFCFA",boxShadow:"0 9px 28px rgba(29,65,44,.045)"};
 const sectionCard:CSSProperties={border:"1px solid #E1EBE3",borderRadius:16,margin:"14px 0",padding:14,background:"#FFFFFF",minWidth:0};
 function publicClient(){
@@ -17,7 +17,7 @@ function publicClient(){
  if(!url||!key)throw Error("Public configuration unavailable");
  return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 }
-export default function ProductDetails({branchId,productId,country,lang,accent="#086c66",dark=false,imageUrl,tableOrdering=false}:Props){
+export default function ProductDetails({branchId,productId,country,lang,accent="#086c66",dark=false,imageUrl,tableOrdering=false,serviceMode="browse"}:Props){
  const [open,setOpen]=useState(false),[loading,setLoading]=useState(false),[error,setError]=useState(""),[details,setDetails]=useState<Details|null>(null);
  const [selection,setSelection]=useState<Record<string,string[]>>({});
  const [removed,setRemoved]=useState<string[]>([]);
@@ -154,7 +154,7 @@ export default function ProductDetails({branchId,productId,country,lang,accent="
     </button>:null}
     {added?<p role="status" style={{fontSize:12,color:"#176d4c",margin:"9px 0"}}>{added}</p>:null}
     {!valid?<p role="status" style={{fontSize:12,color:"#99651c"}}>{en?"Please complete required selections.":tr?"Lütfen zorunlu seçenekleri seçin.":"يرجى إكمال الاختيارات المطلوبة."}</p>:null}
-    <p style={{fontSize:11,color:"#75887B",lineHeight:1.8,marginBottom:0}}>{tableOrdering?(en?"Add your choices to the basket, then submit from the basket if table ordering is enabled. Final prices are verified by the server.":tr?"Seçimlerinizi sepete ekleyin. Masa siparişleri açıksa sepetten gönderin; fiyatlar sunucuda doğrulanır.":"أضف اختياراتك إلى السلة ثم أرسل الطلب منها إذا كان استقبال طلبات الطاولة مفعّلاً. يتحقق الخادم من السعر النهائي."):(en?"This is a shop menu preview. Scan your table QR to submit an order; no payment is active.":tr?"Bu mağaza menüsüdür. Sipariş göndermek için masa QR kodunuzu tarayın; ödeme henüz aktif değildir.":"هذه قائمة المتجر للتصفح. لإرسال طلب امسح QR الطاولة؛ الدفع الإلكتروني غير مفعّل حالياً.")}</p>
+    <p style={{fontSize:11,color:"#75887B",lineHeight:1.8,marginBottom:0}}>{tableOrdering?(en?"Add your choices to the basket, then submit from the basket if table ordering is enabled. Final prices are verified by the server.":tr?"Seçimlerinizi sepete ekleyin. Masa siparişleri açıksa sepetten gönderin; fiyatlar sunucuda doğrulanır.":"أضف اختياراتك إلى السلة ثم أرسل الطلب منها إذا كان استقبال طلبات الطاولة مفعّلاً. يتحقق الخادم من السعر النهائي."):serviceMode==="takeaway"?(en?"Add your choices and send a takeaway order if this branch has enabled pickup. The restaurant confirms and prepares your order; online payment is not active.":tr?"Sepetinize ekleyin ve şubenin paket siparişi açıksa gönderin. Restoran onaylayıp hazırlar; çevrim içi ödeme etkin değildir.":"أضف اختياراتك ثم أرسل طلب السفري إذا كانت الخدمة مفعّلة. المطعم يوافق ويحضّر طلبك؛ الدفع الإلكتروني غير مفعّل."):(en?"This is a shop menu preview. Scan your table QR to submit an order; no payment is active.":tr?"Bu mağaza menüsüdür. Sipariş göndermek için masa QR kodunuzu tarayın; ödeme henüz aktif değildir.":"هذه قائمة المتجر للتصفح. لإرسال طلب امسح QR الطاولة؛ الدفع الإلكتروني غير مفعّل حالياً.")}</p>
     <GuestRatingPreview lang={lang}/>
    </div>:null}
     </div></div>
