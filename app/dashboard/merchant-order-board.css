@@ -104,3 +104,45 @@
 .beger-order-history-total{padding:10px 0;border-top:1px solid #eae6dd;font-size:12px}
 .beger-order-history-ticket .beger-order-payment-actions button{min-height:44px}
 @media(max-width:700px){.beger-order-history-content{grid-template-columns:minmax(0,1fr)}.beger-order-history{padding:12px}.beger-order-history-heading button{width:100%}}
+
+/* Merchant branch: local notification styles. Never depend on storefront CSS being imported. */
+.beger-order-board .beger-feedback-panel{
+ display:block!important;width:min(100%,390px)!important;max-width:390px!important;
+ height:auto!important;min-height:0!important;overflow:hidden!important;
+ margin:14px 0 16px!important;border:1px solid #dfe4d2!important;border-radius:14px!important;
+ background:#f8f9f2!important;color:#4d653b!important;box-shadow:0 2px 12px #4149240b!important
+}
+.beger-order-board .beger-feedback-panel>.beger-feedback-summary{
+ display:flex!important;align-items:center!important;gap:10px!important;
+ width:100%!important;min-height:49px!important;height:auto!important;
+ padding:9px 13px!important;cursor:pointer;list-style:none!important;
+ font-size:13px!important;line-height:1.45!important
+}
+.beger-order-board .beger-feedback-summary::-webkit-details-marker{display:none}
+.beger-order-board .beger-feedback-summary>.beger-feedback-bell,
+.beger-order-board .beger-feedback-summary>svg.beger-feedback-bell{
+ display:block!important;box-sizing:content-box!important;flex:0 0 20px!important;
+ width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;
+ max-width:20px!important;max-height:20px!important;
+ margin:0!important;padding:0!important;stroke:#647b46!important;fill:none!important
+}
+.beger-order-board .beger-feedback-summary strong{font-size:13px!important;font-weight:800!important}
+.beger-order-board .beger-feedback-summary-status{font-size:11px!important;font-weight:700!important;margin-inline-start:auto;padding:4px 8px;border-radius:12px;background:#ebf1e4;color:#5b7147}
+.beger-order-board .beger-feedback-chevron{font-size:17px!important;line-height:1!important;flex:none}
+.beger-order-board .beger-feedback-summary:focus-visible{outline:3px solid #9ab27c;outline-offset:-3px;border-radius:12px}
+.beger-order-board .beger-feedback-panel>.beger-feedback-controls{
+ display:flex!important;flex-wrap:wrap!important;gap:10px 14px!important;
+ margin:0!important;padding:13px!important;border:0!important;
+ border-top:1px solid #dfe4d2!important;border-radius:0!important;
+ background:transparent!important;max-width:100%!important
+}
+.beger-order-board .beger-feedback-panel>.beger-feedback-controls legend{
+ position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;
+ clip-path:inset(50%)!important;white-space:nowrap!important
+}
+.beger-order-board .beger-feedback-controls label{font-size:12px!important;white-space:nowrap}
+.beger-order-board .beger-feedback-test{font-size:12px!important;min-height:42px!important}
+@media(max-width:480px){
+ .beger-order-board .beger-feedback-panel{width:100%!important;max-width:100%!important}
+ .beger-order-board .beger-feedback-panel>.beger-feedback-controls{gap:12px}
+}
