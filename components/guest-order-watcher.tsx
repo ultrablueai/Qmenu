@@ -4,6 +4,7 @@ import {createClient} from "@supabase/supabase-js";
 import type {GuestLang} from "../lib/g2-public";
 import {useBegerFeedback,type FeedbackKind} from "./beger-feedback";
 import GuestOrderRating from "./guest-order-rating";
+import GuestLoyaltyStamp from "./guest-loyalty-stamp";
 
 type Status="pending"|"accepted"|"preparing"|"ready"|"fulfilled"|"rejected";
 type TrackedOrder={token:string;reference:string;status:Status;serviceMode:"takeaway"|"dine_in";table:string};
@@ -77,6 +78,7 @@ export default function GuestOrderWatcher({branchId,tableToken,lang,openCart}:{b
    <button type="button" aria-label={lang==="ar"?"إغلاق التنبيه":lang==="tr"?"Bildirimi kapat":"Dismiss alert"} onClick={()=>setOpenNotice(false)}>✕</button>
   </div>:null}
   {order.status==="fulfilled"?<GuestOrderRating key={order.token} token={order.token} lang={lang}/>:null}
+  {order.status==="fulfilled"?<GuestLoyaltyStamp key={"loyalty-"+order.token} branchId={branchId} orderToken={order.token} lang={lang}/>:null}
   <button className="beger-order-watcher-chip" type="button" onClick={openCart}>
    <span aria-hidden="true">🔔</span>
    <span><strong>{order.reference?"#"+order.reference:heading}</strong><small>{label}</small></span>
