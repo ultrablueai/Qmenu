@@ -25,6 +25,6 @@ test("HQ provides real Arabic Turkish English translations and language-directio
  assert.match(hq,/setLang\(saved\)/);
  assert.match(hq,/localStorage\.setItem\("beger-hq-language",v\)/);
  assert.match(hq,/dir=\{lang==="ar"\?"rtl":"ltr"\}/);
- assert.match(hq,/href="#customer-appearance"/);
+ assert.match(hq,/href="\/dashboard\?view=operations#customer-appearance"/);
  assert.doesNotMatch(hq,/fakeRevenue|2,856/);
 });
