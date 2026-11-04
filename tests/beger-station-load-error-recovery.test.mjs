@@ -13,6 +13,7 @@ for (const station of ["cashier", "kitchen"]) {
   });
   test(station+" clears a stale error once a later refresh succeeds",()=>{
     assert.match(source,/if\(error\|\|!Array\.isArray\(data\)\)throw Error/);
-    assert.match(source,/setOrders\(data as Order\[\]\);setLoaded\(true\);setError\(""\);/);
+    const saved=station==="cashier"?/setOrders\(fresh\);setLoaded\(true\);setError\(""\);/:/setOrders\(data as Order\[\]\);setLoaded\(true\);setError\(""\);/;
+    assert.match(source,saved);
   });
 }
