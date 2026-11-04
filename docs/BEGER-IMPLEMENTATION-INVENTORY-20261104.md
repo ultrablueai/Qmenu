@@ -47,3 +47,11 @@ Date: 2026-11-04. Scope: READ-ONLY platform inspection; no production mutation.
 - PR #5 closed **without merge**. Historical commits retained; G6/G7 existing SQL remains authoritative.
 - New test: `tests/beger-pager-authoritative-state.test.mjs` (commit `a5557eef`) checks allowed edges, branch access, row lock and G7 audit trigger. Its source patterns were inspected; full Node tests/build and browser E2E are still **unverified**.
 - Next: run full suite on current branch and real staff/customer E2E; no production changes.
+
+## 2026-11-04 — G9/G10 privilege hardening checkpoint
+
+- Inspected live Staging PostgreSQL function privileges for 13 G9/G10 functions: all 13 returned `anon_execute = false`. Both internal `g9_kitchen_allowed` and `g10_cashier_allowed` also returned `auth_execute = false`; authenticated-facing RPCs had explicit authenticated EXECUTE. All inspected functions were SECURITY DEFINER with restricted search_path. This is **privilege inventory**, not complete exploit or real-user authorization proof.
+- Reviewed `supabase/migrations/20261104194500_g9_kitchen_staff_workstation.sql` and `supabase/migrations/20261104231500_g10_branch_cashier.sql`: confirmed branch/business filters, row locks, constrained state edges and existing idempotent merchant-recorded collection (not PSP/bank settlement). No need to recreate workstations or tables.
+- Added `tests/beger-g9-g10-privilege-boundary.test.mjs` in commit `a6b6d0aca2a08c2d861fa05ac9c999f8f00d4a12`. Five **static regression** tests guard public/anon EXECUTE revocations, minimal kitchen fields, branch guards, constrained transitions and existing cashier collection safety. File existence verified on GitHub; **no completed Node test run or Next build at that commit**, no CI statuses returned.
+- Remaining: execute `npm test && npm run build` on the exact HEAD; conduct real authenticated independent kitchen/cashier staff sessions, deny cross-branch and cross-tenant calls, test simultaneous status/collection attempts and Android/iOS responsive views before any commercial GO.
+- No schema alteration, no test identities/transactions created, no production change.
