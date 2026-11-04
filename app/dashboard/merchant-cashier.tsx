@@ -17,7 +17,7 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
  const refresh=useCallback(async()=>{
   const {data,error}=await browserSupabase().rpc("g10_cashier_queue",{p_branch:branchId});
   if(error||!Array.isArray(data))throw Error("Queue unavailable");
-  setOrders(data as Order[]);setLoaded(true);
+  setOrders(data as Order[]);setLoaded(true);setError("");
  },[branchId]);
  useEffect(()=>{
   let active=true;setOrders([]);setLoaded(false);setError("");setNotice("");setMethods({});
@@ -62,7 +62,7 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
   </nav>
   {notice?<p className="beger-cashier-success" role="status">{notice}</p>:null}
   {error?<p className="beger-cashier-error" role="alert">{error}</p>:null}
-  {!loaded?<p role="status">جارٍ تحميل الطلبات…</p>:visible.length===0?<p>لا توجد طلبات في هذا القسم.</p>:null}
+  {!loaded&&!error?<p role="status">جارٍ تحميل الطلبات…</p>:loaded&&visible.length===0?<p>لا توجد طلبات في هذا القسم.</p>:null}
   <div className="beger-cashier-grid">{visible.map(order=><article key={order.id}>
    <div className="beger-cashier-head"><div><strong>#{order.reference}</strong><small>{order.table} · {new Date(order.createdAt).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</small></div><span>{statuses[order.status]}</span></div>
    <div className="beger-cashier-products">{order.items.map((item,i)=><span key={i}>{item.quantity} × {item.name}</span>)}</div>
