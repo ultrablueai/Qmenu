@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useState} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
 import QrSvg from "../../lib/qr/qr-svg";
+import MerchantPagerDisplay from "./merchant-pager-display";
 import "./merchant-pager.css";
 type PagerStatus="waiting"|"preparing"|"ready"|"fulfilled"|"cancelled";
 type Ticket={id:string;number:number;token:string;reference:string|null;status:PagerStatus;createdAt:string;readyAt:string|null};
@@ -79,6 +80,7 @@ export default function MerchantPager({branchId,branchName}:{branchId:string;bra
    <a href={ticketUrl(selected.token)} target="_blank" rel="noopener noreferrer">فتح بطاقة الزبون ↗</a>
    <button type="button" onClick={async()=>{try{await navigator.clipboard.writeText(ticketUrl(selected.token));setMessage("تم نسخ رابط النداء.");}catch{setError("تعذّر النسخ. استخدم رابط فتح بطاقة الزبون.");}}}>نسخ الرابط</button>
   </section>:null}
+  <MerchantPagerDisplay key={"display-"+branchId} branchId={branchId}/>
   <div className="beger-pager-tabs" role="group" aria-label="عرض النداءات">
    <button type="button" aria-pressed={view==="active"} onClick={()=>setView("active")}>النشطة ({active.length})</button>
    <button type="button" aria-pressed={view==="closed"} onClick={()=>setView("closed")}>المغلقة ({closed.length})</button>
