@@ -38,7 +38,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
     .eq("user_id", user.id)
     .limit(10);
 
-  if (!membershipError && !memberships?.length) redirect("/onboarding");
+  if (!membershipError && !memberships?.length) redirect("/staff");
 
   // Platform authority is checked independently of merchant memberships.
   // A failed permission read never grants a platform navigation entry.
