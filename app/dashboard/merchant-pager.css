@@ -1,0 +1,38 @@
+.beger-pager-manager{display:grid;gap:17px;min-width:0;color:#44382d}
+.beger-pager-manager-intro{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.beger-pager-manager-intro span{font-size:10px;letter-spacing:.08em;font-weight:800;color:#95754c}
+.beger-pager-manager-intro h3{font-size:clamp(22px,3vw,30px);margin:6px 0}
+.beger-pager-manager-intro p{margin:0;color:#817364;font-size:12px}
+.beger-pager-counts{background:#edf3e5;padding:12px 20px;border-radius:14px;display:grid;gap:3px;text-align:center;color:#52703a}
+.beger-pager-counts strong{font-size:30px}.beger-pager-counts small{font-size:10px}
+.beger-pager-create{display:flex;gap:11px;align-items:end;flex-wrap:wrap;padding:16px;background:#faf7f1;border:1px solid #e5ddcf;border-radius:16px}
+.beger-pager-create label{flex:1 1 220px;min-width:0;display:grid;gap:7px;font-size:12px;font-weight:800}
+.beger-pager-create input{width:100%;max-width:100%;min-height:46px;font:inherit;border:1px solid #dbd3c7;border-radius:10px;padding:10px;background:#fff;color:#42392e}
+.beger-pager-create button{min-height:46px;padding:10px 20px;border:0;border-radius:11px;background:#637d47;color:#fff;font-weight:800;cursor:pointer}
+.beger-pager-manager button:disabled{opacity:.55;cursor:not-allowed}
+.beger-pager-notice{font-size:12px;color:#8c7966;margin:0;line-height:1.65}
+.beger-pager-success,.beger-pager-error{padding:11px;border-radius:10px;font-size:12px}
+.beger-pager-success{background:#edf4e8;color:#4a6737}.beger-pager-error{background:#fff0ea;color:#963f2e}
+.beger-pager-new-ticket{border-radius:18px;padding:16px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:18px;border:1px solid #d5dfc5;background:#f6f8f1}
+.beger-pager-new-ticket>div:first-child{display:grid;gap:6px;text-align:center}
+.beger-pager-new-ticket>div:first-child strong{font-size:68px;color:#3e6335;line-height:1.1}
+.beger-pager-new-ticket>div:nth-child(2){display:grid;gap:8px;justify-items:center;background:white;border-radius:13px;padding:12px}
+.beger-pager-new-ticket a,.beger-pager-new-ticket button{border-radius:9px;border:1px solid #b5c4a0;background:#fff;padding:10px;min-height:43px;color:#53703b;font-size:12px;cursor:pointer}
+.beger-pager-tabs{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:10px;border-bottom:1px solid #e8dfd1}
+.beger-pager-tabs button{min-height:43px;border:1px solid #d9d9cb;background:white;color:#6d654f;border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer}
+.beger-pager-tabs button[aria-pressed=true]{background:#637d47;color:white;border-color:#637d47}
+.beger-pager-tickets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.beger-pager-ticket{min-width:0;border:1px solid #e4dccd;border-radius:16px;background:#fff;display:flex;gap:13px;padding:13px}
+.beger-pager-ticket-number{flex:0 0 94px;background:#e9f0e0;border-radius:13px;display:grid;align-content:center;justify-items:center;gap:5px;padding:9px;color:#4e6b38;text-align:center}
+.beger-pager-ticket-number strong{font-size:38px;line-height:1.1}
+.beger-pager-ticket-number span{font-size:10px;font-weight:800}
+.beger-pager-ticket-detail{flex:1;min-width:0;display:grid;align-content:center;gap:8px}
+.beger-pager-ticket-detail small{font-size:11px;color:#7f7363;overflow-wrap:anywhere}
+.beger-pager-ticket-detail a{font-size:12px;color:#536e3d;font-weight:800}
+.beger-pager-ticket-detail button{min-height:40px;border:0;border-radius:10px;background:#657d47;color:white;font-weight:800;cursor:pointer}
+.beger-pager-ticket-detail button.beger-pager-secondary{border:1px solid #e3d8ca;color:#876b55;background:#fff}
+.beger-pager-empty{padding:18px;text-align:center;color:#8b8174;font-size:13px}
+.beger-pager-manager button:focus-visible,.beger-pager-manager a:focus-visible{outline:3px solid #91a973;outline-offset:3px}
+@media(max-width:1120px){.beger-pager-tickets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:660px){.beger-pager-tickets{grid-template-columns:minmax(0,1fr)}.beger-pager-ticket-number{flex-basis:85px}.beger-pager-create button{width:100%}.beger-pager-new-ticket{flex-direction:column}}
+@media print{body *{visibility:hidden!important}.beger-pager-new-ticket,.beger-pager-new-ticket *{visibility:visible!important}.beger-pager-new-ticket{position:absolute;inset:0 auto auto 0;width:80mm;box-shadow:none!important;border:none!important;background:white!important}.beger-pager-new-ticket button,.beger-pager-new-ticket a{display:none!important}}
