@@ -1,6 +1,6 @@
 # G8 — Collection period close (staging)
 
-Status: **Database migration applied on Beger Staging and merchant UI implemented. Awaiting final build gate and real signed-in merchant acceptance test.** This document does not claim production readiness.
+Status: **Staging implementation built and deployed READY, 314/314 automated tests passed, Next.js TypeScript checks passed, migration applied; real authenticated pilot acceptance remains open.** This is not production readiness.
 
 ## Implementation
 - `supabase/migrations/20261104220000_g8_collection_close.sql` applied to the isolated Supabase staging project on 2026-11-04.
@@ -10,7 +10,7 @@ Status: **Database migration applied on Beger Staging and merchant UI implemente
 - No anonymous access to raw close records or the RPC. Live membership checks apply to the RPC.
 - Only money recorded by merchants is included (by `paid_at`); no bank settlement, cash drawer counts, adjustments, refunds, tax/legal close or payment gateway.
 
-## Pilot acceptance tests not yet signed off
+## Manual pilot acceptance tests not yet signed off
 - With a real owner/manager account, inspect preview and confirm one low-risk sample close using staging-only sample records.
 - Verify duplicate and overlapping intervals fail cleanly; nonoverlapping consecutive intervals work.
 - Verify a staff login and an unrelated business cannot preview, close, or read.
