@@ -12,7 +12,7 @@ const next:Partial<Record<PagerStatus,{status:PagerStatus;label:string}>>={
  preparing:{status:"ready",label:"نداء: جاهز"},
  ready:{status:"fulfilled",label:"تأكيد التسليم"}
 };
-export default function MerchantPager({branchId,branchName}:{branchId:string;branchName:string}){
+export default function MerchantPager({branchId,branchName,staffMode=false}:{branchId:string;branchName:string;staffMode?:boolean}){
  const [tickets,setTickets]=useState<Ticket[]>([]);
  const [reference,setReference]=useState("");
  const [origin,setOrigin]=useState("");
@@ -80,7 +80,7 @@ export default function MerchantPager({branchId,branchName}:{branchId:string;bra
    <a href={ticketUrl(selected.token)} target="_blank" rel="noopener noreferrer">فتح بطاقة الزبون ↗</a>
    <button type="button" onClick={async()=>{try{await navigator.clipboard.writeText(ticketUrl(selected.token));setMessage("تم نسخ رابط النداء.");}catch{setError("تعذّر النسخ. استخدم رابط فتح بطاقة الزبون.");}}}>نسخ الرابط</button>
   </section>:null}
-  <MerchantPagerDisplay key={"display-"+branchId} branchId={branchId}/>
+  {!staffMode?<MerchantPagerDisplay key={"display-"+branchId} branchId={branchId}/>:null}
   <div className="beger-pager-tabs" role="group" aria-label="عرض النداءات">
    <button type="button" aria-pressed={view==="active"} onClick={()=>setView("active")}>النشطة ({active.length})</button>
    <button type="button" aria-pressed={view==="closed"} onClick={()=>setView("closed")}>المغلقة ({closed.length})</button>
