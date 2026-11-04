@@ -11,12 +11,13 @@ import MerchantReport from "./merchant-report";
 import MerchantReviews from "./merchant-reviews";
 import MerchantLoyalty from "./merchant-loyalty";
 import MerchantPager from "./merchant-pager";
+import MerchantStaff from "./merchant-staff";
 import "../qr-experience.css";
 import "./merchant-workspace.css";
 
 type Branch={id:string;name:string};
 type Props={businessId:string;country:string;branches:Branch[]};
-type Workspace="orders"|"pager"|"reports"|"catalog"|"qr"|"appearance"|"reviews"|"loyalty"|"legacy";
+type Workspace="orders"|"pager"|"reports"|"catalog"|"qr"|"appearance"|"reviews"|"loyalty"|"staff"|"legacy";
 const workspaceSections:{id:Workspace;icon:string;name:string;help:string}[]=[
  {id:"orders",icon:"▣",name:"الطلبات والمطبخ",help:"طلبات مباشرة · تحصيل · طباعة"},
  {id:"pager",icon:"♧",name:"البيجر المستقل",help:"الكاشير · أرقام النداء · QR"},
@@ -26,6 +27,7 @@ const workspaceSections:{id:Workspace;icon:string;name:string;help:string}[]=[
  {id:"appearance",icon:"◉",name:"الثيمات واللغات",help:"التصميم · الألوان · اللغات"},
  {id:"reviews",icon:"★",name:"التقييمات",help:"تقييمات الطلبات المكتملة · تعليقات خاصة"},
  {id:"loyalty",icon:"✦",name:"الولاء والمكافآت",help:"بطاقة الأختام · إعدادات الفروع"},
+ {id:"staff",icon:"♙",name:"الموظفون والصلاحيات",help:"تعيين موظف بيجر لكل فرع"},
  {id:"legacy",icon:"⚙",name:"الأدوات القديمة",help:"أدوات الانتقال المحفوظة"}
 ];
 /** The merchant chooses a single workspace; no stacked editors or unrelated forms. */
@@ -46,6 +48,7 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
    else if(h==="#merchant-reports")setWorkspace("reports");
    else if(h==="#merchant-reviews")setWorkspace("reviews");
    else if(h==="#merchant-loyalty")setWorkspace("loyalty");
+   else if(h==="#merchant-staff")setWorkspace("staff");
   };
   showHash();window.addEventListener("hashchange",showHash);
   return()=>window.removeEventListener("hashchange",showHash);
@@ -99,6 +102,7 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
    {workspace==="appearance"?<div id="customer-appearance"><MerchantAppearance businessId={businessId}/></div>:null}
    {workspace==="reviews"?<div id="merchant-reviews"><MerchantReviews key={"reviews-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="loyalty"?<div id="merchant-loyalty"><MerchantLoyalty key={"loyalty-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
+   {workspace==="staff"?<div id="merchant-staff"><MerchantStaff key={"staff-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="catalog"?<div id="central-catalog"><CentralCatalog businessId={businessId} country={country} branches={branches}/></div>:null}
    {workspace==="legacy"?<details open><summary>إدارة القوائم القديمة الخاصة بالفرع (مرحلة انتقالية)</summary><p>احتفظنا بالأدوات القديمة للحفاظ على المنتجات السابقة. لا تدخل المنتج في النظامين معاً.</p><MenuManager key={activeId} businessId={businessId} branchId={activeId} country={country}/></details>:null}
   </div>
