@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useState} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
 import MerchantKitchenAccess from "./merchant-kitchen-access";
+import MerchantCashierAccess from "./merchant-cashier-access";
 import "./merchant-staff.css";
 type Member={email:string;assignedAt:string};
 export default function MerchantStaff({branchId,branchName}:{branchId:string;branchName:string}){
@@ -48,6 +49,7 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
    </div>)}
   </div>
   <MerchantKitchenAccess key={"kitchen-"+branchId} branchId={branchId}/>
+  <MerchantCashierAccess key={"cashier-"+branchId} branchId={branchId}/>
   <p className="beger-staff-explainer">شاشة الموظف: <a href="/staff/pager" target="_blank" rel="noopener noreferrer">فتح محطة البيجر ↗</a>. يستطيع الموظف إصدار رقم وتحديث حالته فقط؛ لا يستطيع إدارة الفروع أو المستخدمين.</p>
  </section>;
 }
