@@ -14,7 +14,7 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
  const refresh=useCallback(async()=>{
   const {data,error}=await browserSupabase().rpc("g9_kitchen_queue",{p_branch:branchId});
   if(error||!Array.isArray(data))throw Error("Unauthorized kitchen query");
-  setOrders(data as Order[]);setLoaded(true);
+  setOrders(data as Order[]);setLoaded(true);setError("");
  },[branchId]);
  useEffect(()=>{
   let active=true;setOrders([]);setLoaded(false);setError("");setNotice("");
@@ -41,7 +41,7 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
   <nav aria-label="عرض طلبات المطبخ"><button type="button" aria-pressed={filter==="live"} onClick={()=>setFilter("live")}>بانتظار التجهيز ({orders.filter(o=>o.status!=="ready").length})</button><button type="button" aria-pressed={filter==="ready"} onClick={()=>setFilter("ready")}>جاهزة ({orders.filter(o=>o.status==="ready").length})</button><button type="button" disabled={busy} onClick={()=>void refresh().catch(()=>setError("تعذّر التحديث."))}>تحديث ↻</button></nav>
   {notice?<p role="status" className="beger-kitchen-notice">{notice}</p>:null}
   {error?<p role="alert" className="beger-kitchen-error">{error}</p>:null}
-  {!loaded?<p role="status">جارٍ تحميل الطلبات…</p>:loaded&&shown.length===0?<p>لا توجد طلبات في هذه الحالة.</p>:null}
+  {!loaded&&!error?<p role="status">جارٍ تحميل الطلبات…</p>:loaded&&shown.length===0?<p>لا توجد طلبات في هذه الحالة.</p>:null}
   <div className="beger-kitchen-grid">{shown.map(order=><article key={order.id}>
    <div className="beger-kitchen-card-head"><div><strong>#{order.reference}</strong><small>{order.table} · {new Date(order.createdAt).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</small></div><span>{labels[order.status]}</span></div>
    <ul>{order.items.map((item,i)=><li key={i}><strong>{item.quantity} × {item.name}</strong>
