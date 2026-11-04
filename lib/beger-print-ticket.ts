@@ -23,7 +23,7 @@ const steps:Record<string,string>={
  fulfilled:"تم التسليم",rejected:"مرفوض"
 };
 
-export function printOrderTicket(order:PrintableOrder,branchName:string,kind:TicketKind):boolean{
+export function printOrderTicket(order:PrintableOrder,branchName:string,kind:TicketKind,preferredPaper?:Record<TicketKind,Paper>):boolean{
  // Only a directly clicked staff action opens the preview; never sends customer data to external services.
  const popup=window.open("","_blank","width=680,height=820");
  if(!popup)return false;
@@ -101,7 +101,7 @@ export function printOrderTicket(order:PrintableOrder,branchName:string,kind:Tic
  for(const [value,name] of [["80mm","حراري 80 مم"],["58mm","حراري 58 مم"],["a4","A4 / كشف داخلي"]]){
   const opt=d.createElement("option");opt.value=value;opt.textContent=name;selector.appendChild(opt);
  }
- const defaultPaper:Paper=kind==="summary"?"a4":"80mm";
+ const defaultPaper:Paper=preferredPaper?.[kind]??(kind==="summary"?"a4":kind==="pickup"?"58mm":"80mm");
  selector.value=defaultPaper;
  updatePaper(defaultPaper);
  selector.addEventListener("change",()=>{updatePaper(selector.value as Paper);});
