@@ -19,6 +19,7 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
  const [rosterRevision,setRosterRevision]=useState(0);
  const [invitations,setInvitations]=useState<Invitation[]>([]);
  const [invitationNotice,setInvitationNotice]=useState("");
+ const [copied,setCopied]=useState(false);
  const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
  const refreshInvites=useCallback(async()=>{
@@ -57,11 +58,17 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
    if(requestError||data?.status!=="pending")throw requestError??Error("Invitation not confirmed");
    await refreshInvites();
    setEmail("");
-   setInvitationNotice("دعوة "+staffRoles[role].label+" أُنشئت للبريد "+target+". الموظف يسجّل من بوابته ويقبلها بنفسه قبل حصوله على الصلاحية.");
+   setCopied(false);
+   setInvitationNotice("الدعوة جاهزة للبريد "+target+" بدور "+staffRoles[role].label+". شارك رابط الموظف؛ لن تتفعّل الصلاحية قبل القبول.");
   }catch(reason){
    const detail=reason instanceof Error?reason.message:"";
    setError(/forbidden|not authorized|permission|denied|42501/i.test(detail)?"إرسال الدعوة متاح لمالك النشاط فقط.":"تعذّر إنشاء الدعوة. تأكد من البريد وصلاحيات الفرع ثم حاول مرة أخرى.");
   }finally{setBusy(false)}
+ }
+ async function copyStaffLink(){
+  const link=new URL("/staff",window.location.origin).toString();
+  try{await navigator.clipboard.writeText(link);setCopied(true)}
+  catch{setError("تعذّر النسخ تلقائياً. افتح رابط الموظف وشاركه يدوياً.");}
  }
  async function revokeInvitation(id:string){
   if(busy||!window.confirm("إلغاء هذه الدعوة قبل قبولها؟"))return;
@@ -75,14 +82,21 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
  }
  return <section className="beger-staff-workspace" dir="rtl" aria-label="الموظفون والصلاحيات">
   <div className="beger-staff-intro"><span>BEGER / STAFF ACCESS</span><h3>الموظفون والأدوار</h3><p>{branchName} · عيّن الموظف لدوره والفرع الصحيح، ثم اختبر المحطة بحسابه.</p></div>
-  <ol className="beger-staff-steps"><li>صاحب النشاط يدخل بريد الموظف ويختار دوره. تُنشأ دعوة معلّقة دون منح صلاحية فورية.</li><li>الموظف يفتح <a href="/staff/register" target="_blank" rel="noopener noreferrer">بوابة تسجيل الموظفين</a> ويؤكد نفس البريد المدعو.</li><li>الموظف يدخل <a href="/staff" target="_blank" rel="noopener noreferrer">مساحة الموظف</a> ويقبل الدعوة، ثم تظهر محطته.</li></ol>
+  <ol className="beger-staff-steps"><li>أدخل بريد الموظف واختر وظيفته، ثم أنشئ الدعوة.</li><li>شارك رابط الموظف. إن كان مسجّلاً يدخل مباشرة؛ وإلا ينشئ حسابه ويؤكد بريده.</li><li>يقبل الدعوة من مساحته، فتظهر المحطة المصرّح بها تلقائياً.</li></ol>
   <form className="beger-staff-add beger-staff-quick-add" onSubmit={e=>{e.preventDefault();void quickAssign()}}>
    <label>بريد الموظف المراد دعوته<input value={email} onChange={e=>setEmail(e.target.value)} required type="email" maxLength={254} autoComplete="off" inputMode="email" dir="ltr" placeholder="employee@example.com"/></label>
    <label>الدور المطلوب<select value={role} onChange={e=>setRole(e.target.value as StaffRole)}>{(Object.keys(staffRoles) as StaffRole[]).map(value=><option key={value} value={value}>{staffRoles[value].label}</option>)}</select></label>
    <button type="submit" disabled={busy||loading}>{busy?"جارٍ إنشاء الدعوة…":"إرسال دعوة الدور"}</button>
   </form>
   <p className="beger-staff-explainer">الدور المختار: {staffRoles[role].help}. الدعوة مرتبطة بهذا البريد والفرع وتنتهي خلال 14 يوماً. تتفعّل فقط عندما يقبلها الموظف من حساب مؤكد البريد. لا نُنشئ له كلمة مرور، ولا نرسل بريداً تلقائياً في Staging؛ أرسل له رابط بوابة الموظفين.</p>
-  {invitationNotice?<p role="status" className="beger-staff-notice">{invitationNotice} <a href="/staff/register" target="_blank" rel="noopener noreferrer">فتح بوابة تسجيل الموظفين</a></p>:null}
+  {invitationNotice?<div role="status" className="beger-staff-invite-success">
+   <strong>{invitationNotice}</strong>
+   <div className="beger-staff-share-actions">
+    <button type="button" onClick={()=>void copyStaffLink()}>{copied?"تم نسخ رابط الموظف ✓":"نسخ رابط الموظف"}</button>
+    <a href="/staff" target="_blank" rel="noopener noreferrer">فتح بوابة الموظف</a>
+    <a href="/staff/register" target="_blank" rel="noopener noreferrer">تسجيل موظف جديد</a>
+   </div>
+  </div>:null}
   <div className="beger-staff-list" aria-label="دعوات الموظفين"><strong>دعوات الموظفين ({invitations.length})</strong>{invitations.length===0?<p>لا توجد دعوات لهذا الفرع.</p>:invitations.map(invite=><div key={invite.id} className="beger-staff-row"><span>{invite.email} · {staffRoles[invite.role].label} · {invite.status==="pending"?"بانتظار القبول":invite.status==="accepted"?"مقبولة":invite.status==="expired"?"منتهية":"ملغاة"}</span>{invite.status==="pending"?<button type="button" disabled={busy} onClick={()=>void revokeInvitation(invite.id)}>إلغاء الدعوة</button>:null}</div>)}</div>
   {notice?<p role="status" className="beger-staff-notice">{notice}</p>:null}
   {error?<p role="alert" className="beger-staff-error">{error}</p>:null}
