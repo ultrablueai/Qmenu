@@ -1,5 +1,11 @@
 # BEGER — Execution Board / Next-Agent Handoff
-Updated 2026-11-01. This is the operational checklist; `BEGER-CANONICAL-PLAN.md` owns phase order and product contract, `BEGER-LOYALTY-CARD-NOTIFICATIONS-SPEC.md` owns detailed future loyalty/notification design.
+Historical execution journal, updated with verified 2026-11-04 inventory below. This is the operational checklist; `BEGER-CANONICAL-PLAN.md` owns phase order and product contract, `BEGER-LOYALTY-CARD-NOTIFICATIONS-SPEC.md` owns detailed future loyalty/notification design.
+
+## CURRENT HANDOFF OVERRIDE — 2026-11-04 (read before historical phase entries)
+
+**Current verified implementation baseline:** [BEGER-IMPLEMENTATION-INVENTORY-20261104.md](BEGER-IMPLEMENTATION-INVENTORY-20261104.md). Earlier claims below of G2/G3/Pager/kitchen/cashier being merely planned, or that no second auth identity exists, are **dated historical snapshots, not current instructions**. Verify live code, staging migrations, current deployment, and open PRs before any work. Staging reaches G10, with existing independent G6 Pager, G7 staff/print/audit, G8 collection close, G9 kitchen and G10 cashier. Acceptance remains open; NO commercial GO.
+
+**Do-not-duplicate warning:** draft PR #5 on `feat/pager-ticket-lifecycle` repeats the existing G6 state machine with conflicting `ready -> cancelled` semantics and an unpersisted `version` field. Do not merge or build a parallel Pager engine. Reconcile against live `g6_pager_transition` and current tests first. Active branch: `feat/g1-foundation` (not `main`). Production stays untouched.
 
 ## Rule zero
 ONE phase at a time. Do not treat documentation, mocks, test counts, build or READY as commercial GO. Do not silently jump to loyalty or paid customer subscriptions. No production changes, PR merge or irreversible operations without explicit approval. Beger/Qmenu is independent of DIMASQ, Garfix, Sovereign, SatışDesk, LearningOS.
