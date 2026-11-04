@@ -3,7 +3,8 @@ import {useEffect,useRef,useState} from "react";
 import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {browserSupabase} from "../../lib/supabase/browser";
 import {publicServiceSignal,publicSignalLabels} from "../../lib/beger-service-workflows";
-import {printOrderTicket} from "../../lib/beger-print-ticket";
+import {printOrderTicket as printOrderTicketBase} from "../../lib/beger-print-ticket";
+import MerchantPrintSettings,{DEFAULT_BRANCH_PRINT_SETTINGS,type BranchPrintSettings} from "./merchant-print-settings";
 import {printFilteredOrderList} from "../../lib/beger-print-order-list";
 import {downloadOrderCsv} from "../../lib/beger-order-csv";
 import "./merchant-order-board.css";
@@ -20,6 +21,8 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
  const [historyOpen,setHistoryOpen]=useState(false),[historyBusy,setHistoryBusy]=useState(false),[closedOrders,setClosedOrders]=useState<Order[]>([]),[historyLoaded,setHistoryLoaded]=useState(false);
  const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  const [collectionMethods,setCollectionMethods]=useState<Record<string,string>>({});
+ const [printSettings,setPrintSettings]=useState<BranchPrintSettings>(DEFAULT_BRANCH_PRINT_SETTINGS);
+ const printOrderTicket=(order:Order,branch:string,kind:"kitchen"|"pickup"|"summary")=>printOrderTicketBase(order,branch,kind,printSettings);
  const [activeView,setActiveView]=useState<"live"|"history">("live");
  const [archiveLayout,setArchiveLayout]=useState<"grid"|"list"|"table">("table");
  const [archiveSort,setArchiveSort]=useState<"newest"|"oldest">("newest");
@@ -140,6 +143,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
       {label:"لم يُسجّل تحصيلها",value:orders.filter(o=>o.paymentStatus!=="paid").length}
     ]).map(stat=><div className="beger-order-board-kpi" key={stat.label}><span>{stat.label}</span><strong>{loaded?stat.value:"—"}</strong></div>)}
   </section>:null}
+  <MerchantPrintSettings branchId={branchId} onSettings={setPrintSettings}/>
   <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("new-order","هذا تنبيه اختبار، وليس طلباً جديداً")}/>
   {feedback.message?<p role="status" className="beger-feedback-toast">{feedback.message}</p>:null}
   {error?<p role="alert" className="beger-order-board-error">{error}</p>:null}
