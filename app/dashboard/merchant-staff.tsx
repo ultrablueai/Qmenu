@@ -66,7 +66,7 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
   }finally{setBusy(false)}
  }
  async function copyStaffLink(){
-  const link=new URL("/staff",window.location.origin).toString();
+  const link=new URL("/staff/join",window.location.origin).toString();
   try{await navigator.clipboard.writeText(link);setCopied(true)}
   catch{setError("تعذّر النسخ تلقائياً. افتح رابط الموظف وشاركه يدوياً.");}
  }
@@ -93,7 +93,7 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
    <strong>{invitationNotice}</strong>
    <div className="beger-staff-share-actions">
     <button type="button" onClick={()=>void copyStaffLink()}>{copied?"تم نسخ رابط الموظف ✓":"نسخ رابط الموظف"}</button>
-    <a href="/staff" target="_blank" rel="noopener noreferrer">فتح بوابة الموظف</a>
+    <a href="/staff/join" target="_blank" rel="noopener noreferrer">فتح رابط الدعوة</a>
     <a href="/staff/register" target="_blank" rel="noopener noreferrer">تسجيل موظف جديد</a>
    </div>
   </div>:null}
