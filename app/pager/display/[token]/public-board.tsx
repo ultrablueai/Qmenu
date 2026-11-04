@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
 import "./public-board.css";
+import "./public-board.css";
 type Display={branchName:string;ready:number[];waitingCount:number;preparingCount:number};
 function client(){
  const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
