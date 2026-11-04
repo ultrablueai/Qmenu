@@ -5,7 +5,7 @@
 .beger-pager-manager-intro p{margin:0;color:#817364;font-size:12px}
 .beger-pager-counts{background:#edf3e5;padding:12px 20px;border-radius:14px;display:grid;gap:3px;text-align:center;color:#52703a}
 .beger-pager-counts strong{font-size:30px}.beger-pager-counts small{font-size:10px}
-.beger-pager-create{display:flex;gap:11px;align-items:end;flex-wrap:wrap;padding:16px;background:#faf7f1;border:1px solid #e5ddcf;border-radius:16px}
+.beger-pager-create{display:flex;gap:11px;align-items:flex-end;flex-wrap:wrap;padding:16px;background:#faf7f1;border:1px solid #e5ddcf;border-radius:16px}
 .beger-pager-create label{flex:1 1 220px;min-width:0;display:grid;gap:7px;font-size:12px;font-weight:800}
 .beger-pager-create input{width:100%;max-width:100%;min-height:46px;font:inherit;border:1px solid #dbd3c7;border-radius:10px;padding:10px;background:#fff;color:#42392e}
 .beger-pager-create button{min-height:46px;padding:10px 20px;border:0;border-radius:11px;background:#637d47;color:#fff;font-weight:800;cursor:pointer}
