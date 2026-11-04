@@ -99,3 +99,7 @@ Date: 2026-11-04. Scope: READ-ONLY platform inspection; no production mutation.
 - Redirect only **unassigned and staff-only** accounts from dashboard to `/staff`. Mixed owner/manager memberships still use merchant dashboard. Existing G9/G10 assignment RPCs already insert `memberships(role='staff')` as needed and remain unchanged.
 - Updated login language and documented post-verification navigation. Added `tests/beger-staff-login-routing.test.mjs` (4 tests). Real cross-account browser acceptance remains outstanding, with zero production changes.
 - This entry triggers exact-HEAD isolated Staging validation `[beger-deploy]`, subject to observed test and build results. Stable alias: `qmenu-staging-git-feat-g1-foundation-ultrablueais-projects.vercel.app`.
+
+### 2026-11-04 — Staff routing CI correction
+- First validation for staff landing, deployment `dpl_8qwPea4VsvhbRRbpikzMZPNmyay5`, failed **one** old static test among 348. `tests/merchant-auth-routing.test.mjs` asserted legacy `/dashboard -> /onboarding` for membershipless accounts. That path is precisely the reported employee bug. Updated it to verify the new staff-only and unassigned access route rather than suppressing it. No change to server-side auth.
+- Triggering a second Staging pipeline using `[beger-deploy]`. Do not claim ready until its real logs confirm success.
