@@ -92,3 +92,10 @@ Date: 2026-11-04. Scope: READ-ONLY platform inspection; no production mutation.
 - This change is staging-only. The deployment commit bears `[beger-deploy]` to enter the existing guarded test/build pipeline, pending observed Vercel result.
 
 - First staff-onboarding CI run `dpl_63Kf95dbDsyC88r3LCba24GMc4xs` failed 1 of 344 static tests: the new contract test assumed identical owner/manager rejection text for both pre-existing G9 and G10 SQL functions. SQL correctly protects privileged membership in both, but uses different equivalent error text. Corrected the test to check both known messages; did not weaken the authorization condition or modify database functions. Rechecking the entire pipeline at the next commit.
+
+## 2026-11-04 — Employee misrouting from merchant onboarding
+- Reproduced from source: `app/login/page.tsx` sent all authenticated identities to `/dashboard`; `app/dashboard/page.tsx` redirected accounts with no membership to `/onboarding`, confusing employees with new merchants. User screenshot confirms the symptom; no secret/access data used.
+- Added `app/staff/page.tsx` as permission-checked employee landing. Its three existing RPCs discover assigned branches, including correct failure-closed behavior; never relies on email alone or grants access. Unassigned accounts get an explicit waiting-for-owner message; genuine new owners have an explicit link to create their business.
+- Redirect only **unassigned and staff-only** accounts from dashboard to `/staff`. Mixed owner/manager memberships still use merchant dashboard. Existing G9/G10 assignment RPCs already insert `memberships(role='staff')` as needed and remain unchanged.
+- Updated login language and documented post-verification navigation. Added `tests/beger-staff-login-routing.test.mjs` (4 tests). Real cross-account browser acceptance remains outstanding, with zero production changes.
+- This entry triggers exact-HEAD isolated Staging validation `[beger-deploy]`, subject to observed test and build results. Stable alias: `qmenu-staging-git-feat-g1-foundation-ultrablueais-projects.vercel.app`.
