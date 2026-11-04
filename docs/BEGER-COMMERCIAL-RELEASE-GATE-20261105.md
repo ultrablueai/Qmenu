@@ -37,3 +37,6 @@
 
 ## 2026-11-05 verified database snapshot
 At read-only inspection: 3 businesses; 0 plans; 0 subscriptions; 2 pager tickets; 0 ratings; 1 staff invitation. Counts may change with real pilot activity and do not indicate feature completeness. Never automatically purge existing demo/test records.
+
+## 2026-11-05 Staging CI request
+The current document-only commit requests exact-HEAD Staging validation through the protected `[beger-deploy]` gate for the staff UX simplification and release baseline. Do not mark the build or pilot READY until Vercel log evidence is observed.
