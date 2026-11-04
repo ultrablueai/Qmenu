@@ -9,3 +9,12 @@
 .beger-staff-kitchen>summary:focus-visible{outline:3px solid #abc296;outline-offset:2px}
 
 .beger-staff-stations{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.beger-staff-stations a{min-width:0;display:grid;gap:6px;padding:14px;border:1px solid #dce4d4;background:#f7faf3;border-radius:13px;text-decoration:none;color:#47633b;font-weight:850;font-size:14px}.beger-staff-stations span{font-size:11px;font-weight:500;color:#766e60;line-height:1.6}.beger-staff-stations a:focus-visible{outline:3px solid #98b47b;outline-offset:2px}@media(max-width:720px){.beger-staff-stations{grid-template-columns:1fr}}
+
+.beger-staff-steps{margin:0;padding:14px 34px 14px 18px;display:grid;gap:9px;border:1px solid #e3e6d9;border-radius:14px;background:#f8fbf4;color:#52664b;font-size:13px;line-height:1.8}
+.beger-staff-steps li{padding-inline-start:3px}
+.beger-staff-steps a{color:#426837;font-weight:800}
+.beger-staff-quick-add label{flex:1 1 190px}
+.beger-staff-quick-add select{min-height:46px;border:1px solid #ddd5c6;border-radius:10px;padding:9px 13px;background:#fff;color:#403629;font:inherit;width:100%;box-sizing:border-box}
+.beger-staff-quick-add button{flex:0 0 auto}
+.beger-staff-workspace select:focus-visible,.beger-staff-workspace a:focus-visible{outline:3px solid #98b47b;outline-offset:3px}
+@media(max-width:620px){.beger-staff-quick-add label,.beger-staff-quick-add button{flex:1 1 100%;width:100%}.beger-staff-steps{padding:13px 29px 13px 12px}}
