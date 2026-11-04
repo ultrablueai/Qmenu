@@ -37,7 +37,7 @@ test("cashier can print QR, search via branch list, transition status and confir
  assert.match(merchant,/window\.print\(\)/);
  assert.match(merchant,/g6_pager_branch_tickets/);
  assert.match(merchant,/g6_pager_transition/);
- assert.match(merchant,/فاتورة الخارجية/);
+ assert.match(merchant,/الفاتورة الخارجية/);
  assert.match(merchant,/تأكيد التسليم/);
  assert.match(client,/احتفظ بهذه الصفحة مفتوحة/);
 });
