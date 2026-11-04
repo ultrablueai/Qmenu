@@ -5,6 +5,7 @@ import MerchantKitchenAccess from "./merchant-kitchen-access";
 import MerchantCashierAccess from "./merchant-cashier-access";
 import "./merchant-staff.css";
 type Member={email:string;assignedAt:string};
+type Invitation={id:string;email:string;role:"cashier"|"kitchen"|"pager";status:"pending"|"accepted"|"revoked"|"expired";expiresAt:string};
 type StaffRole="cashier"|"kitchen"|"pager";
 const staffRoles:Record<StaffRole,{label:string;rpc:string;station:string;help:string}>={
  cashier:{label:"كاشير",rpc:"g10_cashier_assign",station:"/staff/cashier",help:"قبول الطلب، تأكيد التسليم وتسجيل التحصيل اليدوي"},
@@ -16,8 +17,15 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
  const [email,setEmail]=useState("");
  const [role,setRole]=useState<StaffRole>("cashier");
  const [rosterRevision,setRosterRevision]=useState(0);
+ const [invitations,setInvitations]=useState<Invitation[]>([]);
+ const [invitationNotice,setInvitationNotice]=useState("");
  const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
+ const refreshInvites=useCallback(async()=>{
+  const {data,error}=await browserSupabase().rpc("g11_owner_invitations",{p_branch:branchId});
+  if(error||!Array.isArray(data))throw Error("Invitation roster unavailable");
+  setInvitations(data as Invitation[]);
+ },[branchId]);
  const refresh=useCallback(async()=>{
   const {data,error}=await browserSupabase().rpc("g7_staff_pager_roster",{p_branch:branchId});
   if(error||!Array.isArray(data))throw Error("Unable to fetch roster");
@@ -25,9 +33,9 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
  },[branchId]);
  useEffect(()=>{
   let live=true;setMembers([]);setLoading(true);setError("");setNotice("");
-  void refresh().catch(()=>{if(live)setError("تعذّر قراءة موظفي الفرع. تحقق من صلاحيات الإدارة.")}).finally(()=>{if(live)setLoading(false)});
+  void Promise.all([refresh(),refreshInvites()]).catch(()=>{if(live)setError("تعذّر قراءة الموظفين أو الدعوات. تحقق من صلاحية المالك.")}).finally(()=>{if(live)setLoading(false)});
   return()=>{live=false};
- },[refresh]);
+ },[refresh,refreshInvites]);
  async function assign(target:string,allow:boolean){
   if(busy)return;
   if(!allow&&!window.confirm("إلغاء وصول هذا الموظف إلى البيجر في هذا الفرع؟"))return;
@@ -42,31 +50,40 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
   }finally{setBusy(false)}
  }
  async function quickAssign(){
-  if(busy)return;
-  setBusy(true);setError("");setNotice("");
+  if(busy)return;setBusy(true);setError("");setNotice("");setInvitationNotice("");
   const target=email.trim().toLowerCase();
-  const selected=staffRoles[role];
   try{
-   const {error:requestError}=await browserSupabase().rpc(selected.rpc,{p_branch:branchId,p_email:target,p_allow:true});
-   if(requestError)throw requestError;
-   if(role==="pager")await refresh();
-   setRosterRevision(v=>v+1);
+   const {data,error:requestError}=await browserSupabase().rpc("g11_staff_invite",{p_branch:branchId,p_email:target,p_role:role});
+   if(requestError||data?.status!=="pending")throw requestError??Error("Invitation not confirmed");
+   await refreshInvites();
    setEmail("");
-   setNotice("تم تعيين "+target+" بدور "+selected.label+" في فرع "+branchName+". يمكن للموظف تسجيل الدخول إلى محطته.");
+   setInvitationNotice("دعوة "+staffRoles[role].label+" أُنشئت للبريد "+target+". الموظف يسجّل من بوابته ويقبلها بنفسه قبل حصوله على الصلاحية.");
   }catch(reason){
    const detail=reason instanceof Error?reason.message:"";
-   setError(/register|not found|does not exist|User must register/i.test(detail)?"الحساب غير مسجل في Beger بعد. اطلب من الموظف إنشاء حساب وتأكيد بريده، ثم أعد التعيين.":/forbidden|not authorized|permission|denied|42501/i.test(detail)?"تعيين الأدوار متاح لمالك النشاط فقط. سجل الدخول بحساب المالك.":"تعذّر منح الصلاحية. تأكد من تسجيل حساب الموظف وصلاحية المالك، ثم أعد المحاولة.");
+   setError(/forbidden|not authorized|permission|denied|42501/i.test(detail)?"إرسال الدعوة متاح لمالك النشاط فقط.":"تعذّر إنشاء الدعوة. تأكد من البريد وصلاحيات الفرع ثم حاول مرة أخرى.");
   }finally{setBusy(false)}
+ }
+ async function revokeInvitation(id:string){
+  if(busy||!window.confirm("إلغاء هذه الدعوة قبل قبولها؟"))return;
+  setBusy(true);setError("");
+  try{
+   const {error}=await browserSupabase().rpc("g11_revoke_invitation",{p_invitation:id});
+   if(error)throw error;
+   await refreshInvites();setInvitationNotice("أُلغيت الدعوة المعلّقة.");
+  }catch{setError("تعذّر إلغاء الدعوة. تحقق من صلاحية المالك.")}
+  finally{setBusy(false)}
  }
  return <section className="beger-staff-workspace" dir="rtl" aria-label="الموظفون والصلاحيات">
   <div className="beger-staff-intro"><span>BEGER / STAFF ACCESS</span><h3>الموظفون والأدوار</h3><p>{branchName} · عيّن الموظف لدوره والفرع الصحيح، ثم اختبر المحطة بحسابه.</p></div>
-  <ol className="beger-staff-steps"><li>الموظف ينشئ حسابه في <a href="/signup" target="_blank" rel="noopener noreferrer">صفحة التسجيل</a> ويؤكد البريد. لا يحتاج لإنشاء متجر.</li><li>المالك يدخل بريد الموظف ويختار وظيفته لهذا الفرع.</li><li>الموظف يفتح رابط محطته أدناه ويسجل الدخول بحسابه.</li></ol>
+  <ol className="beger-staff-steps"><li>صاحب النشاط يدخل بريد الموظف ويختار دوره. تُنشأ دعوة معلّقة دون منح صلاحية فورية.</li><li>الموظف يفتح <a href="/staff/register" target="_blank" rel="noopener noreferrer">بوابة تسجيل الموظفين</a> ويؤكد نفس البريد المدعو.</li><li>الموظف يدخل <a href="/staff" target="_blank" rel="noopener noreferrer">مساحة الموظف</a> ويقبل الدعوة، ثم تظهر محطته.</li></ol>
   <form className="beger-staff-add beger-staff-quick-add" onSubmit={e=>{e.preventDefault();void quickAssign()}}>
-   <label>بريد الموظف المسجّل<input value={email} onChange={e=>setEmail(e.target.value)} required type="email" maxLength={254} autoComplete="off" inputMode="email" dir="ltr" placeholder="employee@example.com"/></label>
+   <label>بريد الموظف المراد دعوته<input value={email} onChange={e=>setEmail(e.target.value)} required type="email" maxLength={254} autoComplete="off" inputMode="email" dir="ltr" placeholder="employee@example.com"/></label>
    <label>الدور المطلوب<select value={role} onChange={e=>setRole(e.target.value as StaffRole)}>{(Object.keys(staffRoles) as StaffRole[]).map(value=><option key={value} value={value}>{staffRoles[value].label}</option>)}</select></label>
-   <button type="submit" disabled={busy||loading}>{busy?"جارٍ التعيين…":"تعيين الموظف"}</button>
+   <button type="submit" disabled={busy||loading}>{busy?"جارٍ إنشاء الدعوة…":"إرسال دعوة الدور"}</button>
   </form>
-  <p className="beger-staff-explainer">الدور المختار: {staffRoles[role].help}. التعيين لهذا الفرع فقط، ولا يُنشئ حساباً أو يرسل دعوة. يجب أن يكون المنفّذ مالك النشاط.</p>
+  <p className="beger-staff-explainer">الدور المختار: {staffRoles[role].help}. الدعوة مرتبطة بهذا البريد والفرع وتنتهي خلال 14 يوماً. تتفعّل فقط عندما يقبلها الموظف من حساب مؤكد البريد. لا نُنشئ له كلمة مرور، ولا نرسل بريداً تلقائياً في Staging؛ أرسل له رابط بوابة الموظفين.</p>
+  {invitationNotice?<p role="status" className="beger-staff-notice">{invitationNotice} <a href="/staff/register" target="_blank" rel="noopener noreferrer">فتح بوابة تسجيل الموظفين</a></p>:null}
+  <div className="beger-staff-list" aria-label="دعوات الموظفين"><strong>دعوات الموظفين ({invitations.length})</strong>{invitations.length===0?<p>لا توجد دعوات لهذا الفرع.</p>:invitations.map(invite=><div key={invite.id} className="beger-staff-row"><span>{invite.email} · {staffRoles[invite.role].label} · {invite.status==="pending"?"بانتظار القبول":invite.status==="accepted"?"مقبولة":invite.status==="expired"?"منتهية":"ملغاة"}</span>{invite.status==="pending"?<button type="button" disabled={busy} onClick={()=>void revokeInvitation(invite.id)}>إلغاء الدعوة</button>:null}</div>)}</div>
   {notice?<p role="status" className="beger-staff-notice">{notice}</p>:null}
   {error?<p role="alert" className="beger-staff-error">{error}</p>:null}
   <div className="beger-staff-list">
