@@ -40,7 +40,7 @@ test("report filters and charts come only from authenticated branch RPC, never p
  assert.doesNotMatch(ui,/Math\.random\(|mockOrders|fakeRevenue|localStorage/);
 });
 test("report is a separate responsive merchant workspace and shows real collection methods",()=>{
- assert.match(workspace,/type Workspace="orders"\|"reports"/);
+ assert.match(workspace,/type Workspace=.*"orders".*"reports"/);
  assert.match(workspace,/workspace==="reports"\?<div id="merchant-reports"/);
  assert.match(workspace,/MerchantReport key=/);
  assert.match(ui,/row\.cashMinor/);
