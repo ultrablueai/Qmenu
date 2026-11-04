@@ -42,6 +42,6 @@ export default function LoginPage() {
       {error&&<p className="beger-auth-error" role="alert">{error}</p>}
       <button className="beger-marketing-button" disabled={busy} type="submit">{busy?"جارٍ التحقق...":"تسجيل الدخول ←"}</button>
     </form>
-    <nav className="beger-auth-links" aria-label="خيارات الحساب"><Link href="/forgot-password">نسيت كلمة المرور؟</Link><Link href="/signup">إنشاء حساب جديد</Link><Link href="/">العودة للرئيسية</Link></nav>
+    <nav className="beger-auth-links" aria-label="خيارات الحساب"><Link href="/forgot-password">نسيت كلمة المرور؟</Link><Link href="/staff/register">تسجيل موظف</Link><Link href="/signup">إنشاء حساب تاجر</Link><Link href="/">العودة للرئيسية</Link></nav>
   </BegerAuthLayout>;
 }
