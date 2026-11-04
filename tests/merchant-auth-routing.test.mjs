@@ -17,8 +17,8 @@ test("dashboard redirects anonymous users to login", () => {
   assert.match(dashboard, /if \(error \|\| !user\) redirect\("\/login"\)/);
 });
 
-test("dashboard automatically redirects authenticated users without memberships to onboarding", () => {
-  assert.match(dashboard, /if \(!membershipError && !memberships\?\.length\) redirect\("\/onboarding"\)/);
+test("dashboard routes unassigned or staff-only accounts to a limited staff landing", () => {
+  assert.match(dashboard, /if \(!membershipError && \(!memberships\?\.length \|\| memberships\.every\(m=>m\.role==="staff"\)\)\) redirect\("\/staff"\)/);
   assert.match(dashboard, /\{membershipError \?/);
 });
 
