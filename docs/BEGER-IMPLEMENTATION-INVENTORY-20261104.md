@@ -55,3 +55,9 @@ Date: 2026-11-04. Scope: READ-ONLY platform inspection; no production mutation.
 - Added `tests/beger-g9-g10-privilege-boundary.test.mjs` in commit `a6b6d0aca2a08c2d861fa05ac9c999f8f00d4a12`. Five **static regression** tests guard public/anon EXECUTE revocations, minimal kitchen fields, branch guards, constrained transitions and existing cashier collection safety. File existence verified on GitHub; **no completed Node test run or Next build at that commit**, no CI statuses returned.
 - Remaining: execute `npm test && npm run build` on the exact HEAD; conduct real authenticated independent kitchen/cashier staff sessions, deny cross-branch and cross-tenant calls, test simultaneous status/collection attempts and Android/iOS responsive views before any commercial GO.
 - No schema alteration, no test identities/transactions created, no production change.
+
+## 2026-11-04 — Cashier/kitchen failed-load UX fix
+- Fixed `app/dashboard/merchant-cashier.tsx` and `app/dashboard/merchant-kitchen.tsx`: initial queue errors now stop the misleading "loading" message; a later successful queue fetch clears the earlier error. Existing authorization and RPC mutations are unchanged.
+- Added `tests/beger-station-load-error-recovery.test.mjs` (2 tests parameterized over 2 workstations; 4 scenarios) at commit `69bb78fa09a300309afbac4a91dcaedbed846765`.
+- Re-fetched all three changed files from GitHub and ran targeted source checks for failed-load state, error clearing, alert and retry: **pass**. This is source-level inspection, **not** `node --test`, typechecking, browser E2E, or a Vercel build.
+- No new READY deployment or full CI result verified. No Production or database change. Next gate remains exact-HEAD `npm test && npm run build` and real browser/role tests.
