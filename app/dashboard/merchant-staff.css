@@ -18,3 +18,9 @@
 .beger-staff-quick-add button{flex:0 0 auto}
 .beger-staff-workspace select:focus-visible,.beger-staff-workspace a:focus-visible{outline:3px solid #98b47b;outline-offset:3px}
 @media(max-width:620px){.beger-staff-quick-add label,.beger-staff-quick-add button{flex:1 1 100%;width:100%}.beger-staff-steps{padding:13px 29px 13px 12px}}
+
+.beger-staff-invite-success{display:grid;gap:12px;padding:16px;border:1px solid #c4dbac;background:#f0f8e9;color:#395a2c;border-radius:14px;font-size:13px;line-height:1.7}
+.beger-staff-share-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.beger-staff-share-actions button,.beger-staff-share-actions a{display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;min-height:44px;border-radius:10px;border:1px solid #b6ca9f;background:#fff;color:#3c6330;text-decoration:none;font-weight:800;font-size:12px;cursor:pointer}
+.beger-staff-share-actions button{background:#587844;color:#fff;border-color:#587844}
+@media(max-width:480px){.beger-staff-share-actions{display:grid;grid-template-columns:1fr}.beger-staff-share-actions button,.beger-staff-share-actions a{width:100%}}
