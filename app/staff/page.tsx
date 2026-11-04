@@ -29,8 +29,8 @@ export default async function StaffHome(){
   </header>
   {lookupFailed?<p role="alert" style={{marginTop:20,padding:14,background:"#fff0e7",borderRadius:12}}>تعذّر التحقق من بعض صلاحياتك. حدّث الصفحة قبل طلب تعيين جديد؛ لن نعرض وصولاً غير متحقق منه.</p>:null}
   <section style={{marginTop:26}}>
-   <h2 style={{fontSize:21}}>{hasAccess?"محطاتك المصرّح بها":"حسابك جاهز، بانتظار تعيين دور"}</h2>
-   <p style={{lineHeight:1.8,color:"#766e62"}}>{hasAccess?"اختر محطة العمل والفرع المخصّص لك. كل محطة تتحقق من صلاحياتك عند فتحها.":"لا تنشئ نشاطاً جديداً إذا كنت موظفاً. اطلب من مالك المتجر فتح «الموظفون والصلاحيات»، وإضافة بريدك واختيار دورك في الفرع."}</p>
+   <h2 style={{fontSize:21}}>{hasAccess?"محطاتك المصرّح بها":"دعواتك وصلاحياتك"}</h2>
+   <p style={{lineHeight:1.8,color:"#766e62"}}>{hasAccess?"اختر محطة العمل والفرع المخصّص لك. كل محطة تتحقق من صلاحياتك عند فتحها.":"افحص دعواتك أدناه واقبل الدعوة المرتبطة ببريدك. إن لم تجد دعوة، اطلب من المالك إدخال بريدك في إدارة الموظفين."}</p>
    {hasAccess?<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,240px),1fr))",gap:12,marginTop:18}}>
     {assigned.filter(station=>station.branches.length>0).map(station=><article key={station.role} style={{background:"white",border:"1px solid #e5ded2",borderRadius:16,padding:18}}>
      <h3 style={{marginTop:0}}>{station.title}</h3><p style={{fontSize:13,color:"#756c60"}}>{station.description}</p>
