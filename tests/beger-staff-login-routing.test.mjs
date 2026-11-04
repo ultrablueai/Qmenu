@@ -27,7 +27,8 @@ test("unassigned staff see waiting instructions and new merchants retain explici
  assert.match(staff,/بانتظار تعيين دور/);
  assert.match(staff,/لا تنشئ نشاطاً جديداً إذا كنت موظفاً/);
  assert.match(staff,/href="\/onboarding"/);
- assert.match(signup,/للموظف: أنشئ حسابك وأكّد بريدك/);
+ assert.match(signup,/هذا التسجيل مخصص لمالكي الأنشطة التجارية/);
+ assert.match(staff,/StaffInvitations/);
  assert.match(login,/المالك|صاحب النشاط/);
 });
 
