@@ -28,7 +28,7 @@ test("role assignment is still owner-only and branch-scoped at the database laye
  for(const source of [cashier,kitchen]){
   assert.match(source,/m\.user_id=auth\.uid\(\) and m\.role='owner'/);
   assert.match(source,/where business_id=v_business and branch_id=p_branch and user_id=v_user/);
-  assert.match(source,/Cannot change owner or manager membership/);
+  assert.match(source,/Cannot (?:change owner or manager membership|reassign manager or owner)/);
  }
  assert.match(staff,/منفّذ مالك النشاط/);
 });
