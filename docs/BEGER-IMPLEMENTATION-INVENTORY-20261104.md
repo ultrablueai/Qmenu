@@ -83,3 +83,10 @@ Date: 2026-11-04. Scope: READ-ONLY platform inspection; no production mutation.
 - Addressed observed Autoprefixer `align-items: end` warnings in `app/dashboard/merchant-staff.css` and `app/dashboard/merchant-pager.css` by replacing the ambiguous flex alignment with `flex-end`. No business, permissions, or data flow changes.
 - Added `tests/beger-css-flex-alignment.test.mjs` with two source-contract checks to prevent recurrence.
 - This exact-HEAD commit requests a Staging-only build using the existing `[beger-deploy]` guard. The actual automated-test and build results must be verified in Vercel before marking READY. No production changes.
+
+### 2026-11-04 — Staff onboarding UX and pilot readiness
+- Pilot Staging inspection found no assigned users in `g7_staff_branch_access`, `g9_kitchen_staff_branches`, or `g10_cashier_staff_branches` at check time. No staff accounts were created or role assignments were changed by the assistant.
+- Updated `app/dashboard/merchant-staff.tsx` to present **one explicit role picker** for branch-scoped owner-managed grants. It reuses the already-applied G7/G9/G10 assignment RPCs rather than inventing new roles. Old per-role detail panels remain available for roster/revocation. Role changes refresh associated rosters.
+- Updated `app/signup/page.tsx` so employees are told to register/verify their own email **without opening another business**, and use the assigned station; employer must grant that branch role.
+- Added mobile layout `app/dashboard/merchant-staff.css` and test `tests/beger-staff-onboarding.test.mjs` with 4 static contract checks. Neither tests nor UI can prove real cross-account acceptance; to finish pilot, register independent employee accounts, confirm emails, assign roles as owner and test granted/denied stations on separate devices.
+- This change is staging-only. The deployment commit bears `[beger-deploy]` to enter the existing guarded test/build pipeline, pending observed Vercel result.
