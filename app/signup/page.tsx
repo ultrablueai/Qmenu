@@ -26,7 +26,7 @@ export default function Signup() {
    } finally { setBusy(false); }
  }
  return <BegerAuthLayout title="إنشاء حساب Beger" eyebrow="BEGER · تسجيل حساب">
-   <p className="beger-auth-description">للتاجر: أنشئ حساباً ثم أضف نشاطك وفروعك. للموظف: أنشئ حسابك وأكّد بريدك، ثم اطلب من مالك المتجر تعيين دورك؛ لا تنشئ نشاطاً جديداً.</p>
+   <p className="beger-auth-description">هذا التسجيل مخصص لمالكي الأنشطة التجارية. إذا كنت موظفاً أو تلقيت دعوة دور، استخدم بوابة تسجيل الموظفين المستقلة.</p>
    <form className="beger-auth-form" onSubmit={submit}>
     <label className="beger-auth-label" htmlFor="email">البريد الإلكتروني</label>
     <input className="beger-auth-input" id="email" type="email" autoComplete="email" inputMode="email" dir="ltr" placeholder="name@example.com" required value={email} onChange={e=>setEmail(e.target.value)}/>
@@ -35,6 +35,6 @@ export default function Signup() {
     <button className="beger-marketing-button" disabled={busy} type="submit">{busy?"جارٍ التسجيل...":"إنشاء الحساب ←"}</button>
    </form>
    {message&&<p className="beger-auth-success" role="status">{message}</p>}
-   <nav className="beger-auth-links" aria-label="خيارات الحساب"><Link href="/login">عندك حساب؟ تسجيل الدخول</Link><Link href="/">العودة للرئيسية</Link></nav>
+   <nav className="beger-auth-links" aria-label="خيارات الحساب"><Link href="/login">عندك حساب؟ تسجيل الدخول</Link><Link href="/staff/register">تسجيل الموظفين</Link><Link href="/">العودة للرئيسية</Link></nav>
   </BegerAuthLayout>;
 }
