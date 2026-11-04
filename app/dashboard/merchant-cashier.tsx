@@ -1,5 +1,6 @@
 "use client";
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
+import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {browserSupabase} from "../../lib/supabase/browser";
 import "./merchant-cashier.css";
 type Status="pending"|"accepted"|"preparing"|"ready"|"fulfilled";
@@ -9,6 +10,9 @@ const statuses:Record<Status,string>={pending:"بانتظار قبول الطل�
 const paymentNames:Record<Payment,string>={cash:"نقداً",external_card:"بطاقة عبر جهاز المحل",external_transfer:"تحويل خارجي"};
 function money(value:number,currency:string){const div=currency==="TRY"?100:1;return new Intl.NumberFormat("ar",{maximumFractionDigits:div===100?2:0,minimumFractionDigits:div===100?2:0}).format(value/div)+" "+currency;}
 export default function MerchantCashier({branchId,branchName}:{branchId:string;branchName:string}){
+ const feedback=useBegerFeedback();
+ const seenReady=useRef<Set<string>|null>(null);
+ const [announcement,setAnnouncement]=useState("");
  const [orders,setOrders]=useState<Order[]>([]);
  const [methods,setMethods]=useState<Record<string,Payment>>({});
  const [busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
@@ -17,10 +21,20 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
  const refresh=useCallback(async()=>{
   const {data,error}=await browserSupabase().rpc("g10_cashier_queue",{p_branch:branchId});
   if(error||!Array.isArray(data))throw Error("Queue unavailable");
-  setOrders(data as Order[]);setLoaded(true);setError("");
- },[branchId]);
+  const fresh=data as Order[];
+  const ready=new Set(fresh.filter(o=>o.status==="ready").map(o=>o.id));
+  if(seenReady.current!==null){
+   const newlyReady=fresh.filter(o=>o.status==="ready"&&!seenReady.current!.has(o.id));
+   if(newlyReady.length){
+    const text=newlyReady.length===1?"الطلب #"+newlyReady[0].reference+" جاهز للاستلام":newlyReady.length+" طلبات أصبحت جاهزة للاستلام";
+    setAnnouncement(text);feedback.signal("ready",text);
+   }
+  }
+  seenReady.current=ready;
+  setOrders(fresh);setLoaded(true);setError("");
+ },[branchId,feedback.signal]);
  useEffect(()=>{
-  let active=true;setOrders([]);setLoaded(false);setError("");setNotice("");setMethods({});
+  let active=true;seenReady.current=null;setAnnouncement("");setOrders([]);setLoaded(false);setError("");setNotice("");setMethods({});
   const update=()=>{void refresh().catch(()=>{if(active)setError("تعذّر تحميل طلبات الكاشير. تحقق من صلاحية الفرع.")})};
   update();const timer=window.setInterval(update,8000);
   return()=>{active=false;window.clearInterval(timer)};
@@ -50,11 +64,17 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
   }catch{setError("تعذّر تسجيل التحصيل. تحقّق من سجل الطلب قبل إعادة المحاولة حتى لا يتكرر التسجيل.");}
   finally{setBusy(false)}
  }
+ function announce(order:Order){
+  const text="الطلب #"+order.reference+" جاهز للاستلام";
+  setAnnouncement(text);feedback.signal("ready",text);
+ }
  const active=orders.filter(o=>o.status!=="fulfilled");
  const complete=orders.filter(o=>o.status==="fulfilled");
  const visible=filter==="active"?active:complete;
  return <section className="beger-cashier" dir="rtl" aria-label="محطة الكاشير">
   <header><div><small>BEGER / CASHIER STATION</small><h2>محطة الكاشير</h2><p>{branchName} · قبول الطلبات وتسجيل الاستلام فقط، بدون إعدادات أو تسويات.</p></div><strong>{active.length} طلب نشط</strong></header>
+  <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("ready","هذا اختبار تنبيه الجاهزية")} labels={{sound:"الصوت",vibration:"الاهتزاز",test:"تجربة النداء"}}/>
+  {announcement?<p className="beger-cashier-announcement" role="status" aria-live="polite"><span aria-hidden="true">🔔</span><strong>{announcement}</strong><button type="button" onClick={()=>setAnnouncement("")} aria-label="إغلاق إعلان الطلب">إغلاق</button></p>:null}
   <nav aria-label="حالة الطلبات">
    <button type="button" aria-pressed={filter==="active"} onClick={()=>setFilter("active")}>الطلبات النشطة ({active.length})</button>
    <button type="button" aria-pressed={filter==="complete"} onClick={()=>setFilter("complete")}>المسلّمة ({complete.length})</button>
@@ -76,7 +96,7 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
     <button type="button" disabled={busy} onClick={()=>void collect(order)}>تأكيد استلام المبلغ</button>
    </div>}
    {order.status==="pending"?<button type="button" disabled={busy} onClick={()=>void action(order,"accepted")}>قبول الطلب وإرساله للمطبخ</button>:null}
-   {order.status==="ready"?<button type="button" disabled={busy} onClick={()=>void action(order,"fulfilled")}>تأكيد تسليم الطلب</button>:null}
+   {order.status==="ready"?<div className="beger-cashier-ready-actions"><button type="button" onClick={()=>announce(order)}>🔔 إعلان رقم الطلب</button><button type="button" disabled={busy} onClick={()=>void action(order,"fulfilled")}>تأكيد تسليم الطلب</button></div>:null}
   </article>)}</div>
   <p className="beger-cashier-footnote">Beger يسجّل ما يؤكده الموظف فقط. لا ينفذ خصماً بنكياً ولا يصدر فاتورة ضريبية أو تسوية.</p>
  </section>;
