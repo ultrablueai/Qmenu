@@ -24,8 +24,8 @@ test("staff landing checks server-authenticated user and verified role RPCs only
 });
 
 test("unassigned staff see waiting instructions and new merchants retain explicit onboarding choice",()=>{
- assert.match(staff,/بانتظار تعيين دور/);
- assert.match(staff,/لا تنشئ نشاطاً جديداً إذا كنت موظفاً/);
+ assert.match(staff,/دعواتك وصلاحياتك/);
+ assert.match(staff,/افحص دعواتك أدناه واقبل الدعوة المرتبطة ببريدك/);
  assert.match(staff,/href="\/onboarding"/);
  assert.match(signup,/هذا التسجيل مخصص لمالكي الأنشطة التجارية/);
  assert.match(staff,/StaffInvitations/);
