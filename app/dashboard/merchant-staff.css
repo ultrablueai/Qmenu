@@ -7,3 +7,5 @@
 .beger-staff-kitchen-body>p{font-size:12px;color:#827569;line-height:1.7;margin:0}
 .beger-staff-kitchen-body a{color:#5b7644;font-weight:800}
 .beger-staff-kitchen>summary:focus-visible{outline:3px solid #abc296;outline-offset:2px}
+
+.beger-staff-stations{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.beger-staff-stations a{min-width:0;display:grid;gap:6px;padding:14px;border:1px solid #dce4d4;background:#f7faf3;border-radius:13px;text-decoration:none;color:#47633b;font-weight:850;font-size:14px}.beger-staff-stations span{font-size:11px;font-weight:500;color:#766e60;line-height:1.6}.beger-staff-stations a:focus-visible{outline:3px solid #98b47b;outline-offset:2px}@media(max-width:720px){.beger-staff-stations{grid-template-columns:1fr}}
