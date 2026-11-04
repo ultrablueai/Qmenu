@@ -1,6 +1,7 @@
 "use client";
 import {useCallback,useEffect,useState} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
+import MerchantKitchenAccess from "./merchant-kitchen-access";
 import "./merchant-staff.css";
 type Member={email:string;assignedAt:string};
 export default function MerchantStaff({branchId,branchName}:{branchId:string;branchName:string}){
@@ -46,6 +47,7 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
     <span>{member.email}</span><button type="button" disabled={busy} onClick={()=>void assign(member.email,false)}>إلغاء الوصول</button>
    </div>)}
   </div>
+  <MerchantKitchenAccess key={"kitchen-"+branchId} branchId={branchId}/>
   <p className="beger-staff-explainer">شاشة الموظف: <a href="/staff/pager" target="_blank" rel="noopener noreferrer">فتح محطة البيجر ↗</a>. يستطيع الموظف إصدار رقم وتحديث حالته فقط؛ لا يستطيع إدارة الفروع أو المستخدمين.</p>
  </section>;
 }
