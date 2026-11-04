@@ -65,3 +65,11 @@ Date: 2026-11-04. Scope: READ-ONLY platform inspection; no production mutation.
 ## 2026-11-04 — Exact SHA staging validation attempt
 - Deployment for commit `b8b83b3` was CANCELED *before tests* by the existing Vercel Ignored Build Step rule because its commit message lacked `[beger-deploy]`. This is the intended staging-only build throttle, not a test failure. Keep the gate enabled.
 - This documentation commit carries the approved staging trigger marker solely to run the existing `npm test` and `next build` pipeline on current code, without any production changes. Record Vercel outcome separately after actual execution.
+
+## 2026-11-04 — Employee station navigation and ready-order announcement (Staging only)
+
+- User-reported guest order cycle was exercised; no independent authenticated employee/browser acceptance is claimed.
+- Reused existing `g9_*` kitchen and `g10_*` cashier RPCs. `app/dashboard/merchant-staff.tsx` now exposes branch-linked entry points for cashier, kitchen and independent pager; these links do not grant permissions. Owners still assign already-registered staff using the existing role-scoped panels.
+- `app/dashboard/merchant-cashier.tsx`: newly-ready orders from subsequent poll snapshots show a visible accessible announcement and call optional `useBegerFeedback` sound/vibration if enabled by the operator; baseline snapshot never rings for historical ready orders; unchanged ready orders are not repeated on polling. Cashier may manually repeat a ready order announcement via a button without changing DB status, payment or creating a G6 independent pager ticket. Existing guest-side `GuestOrderWatcher` still owns customer-ready order feedback; public G6 Pager board stays separate. This does not provide loudspeaker output, OS/background push, nor a shared public order-number board.
+- CSS added for compact announcement and staff navigation at narrow widths. Test source `tests/beger-cashier-order-announcement.test.mjs` includes four static contract checks; real staff accounts/phone audio, background behavior and two-device verification are still pending.
+- This documentation commit requests an isolated Staging test/build via existing `[beger-deploy]` guard; do not claim success unless Vercel run logs confirm.
