@@ -41,3 +41,9 @@ Date: 2026-11-04. Scope: READ-ONLY platform inspection; no production mutation.
 - Review 320px/Android/iOS layout and Arabic RTL / Turkish & English LTR; fix **specific** observed defects, no broad redesign before screenshot acceptance.
 - Run `npm test && npm run build` on exact HEAD and record results. Guard real printer and Web Push claims behind physical-device evidence.
 - Maintain `docs/BEGER-EXECUTION-BOARD.md` as chronological history while the inventory is the current working baseline. No commercial GO yet.
+
+
+## 2026-11-04 — Pager duplication resolved
+- PR #5 closed **without merge**. Historical commits retained; G6/G7 existing SQL remains authoritative.
+- New test: `tests/beger-pager-authoritative-state.test.mjs` (commit `a5557eef`) checks allowed edges, branch access, row lock and G7 audit trigger. Its source patterns were inspected; full Node tests/build and browser E2E are still **unverified**.
+- Next: run full suite on current branch and real staff/customer E2E; no production changes.
