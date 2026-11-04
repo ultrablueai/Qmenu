@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
+import MerchantCollectionClose from "./merchant-collection-close";
 import "./merchant-report.css";
 
 type Range="today"|"week"|"month";
@@ -93,6 +94,7 @@ export default function MerchantReport({branchId,branchName}:{branchId:string;br
     </div>):<p className="beger-report-empty">لم يُسجّل تحصيل خلال هذه الفترة.</p>}
    </section>
   </div>:null}
+  <MerchantCollectionClose key={"close-"+branchId} branchId={branchId}/>
   <p className="beger-report-footnote">هذا تقرير تشغيلي من بيانات Beger، وليس إغلاقاً ضريبياً أو إثبات تسوية مصرفية. يتم عرض كل عملة على حدة، ولا تُحتسب المدفوعات إلا بعد تسجيل التاجر لاستلامها.</p>
  </section>;
 }
