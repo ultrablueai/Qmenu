@@ -78,3 +78,8 @@ Date: 2026-11-04. Scope: READ-ONLY platform inspection; no production mutation.
 - Vercel attempt `dpl_FVLu9K24yH1m9MYUB7FjMNQKgNK5` returned ERROR: 337/338 tests passed. The one failure was old static test `cashier clears a stale error once a later refresh succeeds`, which matched the previous `setOrders(data as Order[])` code literally. The announced-order refresh now stores the validated snapshot in `fresh`, then still executes `setLoaded(true);setError("")`.
 - Updated `tests/beger-station-load-error-recovery.test.mjs` in commit `13080897` to assert both versions of the *correct* success behavior by station, not to skip or suppress the test.
 - This commit triggers a fresh Staging validation with `[beger-deploy]`. Exact result is pending and must be read from Vercel logs.
+
+### 2026-11-04 — Staff/Pager CSS compatibility
+- Addressed observed Autoprefixer `align-items: end` warnings in `app/dashboard/merchant-staff.css` and `app/dashboard/merchant-pager.css` by replacing the ambiguous flex alignment with `flex-end`. No business, permissions, or data flow changes.
+- Added `tests/beger-css-flex-alignment.test.mjs` with two source-contract checks to prevent recurrence.
+- This exact-HEAD commit requests a Staging-only build using the existing `[beger-deploy]` guard. The actual automated-test and build results must be verified in Vercel before marking READY. No production changes.
