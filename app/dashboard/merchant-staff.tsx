@@ -50,6 +50,6 @@ export default function MerchantStaff({branchId,branchName}:{branchId:string;bra
   </div>
   <MerchantKitchenAccess key={"kitchen-"+branchId} branchId={branchId}/>
   <MerchantCashierAccess key={"cashier-"+branchId} branchId={branchId}/>
-  <p className="beger-staff-explainer">شاشة الموظف: <a href="/staff/pager" target="_blank" rel="noopener noreferrer">فتح محطة البيجر ↗</a>. يستطيع الموظف إصدار رقم وتحديث حالته فقط؛ لا يستطيع إدارة الفروع أو المستخدمين.</p>
+  <nav className="beger-staff-stations" aria-label="محطات عمل الموظفين"><a href={"/staff/cashier?branch="+encodeURIComponent(branchId)} target="_blank" rel="noopener noreferrer">محطة الكاشير <span>قبول وتسليم وتسجيل التحصيل</span></a><a href={"/staff/kitchen?branch="+encodeURIComponent(branchId)} target="_blank" rel="noopener noreferrer">محطة المطبخ <span>التحضير وإعلان الجاهزية</span></a><a href={"/staff/pager?branch="+encodeURIComponent(branchId)} target="_blank" rel="noopener noreferrer">محطة البيجر <span>أرقام الانتظار المستقلة</span></a></nav><p className="beger-staff-explainer">كل محطة تتطلب حساباً مسجلاً وصلاحية مخصصة للفرع. هذه الروابط لا تمنح أي صلاحيات، ولا تعرض البيانات المالية لموظف المطبخ أو البيجر.</p>
  </section>;
 }
