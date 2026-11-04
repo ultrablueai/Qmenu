@@ -61,3 +61,7 @@ Date: 2026-11-04. Scope: READ-ONLY platform inspection; no production mutation.
 - Added `tests/beger-station-load-error-recovery.test.mjs` (2 tests parameterized over 2 workstations; 4 scenarios) at commit `69bb78fa09a300309afbac4a91dcaedbed846765`.
 - Re-fetched all three changed files from GitHub and ran targeted source checks for failed-load state, error clearing, alert and retry: **pass**. This is source-level inspection, **not** `node --test`, typechecking, browser E2E, or a Vercel build.
 - No new READY deployment or full CI result verified. No Production or database change. Next gate remains exact-HEAD `npm test && npm run build` and real browser/role tests.
+
+## 2026-11-04 — Exact SHA staging validation attempt
+- Deployment for commit `b8b83b3` was CANCELED *before tests* by the existing Vercel Ignored Build Step rule because its commit message lacked `[beger-deploy]`. This is the intended staging-only build throttle, not a test failure. Keep the gate enabled.
+- This documentation commit carries the approved staging trigger marker solely to run the existing `npm test` and `next build` pipeline on current code, without any production changes. Record Vercel outcome separately after actual execution.
