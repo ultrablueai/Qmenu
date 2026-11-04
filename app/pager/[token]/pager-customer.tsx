@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
-import {useBegerFeedback} from "../../components/beger-feedback";
+import {useBegerFeedback} from "../../../components/beger-feedback";
 import "./pager-customer.css";
 type Status="waiting"|"preparing"|"ready"|"fulfilled"|"cancelled";
 type Pager={number:number;status:Status;createdAt:string;readyAt:string|null;branchName:string};
