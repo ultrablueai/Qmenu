@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {redirect} from "next/navigation";
 import {serverSupabase} from "../../lib/supabase/server";
+import StaffInvitations from "./staff-invitations";
 
 export const dynamic="force-dynamic";
 type Branch={id:string;name:string};
@@ -37,6 +38,7 @@ export default async function StaffHome(){
     </article>)}
    </div>:<p role="status" style={{padding:18,background:"#eff4e8",borderRadius:14,color:"#506a3a"}}>لم تُمنح لك بعد صلاحية الكاشير أو المطبخ أو البيجر. لن تحتاج إلى إنشاء متجر للحصول عليها.</p>}
   </section>
+  <StaffInvitations/>
   <section style={{marginTop:32,padding:18,border:"1px solid #e8dfd2",borderRadius:14,background:"white"}}>
    <h2 style={{fontSize:17,margin:"0 0 8px"}}>هل أنت صاحب نشاط جديد؟</h2>
    <p style={{fontSize:13,color:"#766c60",lineHeight:1.8}}>إذا كنت تريد فعلاً افتتاح متجرك الخاص وليس الدخول كموظف، يمكنك إنشاء نشاطك الأول.</p>
