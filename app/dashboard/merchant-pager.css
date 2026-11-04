@@ -36,3 +36,23 @@
 @media(max-width:1120px){.beger-pager-tickets{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:660px){.beger-pager-tickets{grid-template-columns:minmax(0,1fr)}.beger-pager-ticket-number{flex-basis:85px}.beger-pager-create button{width:100%}.beger-pager-new-ticket{flex-direction:column}}
 @media print{body *{visibility:hidden!important}.beger-pager-new-ticket,.beger-pager-new-ticket *{visibility:visible!important}.beger-pager-new-ticket{position:absolute;inset:0 auto auto 0;width:80mm;box-shadow:none!important;border:none!important;background:white!important}.beger-pager-new-ticket button,.beger-pager-new-ticket a{display:none!important}}
+
+/* Optional kiosk and analytics tools stay collapsed below the main cashier action. */
+.beger-pager-display-tools{display:grid;gap:10px;min-width:0}
+.beger-pager-display-settings{min-width:0;background:#fffdfa;border:1px solid #e1d9ca;border-radius:14px;padding:13px 15px}
+.beger-pager-display-settings>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;list-style:none;cursor:pointer;font-size:14px;font-weight:850;color:#435d35;min-height:34px}
+.beger-pager-display-settings>summary::-webkit-details-marker{display:none}
+.beger-pager-display-settings>summary span{font-size:11px;background:#edf3e6;padding:6px 10px;border-radius:12px;color:#6c7859;font-weight:750}
+.beger-pager-display-settings>p{font-size:12px;line-height:1.8;color:#79705f}
+.beger-pager-display-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+.beger-pager-display-actions :is(button,a){display:inline-flex;align-items:center;justify-content:center;min-height:41px;padding:8px 13px;font-size:12px;font-weight:800;border-radius:10px;background:#637d47;color:white;text-decoration:none;border:1px solid #637d47;cursor:pointer}
+.beger-pager-display-actions .is-secondary{background:white;color:#826b50;border-color:#e4d8c8}
+.beger-pager-display-settings>button{padding:9px 14px;margin-top:11px;min-height:40px;border-radius:10px;border:1px solid #d3dfc7;color:#597344;background:#eff5e9;cursor:pointer}
+.beger-pager-display-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:12px}
+.beger-pager-display-metrics>div{min-width:0;display:grid;gap:10px;border-radius:12px;background:#f5f3ed;padding:13px}
+.beger-pager-display-metrics span{font-size:11px;color:#817568;line-height:1.5}
+.beger-pager-display-metrics strong{font-size:19px;color:#526e40;line-height:1.3;overflow-wrap:anywhere}
+.beger-pager-display-metrics>p{grid-column:1/-1;font-size:12px;color:#807768;line-height:1.8}
+.beger-pager-display-tools button:focus-visible,.beger-pager-display-tools a:focus-visible{outline:3px solid #9fb684;outline-offset:2px}
+@media(max-width:980px){.beger-pager-display-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:490px){.beger-pager-display-metrics{grid-template-columns:minmax(0,1fr)}.beger-pager-display-actions :is(button,a){flex:1 1 120px}}
