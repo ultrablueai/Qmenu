@@ -20,7 +20,7 @@ test("kitchen queue exposes only cooking information, never payment or guest tok
  const end=sql.indexOf("-- Kitchen cannot accept",start);
  const queue=sql.slice(start,end);
  assert.match(queue,/public.g9_kitchen_allowed\(p_branch\)/);
- assert.match(queue,/o.branch_id=p_branch and business_id=v_business/);
+ assert.match(queue,/branch_id=p_branch and business_id=v_business/);
  assert.match(queue,/status in \('accepted','preparing','ready'\)/);
  assert.match(queue,/order by created_at limit 100/);
  for(const privateField of ["payment_status","payment_method","total_minor","paid_at","public_token","auth.users"])assert.doesNotMatch(queue,new RegExp(privateField));
