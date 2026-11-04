@@ -48,3 +48,7 @@ Phase 1 OPEN / NO-GO. Two real Supabase auth identities were confirmed. SQL isol
 
 ## Current verified handoff (2026-11-04)
 G1-G10 components and applied Staging migrations exist. Read `docs/BEGER-IMPLEMENTATION-INVENTORY-20261104.md` before beginning a new module. Draft Pager PR #5 duplicates G6 and conflicts on allowed state changes; do not merge it until reconciled against the existing SQL and tests. Prioritize real browser/staff/mobile acceptance and keep Production and `main` untouched.
+
+
+## Commercial readiness baseline (2026-11-05)
+Read `docs/BEGER-COMMERCIAL-RELEASE-GATE-20261105.md` before suggesting or declaring launch. Only actual E2E, financial/legal approvals, security and recovery gates can advance commercial GO. Automated static tests and Vercel READY are necessary but insufficient. Do not expand scope or alter Production without owner approval.
