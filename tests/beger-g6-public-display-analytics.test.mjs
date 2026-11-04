@@ -1,0 +1,53 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const sql=readFileSync("supabase/migrations/20261104163000_g6_pager_display_and_analytics.sql","utf8");
+const board=readFileSync("app/pager/display/[token]/public-board.tsx","utf8");
+const route=readFileSync("app/pager/display/[token]/page.tsx","utf8");
+const manager=readFileSync("app/dashboard/merchant-pager-display.tsx","utf8");
+const pager=readFileSync("app/dashboard/merchant-pager.tsx","utf8");
+test("public display requires explicit enablement and an unguessable rotatable token",()=>{
+ assert.match(sql,/display_token uuid not null unique default gen_random_uuid/);
+ assert.match(sql,/enabled boolean not null default false/);
+ assert.match(sql,/p_action not in \('read','enable','disable','rotate'\)/);
+ assert.match(sql,/p_action='rotate' then gen_random_uuid\(\)/);
+ assert.match(sql,/where d.enabled=true and d.display_token=p_token/);
+ assert.match(sql,/alter table public.g6_pager_displays enable row level security/);
+ assert.match(sql,/revoke all on public.g6_pager_displays from public,anon,authenticated/);
+ assert.match(sql,/grant execute on function public.g6_pager_display_config\(uuid,text\) to authenticated/);
+ assert.match(sql,/grant execute on function public.g6_pager_display_status\(uuid\) to anon,authenticated/);
+});
+test("public board returns only ready visible numbers and counts, not personal or private data",()=>{
+ const begin=sql.indexOf('create or replace function public.g6_pager_display_status');
+ const end=sql.indexOf('create or replace function public.g6_pager_branch_analytics');
+ const publicSql=sql.slice(begin,end);
+ assert.match(publicSql,/t.status='ready'/);
+ assert.match(publicSql,/limit 16/);
+ assert.match(publicSql,/waitingCount/);
+ assert.match(publicSql,/preparingCount/);
+ assert.doesNotMatch(publicSql,/external_reference|secret_token|wallet_token|email|phone|customer_name|auth.uid/);
+ assert.match(board,/g6_pager_display_status/);
+ assert.match(board,/display\.ready\.map/);
+ assert.match(route,/PublicPagerBoard token=\{token\}/);
+ assert.doesNotMatch(board,/innerHTML|window\.print\(/);
+});
+test("branch analytics have authenticated merchant authorization and sample-based durations",()=>{
+ const analytics=sql.slice(sql.indexOf('create or replace function public.g6_pager_branch_analytics'));
+ assert.match(analytics,/public.g6_pager_branch_authorized\(p_branch\)/);
+ assert.match(analytics,/where branch_id=p_branch and created_at>=now\(\)-interval '7 days'/);
+ assert.match(analytics,/sampledReady/);
+ assert.match(analytics,/sampledFulfilled/);
+ assert.match(analytics,/extract\(epoch from \(ready_at-created_at\)\)/);
+ assert.match(analytics,/extract\(epoch from \(fulfilled_at-ready_at\)\)/);
+ assert.match(analytics,/grant execute on function public.g6_pager_branch_analytics\(uuid\) to authenticated/);
+ assert.match(manager,/g6_pager_branch_analytics/);
+ assert.match(manager,/ليست وعداً بمدة انتظار/);
+});
+test("merchant display controls are optional and do not modify kitchen order workflow",()=>{
+ assert.match(pager,/MerchantPagerDisplay key=/);
+ assert.match(manager,/g6_pager_display_config/);
+ assert.match(manager,/تغيير الرابط السري/);
+ assert.match(manager,/setConfig\(data as Config\)/);
+ assert.match(manager,/window\.confirm/);
+ assert.doesNotMatch(sql,/insert into public.g3_orders|update public.g3_orders|delete from public.g3_orders/);
+});
