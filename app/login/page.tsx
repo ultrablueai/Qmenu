@@ -22,7 +22,8 @@ export default function LoginPage() {
       }
       if (!data.session) throw new Error("No authenticated session");
       // The dashboard verifies the session and membership server-side.
-      // New merchants are routed from there to /onboarding.
+      // Accounts without memberships go to /staff, where employees wait for assignment
+      // and new merchants can explicitly choose /onboarding.
       const target = new URLSearchParams(window.location.search).get("next");
       // Only these two fixed internal destinations are allowed, never arbitrary URLs.
       window.location.replace(target === "/admin" ? "/admin" : "/dashboard");
@@ -31,16 +32,16 @@ export default function LoginPage() {
       setBusy(false);
     } finally { setBusy(false); }
   }
-  return <BegerAuthLayout title="أهلاً بعودتك إلى Beger" eyebrow="MERCHANT LOGIN · دخول التاجر">
-    <p className="beger-auth-description">ادخل إلى مساحة التاجر لإدارة الفروع، الكتالوج، المنيو وخيارات المنتجات. يتم التحقق من عضويتك وصلاحياتك بأمان.</p>
+  return <BegerAuthLayout title="أهلاً بعودتك إلى Beger" eyebrow="BEGER LOGIN · دخول الحساب">
+    <p className="beger-auth-description">سجّل الدخول بحسابك. صاحب النشاط يدخل إلى لوحة التاجر، والموظف يصل إلى محطته حسب الدور الممنوح له.</p>
     <form className="beger-auth-form" onSubmit={submit}>
       <label className="beger-auth-label" htmlFor="email">البريد الإلكتروني</label>
       <input className="beger-auth-input" id="email" type="email" required autoComplete="email" inputMode="email" placeholder="name@example.com" dir="ltr" value={email} onChange={e=>setEmail(e.target.value)}/>
       <label className="beger-auth-label" htmlFor="password">كلمة المرور</label>
       <input className="beger-auth-input" id="password" type="password" required autoComplete="current-password" placeholder="••••••••••" dir="ltr" value={password} onChange={e=>setPassword(e.target.value)}/>
       {error&&<p className="beger-auth-error" role="alert">{error}</p>}
-      <button className="beger-marketing-button" disabled={busy} type="submit">{busy?"جارٍ التحقق...":"دخول إلى لوحة التاجر ←"}</button>
+      <button className="beger-marketing-button" disabled={busy} type="submit">{busy?"جارٍ التحقق...":"تسجيل الدخول ←"}</button>
     </form>
-    <nav className="beger-auth-links" aria-label="خيارات الحساب"><Link href="/forgot-password">نسيت كلمة المرور؟</Link><Link href="/signup">إنشاء حساب تاجر جديد</Link><Link href="/">العودة للرئيسية</Link></nav>
+    <nav className="beger-auth-links" aria-label="خيارات الحساب"><Link href="/forgot-password">نسيت كلمة المرور؟</Link><Link href="/signup">إنشاء حساب جديد</Link><Link href="/">العودة للرئيسية</Link></nav>
   </BegerAuthLayout>;
 }
