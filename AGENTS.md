@@ -3,10 +3,11 @@
 > Active repository: ultrablueai/Qmenu. Independent project; do not mix with DIMASQ, Garfix, Sovereign, SatışDesk or LearningOS.
 
 ## Must-read at session start
-1. `docs/BEGER-CANONICAL-PLAN.md` — binding scope, QR semantics, phase order, safety gates.
-2. `docs/BEGER-EXECUTION-BOARD.md` — actual status, blockers, evidence, next slice.
-3. `docs/BEGER-LOYALTY-CARD-NOTIFICATIONS-SPEC.md` — approved future customer card/loyalty/notifications, not yet built.
-4. Repository tests, migrations and deployment evidence; do not infer deployment from docs.
+1. `docs/BEGER-IMPLEMENTATION-INVENTORY-20261104.md` — verified current G1-G10 inventory and do-not-duplicate gate.
+2. `docs/BEGER-CANONICAL-PLAN.md` — binding scope, QR semantics, phase order, safety gates.
+3. `docs/BEGER-EXECUTION-BOARD.md` — actual status, blockers, evidence, next slice.
+4. `docs/BEGER-LOYALTY-CARD-NOTIFICATIONS-SPEC.md` — approved future customer card/loyalty/notifications, not yet built.
+5. Repository tests, migrations and deployment evidence; do not infer deployment from docs.
 
 ## Team architecture (ROLE INSTRUCTIONS; NOT claim of running autonomous agents)
 The coordinator splits a *single active phase* into bounded tasks, reviews each independent specialist report, reconciles conflicts and is the only role allowed to propose an integrated change. Specialist reports are advisory until checked against code/tests.
@@ -41,5 +42,9 @@ Skills are repository-local Markdown playbooks loaded only as relevant to the ph
 - `.agents/skills/payment-loyalty-certification/SKILL.md` (later phase only)
 - `.agents/skills/release-gate/SKILL.md`
 
-## Current task (2026-11-01)
+## Historical task (2026-11-01; superseded by 2026-11-04 inventory)
 Phase 1 OPEN / NO-GO. Two real Supabase auth identities were confirmed. SQL isolation with their JWT subjects was verified, but complete browser and mobile E2E, signout/session checks and dual-role navigation still need human/browser proof. Do not advance QR, order, loyalty or subscriptions until Phase 1 gate.
+
+
+## Current verified handoff (2026-11-04)
+G1-G10 components and applied Staging migrations exist. Read `docs/BEGER-IMPLEMENTATION-INVENTORY-20261104.md` before beginning a new module. Draft Pager PR #5 duplicates G6 and conflicts on allowed state changes; do not merge it until reconciled against the existing SQL and tests. Prioritize real browser/staff/mobile acceptance and keep Production and `main` untouched.
