@@ -10,14 +10,16 @@ import MerchantOrderBoard from "./merchant-order-board";
 import MerchantReport from "./merchant-report";
 import MerchantReviews from "./merchant-reviews";
 import MerchantLoyalty from "./merchant-loyalty";
+import MerchantPager from "./merchant-pager";
 import "../qr-experience.css";
 import "./merchant-workspace.css";
 
 type Branch={id:string;name:string};
 type Props={businessId:string;country:string;branches:Branch[]};
-type Workspace="orders"|"reports"|"catalog"|"qr"|"appearance"|"reviews"|"loyalty"|"legacy";
+type Workspace="orders"|"pager"|"reports"|"catalog"|"qr"|"appearance"|"reviews"|"loyalty"|"legacy";
 const workspaceSections:{id:Workspace;icon:string;name:string;help:string}[]=[
  {id:"orders",icon:"▣",name:"الطلبات والمطبخ",help:"طلبات مباشرة · تحصيل · طباعة"},
+ {id:"pager",icon:"♧",name:"البيجر المستقل",help:"الكاشير · أرقام النداء · QR"},
  {id:"reports",icon:"▥",name:"التقارير والكاشير",help:"قيمة الطلبات · التحصيل المسجّل · القنوات"},
  {id:"catalog",icon:"▤",name:"المنتجات والكتالوج",help:"الأصناف · الإضافات · الأسعار"},
  {id:"qr",icon:"▦",name:"رموز QR والطاولات",help:"QR المتجر والطاولات"},
@@ -40,6 +42,7 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
    else if(h==="#customer-appearance")setWorkspace("appearance");
    else if(h==="#qr-management")setWorkspace("qr");
    else if(h==="#merchant-orders")setWorkspace("orders");
+   else if(h==="#merchant-pager")setWorkspace("pager");
    else if(h==="#merchant-reports")setWorkspace("reports");
    else if(h==="#merchant-reviews")setWorkspace("reviews");
    else if(h==="#merchant-loyalty")setWorkspace("loyalty");
@@ -91,6 +94,7 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
     <MerchantTableQr key={activeId} businessId={businessId} branchId={activeId} branchName={activeName}/>
    </div>:null}
    {workspace==="orders"?<div id="merchant-orders"><MerchantOrderBoard key={"orders-"+activeId} businessId={businessId} branchId={activeId} branchName={activeName}/></div>:null}
+   {workspace==="pager"?<div id="merchant-pager"><MerchantPager key={"pager-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="reports"?<div id="merchant-reports"><MerchantReport key={"reports-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="appearance"?<div id="customer-appearance"><MerchantAppearance businessId={businessId}/></div>:null}
    {workspace==="reviews"?<div id="merchant-reviews"><MerchantReviews key={"reviews-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
