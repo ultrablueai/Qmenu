@@ -48,7 +48,7 @@ test("G13 merchant controls are read-only for managers and cannot bypass a pendi
  assert.match(merchant,/g13_withdraw_request/);
  assert.match(merchant,/g13_merchant_requests/);
  assert.match(merchant,/if\(!canRequest\|\|busy\|\|loading\|\|pending\|\|error/);
- assert.match(merchant,/request\.status==="pending"/);
+ assert.match(merchant,/item\.status==="pending"/);
  assert.match(merchant,/الطلب لا يغيّر اشتراكك تلقائياً ولا يُنشئ فاتورة/);
 });
 test("G13 platform review is visible to operators but decisions require platform owner",()=>{
