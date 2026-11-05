@@ -52,3 +52,12 @@ The following exact-HEAD staging deployment will verify the corrected G14 test c
 ## Reclassified follow-ups
 - **CLOSED:** obsolete G14 CI regression, stable-alias deployment at `4ddea904`, direct-read RLS advisor finding as non-exposure, critical 14 FK index findings.
 - **OPEN / CONDITIONAL:** remaining 28 FK performance advisories, anonymous RPC abuse/security testing, real cross-business accounts/devices, commercial prices/taxes/checkout/invoices, backup restoration and external legal sign-off. These cannot be declared closed solely from source checks or synthetic DB-role tests.
+
+## Final verified Staging release — 2026-11-05
+- Deploy SHA: `b2c8594ddec7121770a28d4be6f253013aa4da40`.
+- Vercel ID: `dpl_F7wMVYruPokcZJAUeevDWtkcyfGH`, state `READY`.
+- `npm test`: **376 total / 376 pass / 0 fail**.
+- Next.js 15.5.28 compiled successfully; server type checks passed; prerendered pages **14/14**; build completed.
+- Verified live stable alias `qmenu-staging-git-feat-g1-foundation-ultrablueais-projects.vercel.app` points to this exact deployment ID.
+- This handoff note is docs-only and does not change the deployed code. The G14 UI and fourteen-index migration are now included in the active Staging release.
+- **Release decision remains NO-GO for paid/general public launch**, with real-device and real-account acceptance, payment/tax/legal policies, production recovery and the remaining advisor triage still open. Do not call those closed.
