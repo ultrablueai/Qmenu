@@ -5,6 +5,7 @@ import {browserSupabase} from "../../lib/supabase/browser";
 import {publicServiceSignal,publicSignalLabels} from "../../lib/beger-service-workflows";
 import {printOrderTicket as printOrderTicketBase} from "../../lib/beger-print-ticket";
 import MerchantPrintSettings,{DEFAULT_BRANCH_PRINT_SETTINGS,type BranchPrintSettings} from "./merchant-print-settings";
+import MerchantPrintQueue from "./merchant-print-queue";
 import {printFilteredOrderList} from "../../lib/beger-print-order-list";
 import {downloadOrderCsv} from "../../lib/beger-order-csv";
 import "./merchant-order-board.css";
@@ -14,7 +15,7 @@ type Order={id:string;table:string;serviceMode?:"dine_in"|"takeaway";paymentStat
 const titles:Record<Status,string>={pending:"بانتظار الموافقة",accepted:"تم قبول الطلب",preparing:"قيد التحضير",ready:"جاهز للتسليم",fulfilled:"تم التسليم",rejected:"مرفوض"};
 function formatOrderTotal(minor:number,currency:string){const factor=currency==="TRY"?100:1;return new Intl.NumberFormat("ar",{minimumFractionDigits:currency==="TRY"?2:0,maximumFractionDigits:currency==="TRY"?2:0}).format(minor/factor)+" "+currency;}
 function orderReference(id:string){return id.replace(/-/g,"").slice(0,10).toUpperCase();}
-const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"accepted",label:"قبول الطلب"},accepted:{value:"preparing",label:"إرسال للمطبخ"},preparing:{value:"ready",label:"جاهز للتسليم"},ready:{value:"fulfilled",label:"تأكيد التسليم"}};
+const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"accepted",label:"قبول الطلب وإرساله تلقائياً للمطبخ"},ready:{value:"fulfilled",label:"تأكيد التسليم"}};
 export default function MerchantOrderBoard({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
  const feedback=useBegerFeedback();
  const seen=useRef<Set<string>|null>(null);
@@ -144,6 +145,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
     ]).map(stat=><div className="beger-order-board-kpi" key={stat.label}><span>{stat.label}</span><strong>{loaded?stat.value:"—"}</strong></div>)}
   </section>:null}
   <MerchantPrintSettings branchId={branchId} onSettings={setPrintSettings}/>
+  <MerchantPrintQueue branchId={branchId} branchName={branchName} settings={printSettings}/>
   <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("new-order","هذا تنبيه اختبار، وليس طلباً جديداً")}/>
   {feedback.message?<p role="status" className="beger-feedback-toast">{feedback.message}</p>:null}
   {error?<p role="alert" className="beger-order-board-error">{error}</p>:null}
