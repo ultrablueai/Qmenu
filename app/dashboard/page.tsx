@@ -4,6 +4,7 @@ import styles from "./dashboard.module.css";
 import BranchManager from "./branch-manager";
 import HeadquartersCatalog from "./headquarters-catalog";
 import HqReferenceOverview from "./hq-reference-overview";
+import MerchantSubscriptionStatusPanel,{type MerchantSubscriptionStatus} from "./merchant-subscription-status";
 import BegerSectorConfigurator from "../../components/beger-sector-configurator";
 import "../../components/beger-sector-configurator.css";
 import { serverSupabase } from "../../lib/supabase/server";
@@ -59,7 +60,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
   const branches = branchResult.data ?? [];
   const params=await searchParams;
   const requestedBusiness=params.business;
-  const workspaceViews=["overview","branches","operations","settings","modules"] as const;
+  const workspaceViews=["overview","branches","operations","settings","subscription","modules"] as const;
   const workspaceView=workspaceViews.find(view=>view===params.view)??"overview";
   // The selection is only honored if it belongs to a verified membership.
   const primary = businesses.find((b) => b.id === requestedBusiness && ids.includes(b.id)) ?? businesses.find((b) => b.id === ids[0]) ?? businesses[0];
@@ -71,7 +72,12 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
   const primaryBranches = branches.filter((b) => b.business_id === primary?.id);
   const canManageBranches = currentRole === "owner" || currentRole === "manager";
   const workspaceHref=(view:string)=>"/dashboard?business="+encodeURIComponent(primary?.id??"")+"&view="+view;
-  const workspaceTitles:Record<string,string>={overview:"نظرة عامة",branches:"الفروع والنشاط",operations:"إدارة المتجر",settings:"النموذج والإعدادات",modules:"الوحدات القادمة"};
+  const workspaceTitles:Record<string,string>={overview:"نظرة عامة",branches:"الفروع والنشاط",operations:"إدارة المتجر",settings:"النموذج والإعدادات",subscription:"اشتراك النشاط",modules:"الوحدات القادمة"};
+  const subscriptionResult=workspaceView==="subscription"&&primary&&canManageBranches&&!loadError
+   ?await supabase.rpc("g12_merchant_subscription_status",{p_business:primary.id})
+   :null;
+  const subscriptionData=(subscriptionResult?.data??null) as MerchantSubscriptionStatus|null;
+  const subscriptionError=Boolean(subscriptionResult?.error);
 
   return (
     <div className={styles.shell}>
@@ -108,6 +114,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
           <Link className={`${styles.navItem} ${workspaceView==="branches"?styles.navItemActive:""}`} aria-current={workspaceView==="branches"?"page":undefined} href={workspaceHref("branches")}><span className={styles.navIcon} aria-hidden="true">⌂</span> الفروع ومعلومات النشاط</Link>
           {canManageBranches?<Link className={`${styles.navItem} ${workspaceView==="settings"?styles.navItemActive:""}`} aria-current={workspaceView==="settings"?"page":undefined} href={workspaceHref("settings")}><span className={styles.navIcon} aria-hidden="true">✧</span> نموذج العمل والميزات</Link>:null}
           <Link className={`${styles.navItem} ${workspaceView==="branches"?styles.navItemActive:""}`} href={workspaceHref("branches")}><span className={styles.navIcon} aria-hidden="true">⚙</span> بيانات النشاط</Link>
+          {canManageBranches?<Link className={`${styles.navItem} ${workspaceView==="subscription"?styles.navItemActive:""}`} href={workspaceHref("subscription")} aria-current={workspaceView==="subscription"?"page":undefined}><span className={styles.navIcon} aria-hidden="true">▤</span> الاشتراك والباقة</Link>:null}
           <span className={`${styles.navItem} ${styles.navItemSoon}`} aria-disabled="true">
             <span className={styles.navIcon} aria-hidden="true">▥</span> التقارير <span className={styles.soon}>قريباً</span>
           </span>
@@ -208,6 +215,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
           {workspaceView==="operations"&&!loadError && primary && canManageBranches && <HeadquartersCatalog businessId={primary.id} country={primary.country_code} branches={primaryBranches.map(b => ({id:b.id,name:b.name}))}/>}
 
           {workspaceView==="settings"&&!loadError && primary && canManageBranches ? <div id="business-model" style={{margin:"26px 0"}}><BegerSectorConfigurator key={primary.id} draftKey={primary.id} businessId={primary.id} canSave={currentRole==="owner"}/></div>:null}
+          {workspaceView==="subscription"&&canManageBranches&&!loadError&&primary?<MerchantSubscriptionStatusPanel data={subscriptionData} error={subscriptionError}/>:null}
           {workspaceView==="modules"?<section className={styles.modules} aria-labelledby="modules-heading">
             <div className={styles.panelHead}>
               <div><h2 className={styles.panelTitle} id="modules-heading">أدوات أعمالك</h2><p className={styles.panelSubtitle}>وحدات ستُفعّل بحسب نوع النشاط بعد استكمال البناء والاختبارات</p></div>
