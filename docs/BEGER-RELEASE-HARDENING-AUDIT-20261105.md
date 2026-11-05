@@ -61,3 +61,10 @@ The following exact-HEAD staging deployment will verify the corrected G14 test c
 - Verified live stable alias `qmenu-staging-git-feat-g1-foundation-ultrablueais-projects.vercel.app` points to this exact deployment ID.
 - This handoff note is docs-only and does not change the deployed code. The G14 UI and fourteen-index migration are now included in the active Staging release.
 - **Release decision remains NO-GO for paid/general public launch**, with real-device and real-account acceptance, payment/tax/legal policies, production recovery and the remaining advisor triage still open. Do not call those closed.
+
+## 2026-11-06 — Catalog and tenant-composite index hardening
+- Added and applied **eight** idempotent Staging-only composite indexes in `supabase/migrations/20261106001000_catalog_branch_fk_indexes.sql`. Targeted branch assignments, branch-product publications, modifier groups/options, product ingredients, and dining table branch/business FK paths. Consulted existing indexes first; none of the new indexes changes data, privileges or payment logic.
+- Re-ran live Supabase Performance Advisor: unindexed FK warnings reduced from **28 to 20**. Newly-added indexes initially appear as unused in low-activity Staging, taking unused-index advisory count from 28 to 36; this is expected without workload and **not proof of performance improvement** or reason to drop them.
+- Added `tests/beger-catalog-branch-fk-indexes.test.mjs` to verify exact composite definitions, idempotency and non-mutation. This is a source-contract test, not query latency proof.
+- Deliberately did **not** change public QR order rate limits (currently a fifth order within one minute is rejected per table/takeaway branch). No safe throughput benchmark or alternate anti-abuse control is yet evidenced. Load-testing remains a release gate.
+- This commit requests staging-only `[beger-deploy]` validation; verify exact SHA, test count, build and alias assignment. Commercial NO-GO until real E2E and financial/legal acceptance are complete.
