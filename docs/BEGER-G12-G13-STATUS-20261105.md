@@ -36,3 +36,10 @@
 ## G13 index CI verification retry
 - First index-hardening build failed before Next build because one test file contained an accidentally literal escaped newline at line 61; fixed at commit `59b82cf` without changing business behavior.
 - Re-run the full test suite, staging verification, Next build and deployment on this exact commit. Keep commercial GO blocked and Production untouched.
+
+## 2026-11-05 — G13 production-hardening follow-up
+- Fixed **pending request ordering**: the prior platform queue returned a 100-row pending-prioritized subquery but its final `jsonb_agg` reordered by date only; migration `20261105213000_g13_pending_queue_priority.sql` preserves pending-first order in the actual JSON result and in the 100-row selection. Applied on Staging; verified deployed SQL body and that anonymous EXECUTE remains denied.
+- Fixed merchant request selector for cases where `hasSubscription` changes while component state retains an obsolete `kind`; now submits the same `effectiveKind` displayed in the picker. Added `loadGeneration` guard so a slower prior-tenant query cannot overwrite a newer selected business's request list.
+- Added user-triggered retry/refresh on merchant and platform request lists. No automatic paid subscription, invoicing or entitlement changes.
+- Added `tests/beger-g13-review-hardening.test.mjs` with four regression checks. Real multi-user/tenant E2E remains open; all automated tests and final Vercel build must be verified from the current exact SHA before calling this increment READY.
+- This commit requests guarded Staging CI only via `[beger-deploy]`; stable alias remains unchanged. No Production actions.
