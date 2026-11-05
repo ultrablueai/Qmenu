@@ -43,6 +43,8 @@ export default async function DemoControl(){
   .select("id,name").eq("id",DEMO_BRANCH).eq("business_id",DEMO_BUSINESS).maybeSingle();
  const {data:platformAccess,error:platformError}=await db.from("platform_admins").select("role")
   .eq("user_id",user.id).eq("enabled",true).maybeSingle();
+ const {data:demoTables,error:tablesError}=await db.from("dining_tables")
+  .select("id,label,qr_token,active").eq("business_id",DEMO_BUSINESS).eq("branch_id",DEMO_BRANCH).eq("active",true).order("label").limit(25);
  const isAdmin=!platformError&&["platform_owner","platform_operator"].includes(platformAccess?.role??"");
  const visibleTiles=tiles.filter(t=>isAdmin||t.href!=="/admin");
  return <main dir="rtl" lang="ar" style={{minHeight:"100dvh",padding:"clamp(16px,4vw,40px)",background:"#f6f8f2",color:"#344733"}}>
@@ -56,6 +58,13 @@ export default async function DemoControl(){
      <strong>المتجر: Beger Demo Café — تجريبي · {branch.name}</strong>
      <p style={{color:"#62765b",fontSize:13,margin:"7px 0 0",lineHeight:1.7}}>حساب المالك يستطيع فتح محطات الكاشير والمطبخ والبيجر وفق قواعد الأدوار الحالية، بدون إنشاء موظف وهمي. لتجربة منع الصلاحيات استخدم حساب موظف مستقل.</p>
     </div>
+    <section aria-label="تجربة الطاولات المباشرة" style={{margin:"18px 0 22px",padding:"18px 20px",background:"#fff",border:"1px solid #dfe5da",borderRadius:15}}>
+     <h2 style={{fontSize:19,margin:"0 0 8px"}}>تجربة طلبات الطاولات</h2>
+     <p style={{fontSize:13,lineHeight:1.8,color:"#6c7669",margin:"0 0 12px"}}>افتح طاولة في نافذة خاصة أو هاتف ثانٍ، ثم أرسل الطلب وتابعه من الكاشير والمطبخ. كل رابط من رمز QR الحقيقي للطاولة.</p>
+     {tablesError?<p role="alert">تعذّر التحقق من رموز الطاولات. افتح قسم QR والطاولات لإعادة المحاولة.</p>:!demoTables?.length?<p>لا توجد طاولات فعّالة للعرض حالياً.</p>:<div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+      {demoTables.map(t=><Link key={t.id} href={"/t/"+encodeURIComponent(t.qr_token)+"?lang=ar"} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",minHeight:45,alignItems:"center",padding:"11px 15px",borderRadius:10,background:"#eaf1e2",border:"1px solid #cedec5",textDecoration:"none",color:"#3f6432",fontWeight:800}}>فتح الطاولة: {t.label} ↗</Link>)}
+     </div>}
+    </section>
     <section aria-label="محطات الاختبار" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,235px),1fr))",gap:13}}>
      {visibleTiles.map(tile=><Link key={tile.name} href={tile.href} target={tile.external?"_blank":undefined} rel={tile.external?"noopener noreferrer":undefined} style={{display:"grid",alignContent:"start",gap:9,background:"#fff",border:"1px solid #e0e6dc",borderRadius:16,padding:19,textDecoration:"none",color:"#314d32",minHeight:144,boxShadow:"0 4px 15px #20371a06"}}>
       <span aria-hidden="true" style={{fontSize:24}}>{tile.icon}</span><strong style={{fontSize:16}}>{tile.name}</strong><span style={{fontSize:12,color:"#6b7569",lineHeight:1.75}}>{tile.description}</span>
