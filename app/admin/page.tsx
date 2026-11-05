@@ -4,6 +4,7 @@ import { serverSupabase } from "../../lib/supabase/server";
 import styles from "./admin.module.css";
 import PlanManager from "./plan-manager";
 import TrialManager from "./trial-manager";
+import PlatformSubscriptionRequests from "./subscription-service-requests";
 import SubscriptionRateDraftManager,{type RateDraft} from "./subscription-rate-draft-manager";
 
 export const dynamic = "force-dynamic";
@@ -83,6 +84,7 @@ export default async function PlatformAdminDashboard() {
     <a className={styles.navLink} href="#merchants"><span className={styles.navGlyph} aria-hidden="true">⌂</span>الأنشطة والتجار</a>
     <a className={styles.navLink} href="#plans"><span className={styles.navGlyph} aria-hidden="true">▤</span>الباقات</a>
     <a className={styles.navLink} href="#subscription-rates"><span className={styles.navGlyph} aria-hidden="true">✧</span> أسعار الميزات</a>
+    <a className={styles.navLink} href="#subscription-service-requests"><span className={styles.navGlyph} aria-hidden="true">✉</span>طلبات الاشتراكات</a>
     <a className={styles.navLink} href="#trials"><span className={styles.navGlyph} aria-hidden="true">◷</span>التجارب</a>
     <a className={styles.navLink} href="#security"><span className={styles.navGlyph} aria-hidden="true">♧</span>الصلاحيات والتدقيق</a>
     <a className={styles.navLink} href="#operations"><span className={styles.navGlyph} aria-hidden="true">◈</span>جاهزية المنصة</a>
@@ -134,6 +136,7 @@ export default async function PlatformAdminDashboard() {
     {plansResult.error ? <p className={styles.error} role="alert">تعذّر تحميل الباقات. لا يمكن إدارة الباقات في هذه الحالة.</p> : <PlanManager plans={plans} canManage={owner} />}
     <SubscriptionRateDraftManager rates={rateDrafts} canManage={owner} loadFailed={Boolean(rateResult.error)}/>
     {(plansResult.error || directoryResult.error || trialsResult.error) ? <p role="alert" className={styles.error}>لا يمكن إدارة التجارب حتى يتم تحميل الأنشطة والباقات والاشتراكات بشكل موثوق.</p> : <TrialManager businesses={directory} plans={plans} trials={trials} canManage={owner} />}
+    <PlatformSubscriptionRequests canReview={owner}/>
     <section id="security" className={styles.panel} aria-labelledby="security-heading">
      <div className={styles.panelHead}>
       <div><h2 id="security-heading" className={styles.panelTitle}>صلاحيات المنصة وسجل التدقيق</h2>
