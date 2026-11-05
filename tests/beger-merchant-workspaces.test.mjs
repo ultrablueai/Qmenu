@@ -7,10 +7,11 @@ const css=readFileSync("app/dashboard/merchant-workspace.css","utf8");
 const overview=readFileSync("app/dashboard/hq-reference-overview.tsx","utf8");
 
 test("merchant dashboard is routed into separate workspaces instead of rendering everything below Overview",()=>{
- assert.match(page,/workspaceViews=\["overview","branches","operations","settings","modules"\]/);
+ assert.match(page,/workspaceViews=\["overview","branches","operations","settings","subscription","modules"\]/);
  assert.match(page,/workspaceView==="operations"&&!loadError/);
  assert.match(page,/workspaceView==="branches"\?<div/);
  assert.match(page,/workspaceView==="settings"&&!loadError/);
+ assert.match(page,/workspaceView==="subscription"&&canManageBranches&&!loadError&&primary/);
  assert.match(page,/workspaceView==="modules"\?<section/);
  assert.match(page,/workspaceHref\("operations"\)/);
  assert.match(page,/encodeURIComponent\(primary\?\.id\?\?""\)/);
