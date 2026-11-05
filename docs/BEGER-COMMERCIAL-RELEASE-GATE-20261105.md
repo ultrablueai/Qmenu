@@ -49,3 +49,12 @@ The current document-only commit requests exact-HEAD Staging validation through 
 - Next commit requests validation via `[beger-deploy]` on **the established Staging branch alias**. Do not treat SQL/static tests alone as real merchant billing certification.
 
 - G12 initial CI build failed 1/361 static tests: an older merchant-workspaces test expected a fixed five-tab array. Updated its assertion to cover the new sixth subscription tab, retaining permission checks. Re-running tests and build on a new exact-HEAD staging commit; no production changes.
+
+## 2026-11-05 — G13 subscription request/review lifecycle
+- Implemented `supabase/migrations/20261105200000_g13_subscription_service_requests.sql` and applied to **isolated Staging only**; never modified Production or seeded a paid plan.
+- Merchant owner can file **one pending** review request per business: trial enquiry if no subscription history, plan review, renewal or cancellation request if history exists. It does **not** activate, renew, cancel, create invoices or collect payment. Owner can withdraw while pending. Manager can view but cannot file/withdraw.
+- Platform owner can record an administrative `acknowledged`/ `declined` review in `app/admin/subscription-service-requests.tsx`; platform operator may view but cannot decide. The decision is **not a subscription mutation**. Every create/withdraw/review records a platform audit event. Row locking/unique pending index prevent conflicting concurrent actions.
+- Verified Staging five G13 RPCs reject anonymous EXECUTE; direct table permissions revoked and RLS enabled. Initial requests count 0; no real customer/merchant data inserted.
+- Added merchant request UI within `app/dashboard/merchant-subscription-status.tsx` and static regression contracts `tests/beger-g13-subscription-requests.test.mjs`.
+- **Phase scope warning:** G12/G13 UI and auditable administrative requests can be closed as Staging components only after CI and real two-account QA. **Actual commercial billing stage remains NO-GO** until signed prices, tax/currency treatment, invoice creation/reversal, paid entitlement enforcement and security/legal/backup acceptance. Do not equate review acknowledgement with approval/activation.
+- The next documentation commit requests guarded Staging full CI via `[beger-deploy]`. Staging stable alias must stay unchanged.
