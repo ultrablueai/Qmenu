@@ -47,3 +47,5 @@ The current document-only commit requests exact-HEAD Staging validation through 
 - Added `app/dashboard/merchant-subscription-status.tsx` plus a `subscription` merchant workspace route and `tests/beger-g12-merchant-subscription-status.test.mjs`. No checkout or tenant-to-merchant fund settlement.
 - Paid commercial launch still NO-GO: approved regional tariffs, VAT/tax treatment, invoicing, cancellation, expiry enforcement, billing authorization, reconciliation and cross-tenant authenticated pilot remain outstanding.
 - Next commit requests validation via `[beger-deploy]` on **the established Staging branch alias**. Do not treat SQL/static tests alone as real merchant billing certification.
+
+- G12 initial CI build failed 1/361 static tests: an older merchant-workspaces test expected a fixed five-tab array. Updated its assertion to cover the new sixth subscription tab, retaining permission checks. Re-running tests and build on a new exact-HEAD staging commit; no production changes.
