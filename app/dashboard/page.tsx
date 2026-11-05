@@ -99,6 +99,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
         </nav>:null}
         <nav aria-label="التنقل الرئيسي" className={styles.navGroup}>
           {canOpenPlatform && <Link className={styles.navItem} href="/admin" aria-label="الانتقال إلى إدارة منصة بيجر"><span className={styles.navIcon} aria-hidden="true">◇</span> إدارة منصة بيجر</Link>}
+          {!loadError&&primary?.id==="b0000000-2026-4000-8000-000000000001"&&currentRole==="owner"?<Link className={styles.navItem} href="/demo-control" style={{background:"#e8f0dd",color:"#41612f",fontWeight:900}}><span className={styles.navIcon} aria-hidden="true">✦</span> مركز اختبار المتجر التجريبي</Link>:null}
           <div className={styles.navLabel}>مساحة العمل</div>
           <a className={`${styles.navItem} ${workspaceView==="overview"?styles.navItemActive:""}`} href={workspaceHref("overview")} aria-current={workspaceView==="overview"?"page":undefined}>
             <span className={styles.navIcon} aria-hidden="true">▦</span> نظرة عامة
@@ -120,7 +121,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
           </span>
         </nav>
         <div className={styles.sidebarFooter}>
-          <p className={styles.sidebarNote}>لوحة تجريبية آمنة · لا توجد بيانات مبيعات أو طلبات تجريبية مصطنعة.</p>
+          <p className={styles.sidebarNote}>لوحة تجريبية آمنة · الطلبات التي تنشئها في Staging بيانات اختبار فعلية وليست إيرادات تجارية.</p>
           <form action="/auth/signout" method="post"><button className={styles.signout} type="submit">↪ تسجيل الخروج</button></form>
         </div>
       </aside>
