@@ -54,7 +54,7 @@ export default function MerchantPrintSettings({branchId,onSettings}:{branchId:st
    <button type="button" disabled={!loaded||busy} onClick={()=>void save()}>{busy?"جارٍ الحفظ…":loaded?"حفظ إعدادات الطباعة":"جارٍ التحميل…"}</button>
    {notice?<p role="status" className="beger-print-settings-success">{notice}</p>:null}
    {error?<p role="alert" className="beger-print-settings-error">{error}</p>:null}
-   <p className="beger-print-settings-caveat">لا توجد طباعة تلقائية أو وصول مباشر لأجهزة USB والشبكة في هذه المرحلة. لا ترسل Beger مهام طباعة دون ضغط الموظف.</p>
+   <p className="beger-print-settings-caveat">ينشئ Beger مهام الطباعة تلقائياً عند قبول الطلب، لكن إرسالها لطابعة USB أو الشبكة غير مفعّل بعد. يفتح الموظف المعاينة ويؤكد خروج الورقة. لا تعني المعاينة وحدها نجاح الطباعة.</p>
   </div>
  </details>;
 }
