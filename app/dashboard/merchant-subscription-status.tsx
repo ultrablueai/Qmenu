@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MerchantSubscriptionRequests from "./merchant-subscription-requests";
 
 export type MerchantSubscriptionStatus={
  state:string;has_subscription:boolean;plan_code?:string;plan_name?:string;starts_at?:string;ends_at?:string|null;
@@ -14,7 +15,7 @@ const labels:Record<string,string>={
  expired:"انتهت مدة الاشتراك",
  scheduled:"مجدول ولم يبدأ بعد"
 };
-export default function MerchantSubscriptionStatusPanel({data,error}:{data:MerchantSubscriptionStatus|null;error:boolean}){
+export default function MerchantSubscriptionStatusPanel({data,error,businessId,canRequest}:{data:MerchantSubscriptionStatus|null;error:boolean;businessId:string;canRequest:boolean}){
  const state=data?.state??"not_configured";
  const fmt=(value?:string|null)=>{if(!value)return "غير محدد";const date=new Date(value);return Number.isNaN(date.valueOf())?"غير متاح":date.toLocaleDateString("ar",{year:"numeric",month:"short",day:"numeric"});};
  return <section dir="rtl" aria-labelledby="beger-subscription-status-title" style={{background:"#fff",border:"1px solid #e5e8dc",borderRadius:16,padding:"clamp(16px,3vw,25px)",margin:"18px 0"}}>
@@ -30,6 +31,7 @@ export default function MerchantSubscriptionStatusPanel({data,error}:{data:Merch
    <div><dt style={{fontSize:12,color:"#807668"}}>نهاية الفترة</dt><dd style={{margin:"6px 0",fontWeight:800}}>{fmt(data.ends_at)}</dd></div>
   </dl>}
   <p style={{fontSize:12,lineHeight:1.9,color:"#86796b",marginBottom:0}}>هذه صفحة معلومات فقط. لا تخصم أي مبالغ ولا تفعّل أو تجدّد الاشتراك. أي باقة مدفوعة تحتاج اعتماد الأسعار والفواتير أولاً.</p>
+  {!error?<MerchantSubscriptionRequests businessId={businessId} hasSubscription={Boolean(data?.has_subscription)} canRequest={canRequest}/>:null}
   <Link href="/dashboard?view=operations" style={{display:"inline-flex",marginTop:12,color:"#4d703a",fontWeight:800,textDecoration:"none",fontSize:13}}>العودة إلى إدارة المتجر ←</Link>
  </section>;
 }
