@@ -32,3 +32,7 @@
 - No entitlement cut-off, trial expiration access policy or dunning/cancellation financial settlement approved.
 - Real independent merchant, admin, staff and guest sessions; backup restore/alerts and legal privacy/fiscal sign-off are still missing.
 - The actual commercial billing project remains **OPEN**. Do not treat an administrative acknowledgement as payment approval.
+
+## G13 index CI verification retry
+- First index-hardening build failed before Next build because one test file contained an accidentally literal escaped newline at line 61; fixed at commit `59b82cf` without changing business behavior.
+- Re-run the full test suite, staging verification, Next build and deployment on this exact commit. Keep commercial GO blocked and Production untouched.
