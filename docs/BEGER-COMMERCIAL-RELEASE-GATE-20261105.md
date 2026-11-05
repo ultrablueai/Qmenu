@@ -40,3 +40,10 @@ At read-only inspection: 3 businesses; 0 plans; 0 subscriptions; 2 pager tickets
 
 ## 2026-11-05 Staging CI request
 The current document-only commit requests exact-HEAD Staging validation through the protected `[beger-deploy]` gate for the staff UX simplification and release baseline. Do not mark the build or pilot READY until Vercel log evidence is observed.
+
+## 2026-11-05 — G12 subscription visibility, NOT billing activation
+- Existing `plans` and `subscriptions` tables remain unchanged, with **no prices seeded and no subscription activated**. Existing operator trial RPCs remain intact.
+- Added `supabase/migrations/20261105190000_g12_merchant_subscription_status.sql` in Staging only: a read-only SECURITY DEFINER RPC scoped to the verified merchant owner/manager; anonymous EXECUTE revoked. Returns explicit `not_configured`, dates and plan name from stored rows, not guessed "paid" state. Staging database permissions inspected successfully.
+- Added `app/dashboard/merchant-subscription-status.tsx` plus a `subscription` merchant workspace route and `tests/beger-g12-merchant-subscription-status.test.mjs`. No checkout or tenant-to-merchant fund settlement.
+- Paid commercial launch still NO-GO: approved regional tariffs, VAT/tax treatment, invoicing, cancellation, expiry enforcement, billing authorization, reconciliation and cross-tenant authenticated pilot remain outstanding.
+- Next commit requests validation via `[beger-deploy]` on **the established Staging branch alias**. Do not treat SQL/static tests alone as real merchant billing certification.
