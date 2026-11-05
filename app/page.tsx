@@ -27,8 +27,9 @@ export default function Home(){
      <div className="beger-marketing-actions">
       <Link href={demo} className="beger-marketing-button">جرّب واجهة الزبون <span aria-hidden="true">←</span></Link>
       <Link href="/login" className="beger-marketing-button beger-marketing-button--light">ادخل إلى لوحة التاجر</Link>
+      <Link href="/demo-control" className="beger-marketing-button beger-marketing-button--light">مركز اختبار المتجر للمالك</Link>
      </div>
-     <p className="beger-marketing-note">المعاينة حالياً للمنيو والسلة التجريبية. الطلب والدفع والمكافآت الفعلية ليست مفعّلة بعد.</p>
+     <p className="beger-marketing-note">بيئة اختبار Staging: يمكنك تجربة إرسال الطلبات وتشغيل الكاشير والمطبخ والبيجر. لا يوجد دفع إلكتروني أو اشتراك تجاري مدفوع.</p>
     </div>
     <div className="beger-hero-art" aria-label="صورة مقهى دافئ ضمن هوية Beger">
      <img src={photo} alt="مقهى دافئ بتفاصيل طبيعية وألوان كريمية" loading="eager" referrerPolicy="no-referrer"/>
