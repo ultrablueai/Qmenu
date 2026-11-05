@@ -5,6 +5,7 @@ import styles from "./admin.module.css";
 import PlanManager from "./plan-manager";
 import TrialManager from "./trial-manager";
 import PlatformSubscriptionRequests from "./subscription-service-requests";
+import PlatformLaunchPreflight,{type PlatformLaunchSnapshot} from "./platform-launch-preflight";
 import SubscriptionRateDraftManager,{type RateDraft} from "./subscription-rate-draft-manager";
 
 export const dynamic = "force-dynamic";
@@ -51,14 +52,15 @@ export default async function PlatformAdminDashboard() {
   .select("business_id").eq("user_id",user.id).limit(1);
  const canOpenBusiness = !merchantMembershipError && Boolean(merchantMembership?.length);
 
- const [summaryResult,directoryResult,plansResult,trialsResult,auditResult,rosterResult,rateResult] = await Promise.all([
+ const [summaryResult,directoryResult,plansResult,trialsResult,auditResult,rosterResult,rateResult,preflightResult] = await Promise.all([
   supabase.rpc("platform_admin_overview"),
   supabase.rpc("platform_admin_business_directory"),
   supabase.from("plans").select("id,code,name,active").order("code",{ascending:true}),
   supabase.rpc("platform_admin_trial_overview"),
   supabase.rpc("platform_admin_audit_overview"),
   account.role==="platform_owner" ? supabase.rpc("platform_owner_access_roster") : Promise.resolve({data:[],error:null}),
-  supabase.from("beger_subscription_rate_drafts").select("country,rate_key,monthly_minor,updated_at").order("country").order("rate_key")
+  supabase.from("beger_subscription_rate_drafts").select("country,rate_key,monthly_minor,updated_at").order("country").order("rate_key"),
+  supabase.rpc("g14_platform_launch_preflight")
  ]);
  const summary = (summaryResult.data?.[0] ?? null) as
   {merchant_count: number | string;branch_count:number | string;account_memberships:number | string} | null;
@@ -66,6 +68,7 @@ export default async function PlatformAdminDashboard() {
  const failed = Boolean(summaryResult.error || directoryResult.error || !summary);
  const owner = account.role === "platform_owner";
  const rateDrafts=(rateResult.data??[]) as RateDraft[];
+ const preflightSnapshot=(preflightResult.data??null) as PlatformLaunchSnapshot|null;
  const plans = (plansResult.data ?? []) as {id:string;code:string;name:string;active:boolean}[];
  const trials = (trialsResult.data ?? []) as {business_id:string;plan_code:string;starts_at:string;ends_at:string|null;effective_status:string}[];
  const auditEvents = (auditResult.data ?? []) as {event_id:number;event_action:string;target_kind:string;event_at:string}[];
@@ -87,7 +90,8 @@ export default async function PlatformAdminDashboard() {
     <a className={styles.navLink} href="#subscription-service-requests"><span className={styles.navGlyph} aria-hidden="true">✉</span>طلبات الاشتراكات</a>
     <a className={styles.navLink} href="#trials"><span className={styles.navGlyph} aria-hidden="true">◷</span>التجارب</a>
     <a className={styles.navLink} href="#security"><span className={styles.navGlyph} aria-hidden="true">♧</span>الصلاحيات والتدقيق</a>
-    <a className={styles.navLink} href="#operations"><span className={styles.navGlyph} aria-hidden="true">◈</span>جاهزية المنصة</a>
+    <a className={styles.navLink} href="#launch-readiness"><span className={styles.navGlyph} aria-hidden="true">◈</span>جاهزية الإطلاق</a>
+    <a className={styles.navLink} href="#operations"><span className={styles.navGlyph} aria-hidden="true">▦</span>الوحدات القادمة</a>
     <span className={styles.navLabel} style={{marginTop:18}}>الإدارة القادمة</span>
     <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">▤</span>الفوترة المدفوعة<span className={styles.navTag}>قريباً</span></span>
     <span className={`${styles.navLink} ${styles.navSoon}`}><span className={styles.navGlyph} aria-hidden="true">♧</span>تغيير الأدوار والدعم<span className={styles.navTag}>قريباً</span></span>
@@ -105,9 +109,9 @@ export default async function PlatformAdminDashboard() {
      <span className={styles.safe}>{owner ? "مالك المنصة" : "مشغّل المنصة"} · بيانات التجار قراءة فقط</span>
     </div>
     <section className={styles.hero} aria-label="حالة المرحلة الحالية">
-     <div><h2 className={styles.heroStrong}>أساس الإدارة جاهز للتوسعة المنظمة</h2>
-      <p className={styles.heroDesc}>نعمل الآن على المرحلة الأولى: التحقق من الأدوار والصلاحيات وتجهيز كنترول بنل المالك. خدمات المنيو والطلبات والمطبخ والبيجر لم تُطلق بعد.</p>
-     </div><span className={styles.heroBadge}>المرحلة 1 من 5</span>
+     <div><h2 className={styles.heroStrong}>مرحلة التجربة والتحقق قبل الإطلاق التجاري</h2>
+      <p className={styles.heroDesc}>نعمل الآن على المرحلة الأولى: التحقق من الأدوار والصلاحيات وتجهيز كنترول بنل المالك. المنيو والطلبات والمطبخ والبيجر موجودة في Staging، لكن لم تُعتمد تجارياً قبل الاختبار التشغيلي والأمن والفوترة.</p>
+     </div><span className={styles.heroBadge}>تجربة Staging · غير جاهز للبيع</span>
     </section>
     {failed && <p className={styles.error} role="alert">تعذّر تحميل البيانات الموثوقة من المنصة. لم نعرض إحصاءات تقديرية.</p>}
     <section className={styles.stats} aria-label="مؤشرات المنصة">
@@ -170,6 +174,7 @@ export default async function PlatformAdminDashboard() {
        </tr>)}</tbody>
       </table></div>}
     </section>
+    <PlatformLaunchPreflight snapshot={preflightSnapshot} error={Boolean(preflightResult.error)}/>
     <section id="operations" className={styles.panel} aria-labelledby="operations-heading">
      <div className={styles.panelHead}><div><h2 id="operations-heading" className={styles.panelTitle}>وحدات الإدارة القادمة</h2><p className={styles.panelDesc}>نثبت الصلاحيات والأساس أولاً؛ لم نفعّل تشغيل أو فوترة غير مكتملين.</p></div><span className={styles.panelCount}>قيد التطوير</span></div>
      <div className={styles.grid}>{nextModules.map(m=><div className={styles.module} key={m.title}>
