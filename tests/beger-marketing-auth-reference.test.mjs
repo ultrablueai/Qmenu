@@ -36,5 +36,7 @@ test("merchant auth pages share a visual system while preserving Supabase sign-i
 });
 test("landing and auth contain no simulated real orders or impersonated HQ data",()=>{
  assert.doesNotMatch(landing+auth+login+signup,/2,856|425,300|1,264 Reviews|fakeOrder/);
- assert.match(landing,/ليست مفعّلة بعد/);
+ assert.match(landing,/يمكنك تجربة إرسال الطلبات وتشغيل الكاشير والمطبخ والبيجر/);
+ assert.match(landing,/لا يوجد دفع إلكتروني أو اشتراك تجاري مدفوع/);
+ assert.match(landing,/مركز اختبار المتجر للمالك/);
 });
