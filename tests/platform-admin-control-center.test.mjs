@@ -31,7 +31,9 @@ test("owner panel does not inherit merchant access",()=>{
 test("owner panel makes future functionality explicitly unavailable",()=>{
  assert.match(page,/قراءة فقط/);
  assert.match(page,/غير متاح بعد/);
- assert.match(page,/لم تُطلق بعد/);
+ assert.match(page,/موجودة في Staging، لكن لم تُعتمد تجارياً/);
+ assert.match(page,/غير جاهز للبيع/);
+ assert.doesNotMatch(page,/خدمات المنيو والطلبات والمطبخ والبيجر لم تُطلق بعد/);
  assert.match(page,/أول 100 نشاط/);
 });
 test("owner panel has mobile navigation, semantic table and reduced motion",()=>{
