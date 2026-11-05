@@ -215,7 +215,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
           {workspaceView==="operations"&&!loadError && primary && canManageBranches && <HeadquartersCatalog businessId={primary.id} country={primary.country_code} branches={primaryBranches.map(b => ({id:b.id,name:b.name}))}/>}
 
           {workspaceView==="settings"&&!loadError && primary && canManageBranches ? <div id="business-model" style={{margin:"26px 0"}}><BegerSectorConfigurator key={primary.id} draftKey={primary.id} businessId={primary.id} canSave={currentRole==="owner"}/></div>:null}
-          {workspaceView==="subscription"&&canManageBranches&&!loadError&&primary?<MerchantSubscriptionStatusPanel data={subscriptionData} error={subscriptionError}/>:null}
+          {workspaceView==="subscription"&&canManageBranches&&!loadError&&primary?<MerchantSubscriptionStatusPanel data={subscriptionData} error={subscriptionError} businessId={primary.id} canRequest={currentRole==="owner"}/>:null}
           {workspaceView==="modules"?<section className={styles.modules} aria-labelledby="modules-heading">
             <div className={styles.panelHead}>
               <div><h2 className={styles.panelTitle} id="modules-heading">أدوات أعمالك</h2><p className={styles.panelSubtitle}>وحدات ستُفعّل بحسب نوع النشاط بعد استكمال البناء والاختبارات</p></div>
