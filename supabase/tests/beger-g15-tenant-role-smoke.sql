@@ -11,6 +11,7 @@ with sample as (
  from public.memberships m cross join public.businesses b
  where m.role='owner' and b.id<>m.business_id
  and not exists(select 1 from public.memberships z where z.user_id=m.user_id and z.business_id=b.id)
+ and not exists(select 1 from public.platform_admins a where a.user_id=m.user_id and a.enabled=true)
  order by m.business_id,b.id limit 1
 )
 select set_config('request.jwt.claim.sub',user_id::text,true),
