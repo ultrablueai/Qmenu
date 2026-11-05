@@ -58,3 +58,13 @@ test("G13 platform review is visible to operators but decisions require platform
  assert.match(admin,/if\(!canReview\|\|busy/);
  assert.match(admin,/لا يفعّل اشتراكاً أو يحصّل أموالاً/);
 });
+\n
+test("G13 indexes cover business history, request actors, reviewers, and review queue",()=>{
+ const indexes=readFileSync("supabase/migrations/20261105210000_g13_subscription_request_indexes.sql","utf8");
+ assert.match(indexes,/g13_subscription_requests_business_recent_idx/);
+ assert.match(indexes,/on public\.g13_subscription_requests\(business_id,created_at desc\)/);
+ assert.match(indexes,/on public\.g13_subscription_requests\(requested_by\)/);
+ assert.match(indexes,/on public\.g13_subscription_requests\(reviewed_by\)/);
+ assert.match(indexes,/on public\.g13_subscription_requests\(status,created_at desc\)/);
+ assert.doesNotMatch(indexes,/\bdrop\b|\bdelete\b|\btruncate\b/i);
+});
