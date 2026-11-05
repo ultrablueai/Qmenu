@@ -33,6 +33,7 @@ export default function PlatformSubscriptionRequests({canReview}:{canReview:bool
  return <section id="subscription-service-requests" dir="rtl" style={{background:"#fff",border:"1px solid #dbe3e6",borderRadius:16,padding:"clamp(16px,3vw,26px)",margin:"18px 0"}}>
   <h2 style={{margin:"0 0 9px",fontSize:21,color:"#203e49"}}>طلبات خدمة الاشتراكات</h2>
   <p style={{fontSize:13,lineHeight:1.8,color:"#687986"}}>طلبات التجار للمراجعة البشرية فقط. زر «تمت المراجعة» لا يفعّل اشتراكاً أو يحصّل أموالاً؛ الفوترة تتطلب مسار موافقة مستقلاً.</p>
+  <button type="button" onClick={()=>{if(!busy){setLoading(true);setError("");void refresh().catch(()=>setError("تعذّر تحديث قائمة الطلبات. حاول مرة أخرى.")).finally(()=>setLoading(false))}}} disabled={Boolean(busy)||loading} style={{minHeight:42,padding:"9px 13px",border:"1px solid #d2e0da",borderRadius:10,background:"#fff",color:"#356c61",cursor:"pointer",marginBottom:12}}>↻ تحديث قائمة الطلبات</button>
   {loading?<p role="status">جارٍ تحميل الطلبات…</p>:null}
   {error?<p role="alert" style={{color:"#a74734"}}>{error}</p>:null}
   {notice?<p role="status" style={{color:"#3f785c"}}>{notice}</p>:null}
