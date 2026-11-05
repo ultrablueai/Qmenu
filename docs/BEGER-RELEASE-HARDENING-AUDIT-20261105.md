@@ -35,3 +35,6 @@ The current G3 submit-table and submit-takeaway functions each reject a fifth or
 2. Authenticated negative/positive RLS and function tests for two real independent businesses; exercise with ROLLBACK fixtures where supported.
 3. Verify all critical guest order journeys and multi-role cash/kitchen/Pager flows on actual devices.
 4. Complete commercial policy and certified billing/ops readiness; obtain explicit sign-off.
+
+## Deployment validation handoff
+The following exact-HEAD staging deployment will verify the corrected G14 test contract, the compiled app and the fixed Vercel alias. The commit includes the mandatory `[beger-deploy]` tag. Do not infer success until READY and test totals are recorded.
