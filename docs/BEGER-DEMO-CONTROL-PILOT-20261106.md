@@ -26,3 +26,12 @@ This control hub does not automatically add employees, seed orders, create paid 
 
 ## Staging deployment validation
 The next commit requests guarded `[beger-deploy]` full test/Next build from the exact branch HEAD. Record final deployment SHA, test counts, READY state and stable alias mapping. Never change Production automatically.
+
+## 2026-11-06 G16 — Owner workstation authorization fix
+- Critical pilot bug discovered during **real SQL auth-role simulation**: G10/G9/G7 `my_*_branches` RPCs listed assigned `staff` only, even though owner and manager were already authorized to act in every branch through `*_allowed()`. As a result, opening cashier/kitchen/pager routes as the demo shop owner rendered "no assigned branch."
+- Applied Staging migration `20261106002000_g16_owner_workstation_branches.sql`. The three RPCs now list branches for verified owner/manager memberships, and for staff they list **only the explicitly assigned branch for that station**. Anonymous EXECUTE revoked; no role grants or order modification.
+- Confirmed with rollback-only Staging authorization checks that the existing demo owner now sees the demo branch in **cashier, kitchen and pager (3/3)**. Separately confirmed an already-assigned cashier employee still sees only cashier (not kitchen), and a Pager-only employee sees Pager (not cashier). These simulated SQL checks do not substitute for separate signed JWT/browser E2E tests.
+- `/demo-control` now also retrieves the actual **two existing active table QR tokens** for the verified demo owner from RLS-protected `dining_tables`, and links each to `/t/<token>?lang=ar`. Owner account was independently verified to read two active demo tables via authenticated SQL rollback test.
+- Added `tests/beger-g16-owner-demo-stations.test.mjs`. The existing 3 unrelated stores were left unchanged; no staff were copied across tenants and no owner credentials are shown in the UI.
+- Before G16, an unrelated landing regression test rejected accurate Staging wording and made first build fail at 382/383. It was corrected in `tests/beger-marketing-auth-reference.test.mjs` to require accurate demo-order availability and explicitly unavailable commercial online payment.
+- The next exact-HEAD Staging deployment runs full tests and build using `[beger-deploy]`. No Production changes or claim of real-device acceptance.
