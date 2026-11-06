@@ -1,0 +1,71 @@
+.beger-marketing{--olive:#677c43;--olive-dark:#506433;--copper:#aa5932;--ink:#342920;--muted:#827366;--line:#e9dccd;--cream:#faf6ef;min-height:100dvh;background:#faf6ef;color:var(--ink);font-family:Arial,"Segoe UI",Tahoma,sans-serif}
+.beger-marketing *{box-sizing:border-box}
+.beger-marketing a{text-decoration:none}
+.beger-marketing :is(a,button,input):focus-visible{outline:3px solid #bf8957;outline-offset:3px}
+.beger-marketing-wrap{max-width:1220px;padding:0 25px;margin:0 auto}
+.beger-marketing-nav{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:21px 0;border-bottom:1px solid #e8ded3}
+.beger-marketing-brand{display:flex;align-items:center;gap:12px;direction:ltr;color:#32291f;font-family:Georgia,"Times New Roman",serif;font-size:30px;font-weight:850;letter-spacing:-1.5px}
+.beger-brand-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(140deg,#354126 0 37%,#e2b05f 38% 57%,#ad7440 58% 100%);color:#fff;display:grid;place-items:center;font:900 26px Arial,sans-serif}
+.beger-brand-divider{width:1px;height:35px;background:#9c8c7c;margin:0 4px}
+.beger-brand-qmenu{font-size:26px;color:#a6532e;letter-spacing:-.5px}
+.beger-marketing-navlinks{display:flex;gap:11px;align-items:center;flex-wrap:wrap}
+.beger-marketing-link{font-size:13px;font-weight:800;color:#615344;padding:10px 13px}
+.beger-marketing-button{display:inline-flex;align-items:center;justify-content:center;gap:11px;border-radius:999px;border:1px solid var(--olive);padding:12px 20px;min-height:47px;font:800 13px Arial,sans-serif;color:#fff;background:linear-gradient(110deg,#829250,#556c35);box-shadow:0 7px 19px #697c3e27;cursor:pointer}
+.beger-marketing-button--light{color:#665841;border-color:#e7dacb;background:#fffaf3;box-shadow:none}
+.beger-marketing-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:46px;align-items:center;padding:64px 0 50px}
+.beger-marketing-kicker{display:inline-flex;align-items:center;gap:8px;border:1px solid #e8d7c4;background:#f6eee3;color:#a45c35;padding:8px 13px;border-radius:999px;font-size:12px;font-weight:800}
+.beger-marketing-hero h1{font:800 clamp(40px,5vw,65px)/1.18 Georgia,"Times New Roman",serif;letter-spacing:-1.4px;margin:18px 0 16px;color:#33271e}
+.beger-marketing-hero h1 em{font-style:normal;color:#73864b}
+.beger-marketing-lead{font-size:16px;line-height:1.95;color:#786a5d;max-width:570px;margin:0 0 24px}
+.beger-marketing-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.beger-marketing-note{font-size:11px;color:#928070;margin-top:16px;line-height:1.6}
+.beger-hero-art{position:relative;border-radius:28px;background:#efe1d2;min-height:500px;overflow:hidden;box-shadow:0 22px 52px #5c422522}
+.beger-hero-art>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.beger-hero-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#22201000 30%,#2a2313a8 100%)}
+.beger-art-top{position:absolute;inset:18px 18px auto;z-index:2;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.beger-art-pill{background:#fffcf1e8;backdrop-filter:blur(8px);padding:10px 13px;border-radius:999px;color:#5b583f;font-weight:800;font-size:11px}
+.beger-art-caption{position:absolute;inset:auto 23px 24px;z-index:2;color:white}
+.beger-art-caption h2{font:800 29px Georgia,"Times New Roman",serif;margin:0 0 8px}
+.beger-art-caption p{font-size:13px;line-height:1.7;max-width:400px;margin:0;color:#fff5e7}
+.beger-marketing-section{padding:38px 0 54px}
+.beger-marketing-section-heading{text-align:center;max-width:670px;margin:0 auto 27px}
+.beger-marketing-section-heading h2{font:800 clamp(27px,3vw,40px) Georgia,"Times New Roman",serif;margin:8px 0 12px}
+.beger-marketing-section-heading p{font-size:14px;line-height:1.8;color:#847364;margin:0}
+.beger-feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.beger-feature-card{padding:24px;border-radius:20px;background:#fffcf8;border:1px solid var(--line);box-shadow:0 7px 19px #644b2810;min-height:182px}
+.beger-feature-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:#e9edd8;color:#60753d;font-size:26px}
+.beger-feature-card h3{font:800 20px Georgia,"Times New Roman",serif;margin:17px 0 9px}
+.beger-feature-card p{font-size:13px;color:#827365;line-height:1.8;margin:0}
+.beger-demo-banner{display:flex;justify-content:space-between;align-items:center;gap:22px;padding:26px 28px;border:1px solid #e9d5c3;border-radius:22px;background:linear-gradient(115deg,#ead4be,#fbf5ec 64%,#e5ebd3);margin-bottom:55px}
+.beger-demo-banner h2{font:800 26px Georgia,"Times New Roman",serif;margin:0 0 8px}
+.beger-demo-banner p{font-size:13px;color:#7e6d5d;line-height:1.6;margin:0}
+.beger-marketing-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid #e7dbcf;padding:22px 0 40px;color:#8b7a68;font-size:12px;flex-wrap:wrap}
+.beger-auth-shell{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);direction:ltr}
+.beger-auth-visual{position:relative;isolation:isolate;display:flex;align-items:flex-end;overflow:hidden;background:#b99a7e;min-height:670px;padding:42px}
+.beger-auth-visual>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.beger-auth-visual::after{position:absolute;content:"";inset:0;background:linear-gradient(180deg,#31241714 22%,#2a251fc9 100%);z-index:-1}
+.beger-auth-visual-copy{color:#fff;max-width:500px}
+.beger-auth-visual-copy small{display:inline-block;padding:9px 12px;border:1px solid #ffffff63;background:#fff4e828;border-radius:999px;font-weight:800;font-size:12px}
+.beger-auth-visual-copy h2{font:800 clamp(33px,4vw,55px)/1.14 Georgia,"Times New Roman",serif;margin:18px 0 13px}
+.beger-auth-visual-copy p{font-size:14px;line-height:1.9;color:#f8e8d5;margin:0}
+.beger-auth-side{direction:rtl;display:flex;flex-direction:column;min-width:0;padding:29px clamp(22px,5vw,85px);background:linear-gradient(155deg,#fffdfa,#faf5ec)}
+.beger-auth-side .beger-marketing-brand{font-size:25px;align-self:flex-end}
+.beger-auth-side .beger-brand-qmenu{font-size:22px}
+.beger-auth-side .beger-brand-mark{width:32px;height:32px}
+.beger-auth-panel{width:100%;max-width:435px;margin:auto;min-width:0;padding:40px 0}
+.beger-auth-eyebrow{color:#a9653c;font-weight:800;font-size:12px;letter-spacing:.03em}
+.beger-auth-panel h1{font:800 clamp(29px,3vw,42px)/1.2 Georgia,"Times New Roman",serif;margin:12px 0 12px;color:#302821}
+.beger-auth-description{font-size:13px;line-height:1.9;color:#827568;margin:0 0 27px}
+.beger-auth-form{display:flex;flex-direction:column;gap:11px}
+.beger-auth-label{font-size:12px;font-weight:800;color:#4a3d33}
+.beger-auth-input{border:1px solid #e4d7c9!important;background:#fff!important;border-radius:13px!important;min-height:50px;padding:12px 14px;width:100%;box-sizing:border-box;font:inherit;font-size:14px;color:#33291f;outline:none}
+.beger-auth-input:focus{border-color:#839656!important;box-shadow:0 0 0 3px #879e5423}
+.beger-auth-form .beger-marketing-button{width:100%;margin-top:12px;min-height:52px}
+.beger-auth-links{display:flex;flex-wrap:wrap;gap:13px;align-items:center;justify-content:space-between;margin-top:20px;font-size:12px;font-weight:700}
+.beger-auth-links a{color:#6c7d42}
+.beger-auth-error{padding:12px 14px;border-radius:12px;border:1px solid #f0c9c1;background:#fff0eb;color:#ab4232;font-size:12px;line-height:1.7}
+.beger-auth-success{padding:12px 14px;border-radius:12px;border:1px solid #d7e2cb;background:#f1f6e8;color:#526e36;font-size:12px;line-height:1.7}
+.beger-auth-bottom{font-size:11px;color:#a09284;line-height:1.7;padding-bottom:18px}
+@media(max-width:850px){.beger-marketing-hero{grid-template-columns:1fr;gap:25px;padding:35px 0}.beger-hero-art{min-height:370px}.beger-feature-grid{grid-template-columns:1fr 1fr}.beger-auth-shell{grid-template-columns:1fr}.beger-auth-visual{display:none}.beger-auth-side{min-height:100dvh}.beger-auth-panel{max-width:455px;padding:55px 0}}
+@media(max-width:550px){.beger-marketing-wrap{padding:0 16px}.beger-marketing-nav{padding:16px 0;flex-wrap:wrap}.beger-marketing-brand{font-size:23px;gap:8px}.beger-brand-mark{height:30px;width:30px;font-size:22px}.beger-brand-qmenu{font-size:22px}.beger-brand-divider{height:29px}.beger-marketing-navlinks{width:100%;justify-content:space-between}.beger-marketing-link{padding:8px 2px}.beger-marketing-hero h1{font-size:38px}.beger-marketing-lead{font-size:14px}.beger-feature-grid{grid-template-columns:1fr}.beger-hero-art{min-height:370px}.beger-demo-banner{align-items:flex-start;flex-direction:column;padding:22px}.beger-auth-side{padding:21px}.beger-auth-panel{padding:57px 0}.beger-auth-panel h1{font-size:34px}}
+@media(prefers-reduced-motion:reduce){.beger-marketing *{transition:none!important}}
