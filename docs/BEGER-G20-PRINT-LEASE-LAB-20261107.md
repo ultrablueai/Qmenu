@@ -23,3 +23,7 @@
 4. Signed JWT and multi-account device E2E tests, backup restoration, fiscal paperwork and commercial subscription billing are still release blockers.
 
 **Commercial launch remains NO-GO; Production unchanged.**
+
+## CI rerun note
+- First G20 CI attempt failed in a static source-contract assertion (399/400): a SQL comment mentioning the forbidden key type was incorrectly matched as executable usage. Fixed the assertion to ignore standalone SQL comments before checking for privileged credentials/mutations; no change to runtime database access controls.
+- Re-run the complete guarded Staging pipeline on the next exact-head commit. Do not mark this increment READY until the whole Next.js build and stable alias pass.
