@@ -52,7 +52,7 @@ begin
   raise exception 'Invalid printer destination kind' using errcode='22023';end if;
  v_name:=nullif(pg_catalog.btrim(coalesce(p_destination,'')),'');
  if v_name is null or char_length(v_name)>80 or
-    pg_catalog.position(chr(10) in v_name)>0 or pg_catalog.position(chr(13) in v_name)>0 then
+    pg_catalog.strpos(v_name,chr(10))>0 or pg_catalog.strpos(v_name,chr(13))>0 then
   raise exception 'Invalid printer destination name' using errcode='22023';end if;
 
  insert into public.g19_branch_print_routes(branch_id,business_id,kind,destination_name,updated_by)
