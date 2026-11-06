@@ -27,7 +27,8 @@ test("G20 exclusive claim is locked and short-lived; release checks token and ow
  assert.match(sql,/where public\.g20_print_test_leases\.expires_at<=now\(\)/);
  assert.match(sql,/l\.lease_token=p_token and l\.acquired_by=auth\.uid\(\)/);
  assert.match(sql,/primary key references public\.g17_order_print_jobs/);
- assert.doesNotMatch(sql,/update public\.g17_order_print_jobs|insert into public\.g18_print_job_events|service_role|device_secret/i);
+ const executable=sql.replace(/^--.*$/gm,"");
+ assert.doesNotMatch(executable,/update public\.g17_order_print_jobs|insert into public\.g18_print_job_events|service_role|device_secret/i);
 });
 test("G20 merchant controls clearly restrict operations to dry-run; never claim printing success",()=>{
  for(const rpc of ["g20_test_printer_status","g20_register_test_printer","g20_claim_test_print","g20_release_test_print"])
