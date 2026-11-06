@@ -3,6 +3,7 @@ import {useCallback,useEffect,useState} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
 import {printOrderTicket,type PrintableOrder} from "../../lib/beger-print-ticket";
 import type {BranchPrintSettings} from "./merchant-print-settings";
+import MerchantPrintRoutes,{type PrintDestinations} from "./merchant-print-routes";
 
 type Kind="kitchen"|"pickup"|"summary";
 type State="queued"|"previewed"|"failed"|"confirmed";
@@ -14,6 +15,7 @@ const states:Record<State,string>={queued:"بانتظار فتح الطباعة"
 export default function MerchantPrintQueue({branchId,branchName,settings}:{branchId:string;branchName:string;settings:BranchPrintSettings}){
  const [jobs,setJobs]=useState<PrintJob[]>([]),[events,setEvents]=useState<PrintEvent[]>([]),[loaded,setLoaded]=useState(false);
  const [filter,setFilter]=useState<"pending"|"all">("pending");
+ const [routes,setRoutes]=useState<PrintDestinations>({kitchen:"مطبخ الفرع",pickup:"بطاقات الاستلام",summary:"كاشير الفرع"});
  const [error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState("");
  const refresh=useCallback(async()=>{
   const db=browserSupabase();
@@ -70,6 +72,7 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
    <button type="button" disabled={Boolean(busy)} onClick={()=>void refresh().catch(()=>setError("فشل تحديث الطابور."))} style={{padding:"10px 14px",border:"1px solid #bfd2b7",borderRadius:10,background:"#f6faf2",fontWeight:750}}>تحديث ↻</button>
   </header>
   <p style={{color:"#566c4f",fontSize:12,margin:"12px 0"}}>المهام غير المؤكدة: <strong>{queued.length}</strong> · حالات الفشل: <strong>{failed.length}</strong> · إجمالي المعروض: {jobs.length}. هذه ليست فواتير ضريبية.</p>
+  <MerchantPrintRoutes branchId={branchId} onRoutes={setRoutes}/>
   <nav aria-label="تصفية مهام الطباعة" style={{display:"flex",gap:8,flexWrap:"wrap",margin:"12px 0"}}><button type="button" aria-pressed={filter==="pending"} onClick={()=>setFilter("pending")}>المهام المطلوبة ({queued.length})</button><button type="button" aria-pressed={filter==="all"} onClick={()=>setFilter("all")}>كل المهام ({jobs.length})</button></nav>
   {error?<p role="alert" style={{color:"#9c4436"}}>{error}</p>:null}
   {notice?<p role="status" style={{color:"#426e41"}}>{notice}</p>:null}
@@ -78,6 +81,7 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
   {loaded?<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,255px),1fr))",gap:10}}>
    {visible.map(job=><article key={job.id} style={{border:"1px solid #e0e7dd",borderRadius:12,padding:14,display:"grid",gap:9,alignContent:"start"}}>
     <strong>{titles[job.kind]} · #{job.order.id.replace(/-/g,"").slice(0,10).toUpperCase()}</strong>
+    <span style={{fontSize:12,color:"#496b40"}}>المحطة: {routes[job.kind]} · طباعة المتصفح اليدوية</span>
     <span style={{fontSize:12,color:"#69736b"}}>{job.order.table} · {states[job.state]??"حالة غير معروفة"}</span>
     <small style={{color:"#7e857b"}}>محاولات المعاينة: {job.attempts}</small>
     {job.state==="failed"&&job.failureNote?<p role="alert" style={{fontSize:12,color:"#994932",margin:0}}>سبب التعذّر: {job.failureNote}</p>:null}
