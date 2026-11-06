@@ -30,7 +30,9 @@ test("G17 preview does not claim paper has printed, confirmation and retry are e
  assert.match(sql,/p_action='retry' and v_job\.state in \('previewed','confirmed'\)/);
  assert.match(queue,/فتح المعاينة وحده لا يعني نجاح الطباعة/);
  assert.match(queue,/printOrderTicket\(job\.order,branchName,job\.kind,settings\)/);
- assert.match(queue,/g17_print_job_action/);
+ // G18 now owns the auditable mutation endpoint; legacy G17 callers delegate to it.
+ assert.match(queue,/g18_print_job_action/);
+ assert.match(readFileSync("supabase/migrations/20261106004500_g18_print_failure_audit.sql","utf8"),/select public\.g18_print_job_action\(p_job,p_action,null\)/);
  assert.match(queue,/g17_branch_print_jobs/);
  assert.match(queue,/الطباعة الفعلية من المتصفح تتطلب ضغط الموظف/);
 });
