@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 const read=p=>readFileSync(p,"utf8");
 const feedback=read("components/beger-feedback.tsx");
 const merchant=read("app/dashboard/merchant-order-board.tsx");
+const stationAlerts=read("lib/beger-station-alerts.ts");
 const guest=read("components/guest-order-submission.tsx");
 const watcher=read("components/guest-order-watcher.tsx");
 const basket=read("components/guest-cart.tsx");
@@ -27,12 +28,12 @@ test("feedback preferences persist locally and synchronize across guest modules"
  assert.match(feedback,/window\.removeEventListener\("beger-feedback-change",read\)/);
  assert.match(feedback,/ctx\.resume\(\)/);
 });
-test("merchant alerts only for genuinely new pending orders, not preexisting tickets on first load",()=>{
- assert.match(merchant,/seen=useRef<Set<string>\|null>\(null\)/);
- assert.match(merchant,/if\(seen\.current!==null\)/);
- assert.match(merchant,/o\.status==="pending"&&!seen\.current!\.has\(o\.id\)/);
- assert.match(merchant,/seen\.current=currentIds/);
- assert.match(merchant,/feedback\.signal\("new-order"/);
+test("merchant alerts only for new pending transitions, with quiet initial baseline",()=>{
+ assert.match(merchant,/useStationAlerts\("merchant",branchId,feedback\.signal\)/);
+ assert.match(merchant,/stationAlerts\.observe\(fresh\)/);
+ assert.match(stationAlerts,/if\(previous!==null&&label&&prior!==order\.status\)/);
+ assert.match(stationAlerts,/merchant:\{pending:"طلب جديد ينتظر الموافقة"\}/);
+ assert.match(stationAlerts,/if\(!previous\.alerts\.some\(a=>a\.key===key\)\)/);
  assert.match(merchant,/<BegerFeedbackControls/);
  assert.match(merchant,/feedback\.signal\(status==="accepted"/);
 });
