@@ -37,7 +37,9 @@ test("G17 preview does not claim paper has printed, confirmation and retry are e
  assert.match(queue,/الطباعة الفعلية من المتصفح تتطلب ضغط الموظف/);
 });
 test("G17 order board has one cashier acceptance and defers actual preparation to kitchen",()=>{
- assert.match(board,/pending:\{value:"accepted",label:"قبول الطلب وإرساله تلقائياً للمطبخ"\}/);
+ assert.match(board,/onClick=\{\(\)=>void transition\(o,"accepted"\)\}/);
+ assert.match(board,/✓ وصل للمطبخ · بانتظار أن يبدأ الموظف التحضير/);
+ assert.match(board,/onOpenStation\?\.\("kitchen"\)/);
  assert.doesNotMatch(board,/accepted:\{value:"preparing",label:"إرسال للمطبخ"\}/);
  assert.match(board,/MerchantPrintQueue branchId=\{branchId\} branchName=\{branchName\} settings=\{printSettings\}/);
  assert.match(board,/MerchantPrintSettings branchId=\{branchId\}/);
