@@ -1,5 +1,6 @@
 "use client";
-import {useEffect,useRef,useState} from "react";
+import {useEffect,useState} from "react";
+import {StationAlertBell,useStationAlerts} from "../../components/beger-station-alerts";
 import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {browserSupabase} from "../../lib/supabase/browser";
 import {publicServiceSignal,publicSignalLabels} from "../../lib/beger-service-workflows";
@@ -18,7 +19,7 @@ function orderReference(id:string){return id.replace(/-/g,"").slice(0,10).toUppe
 const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"accepted",label:"قبول الطلب وإرساله تلقائياً للمطبخ"},ready:{value:"fulfilled",label:"تأكيد التسليم"}};
 export default function MerchantOrderBoard({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
  const feedback=useBegerFeedback();
- const seen=useRef<Set<string>|null>(null);
+ const stationAlerts=useStationAlerts("merchant",branchId,feedback.signal);
  const [historyOpen,setHistoryOpen]=useState(false),[historyBusy,setHistoryBusy]=useState(false),[closedOrders,setClosedOrders]=useState<Order[]>([]),[historyLoaded,setHistoryLoaded]=useState(false);
  const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  const [collectionMethods,setCollectionMethods]=useState<Record<string,string>>({});
@@ -49,14 +50,12 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   if(list.error)throw list.error;
   setEnabled(cap.data?.enabled===true);setPickupEnabled(cap.data?.pickup_enabled===true);
   const fresh=Array.isArray(list.data)?list.data as Order[]:[];
-  const currentIds=new Set(fresh.map(o=>o.id));
-  if(seen.current!==null){const unseen=fresh.filter(o=>o.status==="pending"&&!seen.current!.has(o.id));if(unseen.length)feedback.signal("new-order",unseen.length===1?"طلب جديد من "+unseen[0].table:"وصل "+unseen.length+" طلبات جديدة");}
-  seen.current=currentIds;
+  stationAlerts.observe(fresh);
   setOrders(fresh);
   setError("");
   setLoaded(true);
  }
- useEffect(()=>{let live=true;seen.current=null;setLoaded(false);const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
+ useEffect(()=>{let live=true;setLoaded(false);const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
  async function loadHistory(){
   setHistoryBusy(true);
   try{
@@ -147,6 +146,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   <MerchantPrintSettings branchId={branchId} onSettings={setPrintSettings}/>
   <MerchantPrintQueue branchId={branchId} branchName={branchName} settings={printSettings}/>
   <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("new-order","هذا تنبيه اختبار، وليس طلباً جديداً")}/>
+  <StationAlertBell alerts={stationAlerts.alerts} clear={stationAlerts.clear} actionable={orders.filter(o=>o.status==="pending").length} label="التاجر"/>
   {feedback.message?<p role="status" className="beger-feedback-toast">{feedback.message}</p>:null}
   {error?<p role="alert" className="beger-order-board-error">{error}</p>:null}
   {notice?<p role="status" className="beger-order-board-notice">{notice}</p>:null}
