@@ -19,3 +19,6 @@
 - No Production database or schema changes. Prior Staging tenant protections, order transitions, pager isolation and G17–G21 print state remain unchanged.
 - Next run exact-HEAD `npm test && npm run build` through guarded Vercel Staging, then verify same fixed alias and version.
 - Real device sleep/background audio/vibration, independent staff accounts and end-to-end order/print acceptance remain unverified, so commercial launch continues **NO-GO**.
+
+## CI compatibility follow-up
+- First guarded G22 CI attempt detected obsolete assertions for merchant/cashier in-memory dedupe and a Node `.mjs` test mistakenly containing a TypeScript-only annotation. The tests were updated to assert the newer branch-scoped stored snapshot semantics instead. No order/business permissions were relaxed. A fresh full test+Next build on the exact guarded HEAD must verify these repairs before marking G22 deployed.
