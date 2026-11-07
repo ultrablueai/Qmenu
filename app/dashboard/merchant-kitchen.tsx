@@ -1,5 +1,7 @@
 "use client";
 import {useCallback,useEffect,useState} from "react";
+import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
+import {StationAlertBell,useStationAlerts} from "../../components/beger-station-alerts";
 import {browserSupabase} from "../../lib/supabase/browser";
 import "./merchant-kitchen.css";
 type Status="accepted"|"preparing"|"ready";
@@ -7,6 +9,8 @@ type Item={name:string;quantity:number;selections:{options?:{name_ar?:string}[];
 type Order={id:string;reference:string;table:string;status:Status;createdAt:string;items:Item[]};
 const labels:Record<Status,string>={accepted:"بانتظار المطبخ",preparing:"قيد التجهيز",ready:"جاهز للتسليم"};
 export default function MerchantKitchen({branchId,branchName}:{branchId:string;branchName:string}){
+ const feedback=useBegerFeedback();
+ const stationAlerts=useStationAlerts("kitchen",branchId,feedback.signal);
  const [orders,setOrders]=useState<Order[]>([]);
  const [loaded,setLoaded]=useState(false),[busy,setBusy]=useState(false);
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
@@ -14,14 +18,17 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
  const refresh=useCallback(async()=>{
   const {data,error}=await browserSupabase().rpc("g9_kitchen_queue",{p_branch:branchId});
   if(error||!Array.isArray(data))throw Error("Unauthorized kitchen query");
+  stationAlerts.observe(data as Order[]);
   setOrders(data as Order[]);setLoaded(true);setError("");
- },[branchId]);
+ },[branchId,stationAlerts.observe]);
  useEffect(()=>{
   let active=true;setOrders([]);setLoaded(false);setError("");setNotice("");
   const update=()=>{void refresh().catch(()=>{if(active)setError("تعذّر تحميل طلبات المطبخ. تأكد من صلاحية الفرع.")})};
   update();
   const id=window.setInterval(update,7000);
-  return()=>{active=false;window.clearInterval(id)};
+  const onVisible=()=>{if(document.visibilityState==="visible")update()};
+  const onFocus=()=>update();document.addEventListener("visibilitychange",onVisible);window.addEventListener("focus",onFocus);
+  return()=>{active=false;window.clearInterval(id);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
  },[refresh]);
  async function advance(order:Order,next:"preparing"|"ready"){
   if(busy)return;
@@ -38,6 +45,8 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
  const shown=orders.filter(o=>filter==="ready"?o.status==="ready":o.status!=="ready");
  return <section className="beger-kitchen" dir="rtl" aria-label="محطة المطبخ">
   <header><div><small>BEGER / KITCHEN</small><h2>محطة المطبخ</h2><p>{branchName} · أصناف وتجهيز فقط، بدون مدفوعات أو إدارة المتجر.</p></div><strong>{orders.filter(o=>o.status!=="ready").length} طلب للتجهيز</strong></header>
+  <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("accepted","هذا اختبار تنبيه المطبخ")} labels={{sound:"الصوت",vibration:"الاهتزاز",test:"اختبار صوت المطبخ"}}/>
+  <StationAlertBell alerts={stationAlerts.alerts} clear={stationAlerts.clear} actionable={orders.filter(o=>o.status==="accepted").length} label="المطبخ"/>
   <nav aria-label="عرض طلبات المطبخ"><button type="button" aria-pressed={filter==="live"} onClick={()=>setFilter("live")}>بانتظار التجهيز ({orders.filter(o=>o.status!=="ready").length})</button><button type="button" aria-pressed={filter==="ready"} onClick={()=>setFilter("ready")}>جاهزة ({orders.filter(o=>o.status==="ready").length})</button><button type="button" disabled={busy} onClick={()=>void refresh().catch(()=>setError("تعذّر التحديث."))}>تحديث ↻</button></nav>
   {notice?<p role="status" className="beger-kitchen-notice">{notice}</p>:null}
   {error?<p role="alert" className="beger-kitchen-error">{error}</p>:null}
