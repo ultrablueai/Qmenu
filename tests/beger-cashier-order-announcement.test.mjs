@@ -3,18 +3,20 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 
 const cashier=readFileSync("app/dashboard/merchant-cashier.tsx","utf8");
+const stationAlerts=readFileSync("lib/beger-station-alerts.ts","utf8");
 const cashierCss=readFileSync("app/dashboard/merchant-cashier.css","utf8");
 const staff=readFileSync("app/dashboard/merchant-staff.tsx","utf8");
 const staffCss=readFileSync("app/dashboard/merchant-staff.css","utf8");
 const guestWatcher=readFileSync("components/guest-order-watcher.tsx","utf8");
 
-test("cashier announces newly ready orders only after first snapshot; polling does not reannounce unchanged ready orders",()=>{
- assert.match(cashier,/const seenReady=useRef<Set<string>\|null>\(null\)/);
- assert.match(cashier,/if\(seenReady\.current!==null\)/);
- assert.match(cashier,/o\.status==="ready"&&!seenReady\.current!\.has\(o\.id\)/);
- assert.match(cashier,/seenReady\.current=ready/);
- assert.match(cashier,/seenReady\.current=null;setAnnouncement\(""\)/);
- assert.match(cashier,/feedback\.signal\("ready",text\)/);
+test("cashier alerts on new pending and ready status, not unchanged snapshots or historical first load",()=>{
+ assert.match(cashier,/useStationAlerts\("cashier",branchId,feedback\.signal\)/);
+ assert.match(cashier,/stationAlerts\.observe\(fresh\)/);
+ assert.match(stationAlerts,/cashier:\{pending:"طلب جديد ينتظر قبول الكاشير",ready:"طلب جاهز للاستلام"\}/);
+ assert.match(stationAlerts,/if\(previous!==null&&label&&prior!==order\.status\)/);
+ assert.match(stationAlerts,/if\(!previous\.alerts\.some\(a=>a\.key===key\)\)/);
+ assert.match(cashier,/document\.addEventListener\("visibilitychange",onVisible\)/);
+ assert.match(cashier,/<StationAlertBell/);
 });
 
 test("cashier ready ticket can be called again without mutating the order or changing payment",()=>{
