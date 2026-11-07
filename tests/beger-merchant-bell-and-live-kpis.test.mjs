@@ -17,7 +17,7 @@ test("merchant branch notification bell has its own bounded SVG style independen
 test("merchant dashboard KPI cards are based on current scoped order rows, not invented metrics",()=>{
  assert.match(board,/className="beger-order-board-kpis"/);
  assert.match(board,/orders\.filter\(o=>o\.status==="pending"\)\.length/);
- assert.match(board,/orders\.filter\(o=>o\.status==="preparing"\)\.length/);
+ assert.match(board,/orders\.filter\(o=>o\.status==="accepted"\|\|o\.status==="preparing"\)\.length/);
  assert.match(board,/orders\.filter\(o=>o\.status==="ready"\)\.length/);
  assert.match(board,/orders\.filter\(o=>o\.paymentStatus!=="paid"\)\.length/);
  assert.match(board,/\{loaded\?stat\.value:"—"\}/);
