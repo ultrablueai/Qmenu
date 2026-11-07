@@ -14,8 +14,8 @@ test("owner has directly accessible kitchen/cashier stations instead of dead-end
  assert.match(hq,/MerchantKitchen key=/);
  assert.match(hq,/MerchantCashier key=/);
  assert.match(hq,/onOpenStation=\{setWorkspace\}/);
- assert.match(board,/onOpenStation\?\("kitchen"\)/);
- assert.match(board,/onOpenStation\?\("cashier"\)/);
+ assert.match(board,/onOpenStation\?\.\("kitchen"\)/);
+ assert.match(board,/onOpenStation\?\.\("cashier"\)/);
  assert.match(board,/✓ وصل للمطبخ · بانتظار أن يبدأ الموظف التحضير/);
 });
 test("accepted order reaches real kitchen queue; only kitchen starts preparing",()=>{
