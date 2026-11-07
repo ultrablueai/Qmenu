@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import {StationAlertBell,useStationAlerts} from "../../components/beger-station-alerts";
+import {DurableStationNotifications} from "../../components/beger-durable-station-notifications";
 import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {browserSupabase} from "../../lib/supabase/browser";
 import {publicServiceSignal,publicSignalLabels} from "../../lib/beger-service-workflows";
@@ -147,6 +148,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   <MerchantPrintQueue branchId={branchId} branchName={branchName} settings={printSettings}/>
   <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("new-order","هذا تنبيه اختبار، وليس طلباً جديداً")}/>
   <StationAlertBell alerts={stationAlerts.alerts} clear={stationAlerts.clear} actionable={orders.filter(o=>o.status==="pending").length} label="التاجر"/>
+  <DurableStationNotifications branchId={branchId} station="merchant"/>
   {feedback.message?<p role="status" className="beger-feedback-toast">{feedback.message}</p>:null}
   {error?<p role="alert" className="beger-order-board-error">{error}</p>:null}
   {notice?<p role="status" className="beger-order-board-notice">{notice}</p>:null}
