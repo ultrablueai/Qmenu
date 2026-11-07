@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useState} from "react";
 import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {StationAlertBell,useStationAlerts} from "../../components/beger-station-alerts";
+import {DurableStationNotifications} from "../../components/beger-durable-station-notifications";
 import {browserSupabase} from "../../lib/supabase/browser";
 import "./merchant-cashier.css";
 type Status="pending"|"accepted"|"preparing"|"ready"|"fulfilled";
@@ -72,6 +73,7 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
   <header><div><small>BEGER / CASHIER STATION</small><h2>محطة الكاشير</h2><p>{branchName} · قبول الطلبات وتسجيل الاستلام فقط، بدون إعدادات أو تسويات.</p></div><strong>{active.length} طلب نشط</strong></header>
   <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("ready","هذا اختبار تنبيه الجاهزية")} labels={{sound:"الصوت",vibration:"الاهتزاز",test:"تجربة النداء"}}/>
   <StationAlertBell alerts={stationAlerts.alerts} clear={stationAlerts.clear} actionable={orders.filter(o=>o.status==="pending"||o.status==="ready").length} label="الكاشير"/>
+  <DurableStationNotifications branchId={branchId} station="cashier"/>
   {announcement?<p className="beger-cashier-announcement" role="status" aria-live="polite"><span aria-hidden="true">🔔</span><strong>{announcement}</strong><button type="button" onClick={()=>setAnnouncement("")} aria-label="إغلاق إعلان الطلب">إغلاق</button></p>:null}
   <nav aria-label="حالة الطلبات">
    <button type="button" aria-pressed={filter==="active"} onClick={()=>setFilter("active")}>الطلبات النشطة ({active.length})</button>
