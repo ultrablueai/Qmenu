@@ -5,6 +5,7 @@ import {printOrderTicket,type PrintableOrder} from "../../lib/beger-print-ticket
 import type {BranchPrintSettings} from "./merchant-print-settings";
 import MerchantPrintRoutes,{type PrintDestinations} from "./merchant-print-routes";
 import MerchantPrinterLeaseLab from "./merchant-printer-lease-lab";
+import MerchantPrintHealth from "./merchant-print-health";
 
 type Kind="kitchen"|"pickup"|"summary";
 type State="queued"|"previewed"|"failed"|"confirmed";
@@ -74,6 +75,7 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
   </header>
   <p style={{color:"#566c4f",fontSize:12,margin:"12px 0"}}>المهام غير المؤكدة: <strong>{queued.length}</strong> · حالات الفشل: <strong>{failed.length}</strong> · إجمالي المعروض: {jobs.length}. هذه ليست فواتير ضريبية.</p>
   <MerchantPrintRoutes branchId={branchId} onRoutes={setRoutes}/>
+  <MerchantPrintHealth branchId={branchId}/>
   <MerchantPrinterLeaseLab branchId={branchId}/>
   <nav aria-label="تصفية مهام الطباعة" style={{display:"flex",gap:8,flexWrap:"wrap",margin:"12px 0"}}><button type="button" aria-pressed={filter==="pending"} onClick={()=>setFilter("pending")}>المهام المطلوبة ({queued.length})</button><button type="button" aria-pressed={filter==="all"} onClick={()=>setFilter("all")}>كل المهام ({jobs.length})</button></nav>
   {error?<p role="alert" style={{color:"#9c4436"}}>{error}</p>:null}
