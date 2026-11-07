@@ -31,8 +31,11 @@ test("merchant can view and refresh closed orders without mixing them into new-o
  assert.match(board,/setHistoryOpen\(true\)/);
  assert.match(board,/سجل الطلبات السابقة/);
  assert.match(board,/تحديث السجل/);
- assert.match(board,/seen\.current=currentIds/);
- assert.match(board,/o\.status==="pending"&&!seen\.current!\.has\(o\.id\)/);
+ const stationAlerts=readFileSync("lib/beger-station-alerts.ts","utf8");
+ assert.match(board,/stationAlerts\.observe\(fresh\)/);
+ assert.match(stationAlerts,/merchant:\{pending:"طلب جديد ينتظر الموافقة"\}/);
+ assert.match(stationAlerts,/if\(previous!==null&&label&&prior!==order\.status\)/);
+ assert.doesNotMatch(board.slice(board.indexOf("async function loadHistory"),board.indexOf("async function",board.indexOf("async function loadHistory")+1)),/stationAlerts\.observe\(/);
  assert.match(css,/G4: compact, separate seven-day closed-order history/);
  assert.match(css,/@media\(max-width:700px\)/);
 });
