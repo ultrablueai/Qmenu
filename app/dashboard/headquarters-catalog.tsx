@@ -7,6 +7,8 @@ import QrSvg from "../../lib/qr/qr-svg";
 import QrExport from "../../components/qr-export";
 import MerchantTableQr from "./merchant-table-qr";
 import MerchantOrderBoard from "./merchant-order-board";
+import MerchantKitchen from "./merchant-kitchen";
+import MerchantCashier from "./merchant-cashier";
 import MerchantReport from "./merchant-report";
 import MerchantReviews from "./merchant-reviews";
 import MerchantLoyalty from "./merchant-loyalty";
@@ -17,9 +19,11 @@ import "./merchant-workspace.css";
 
 type Branch={id:string;name:string};
 type Props={businessId:string;country:string;branches:Branch[]};
-type Workspace="orders"|"pager"|"reports"|"catalog"|"qr"|"appearance"|"reviews"|"loyalty"|"staff"|"legacy";
+type Workspace="orders"|"kitchen"|"cashier"|"pager"|"reports"|"catalog"|"qr"|"appearance"|"reviews"|"loyalty"|"staff"|"legacy";
 const workspaceSections:{id:Workspace;icon:string;name:string;help:string}[]=[
- {id:"orders",icon:"▣",name:"الطلبات والمطبخ",help:"طلبات مباشرة · تحصيل · طباعة"},
+ {id:"orders",icon:"▣",name:"استقبال الطلبات",help:"موافقة الطلبات ومتابعة التقدم"},
+ {id:"kitchen",icon:"♨",name:"المطبخ",help:"بدء التحضير وإعلان الجاهزية"},
+ {id:"cashier",icon:"▤",name:"الكاشير والتسليم",help:"تحصيل الطلبات وتسليم الجاهز"},
  {id:"pager",icon:"♧",name:"البيجر المستقل",help:"الكاشير · أرقام النداء · QR"},
  {id:"reports",icon:"▥",name:"التقارير والكاشير",help:"قيمة الطلبات · التحصيل المسجّل · القنوات"},
  {id:"catalog",icon:"▤",name:"المنتجات والكتالوج",help:"الأصناف · الإضافات · الأسعار"},
@@ -44,6 +48,8 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
    else if(h==="#customer-appearance")setWorkspace("appearance");
    else if(h==="#qr-management")setWorkspace("qr");
    else if(h==="#merchant-orders")setWorkspace("orders");
+   else if(h==="#merchant-kitchen")setWorkspace("kitchen");
+   else if(h==="#merchant-cashier")setWorkspace("cashier");
    else if(h==="#merchant-pager")setWorkspace("pager");
    else if(h==="#merchant-reports")setWorkspace("reports");
    else if(h==="#merchant-reviews")setWorkspace("reviews");
@@ -68,11 +74,17 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
     </select>
    </label>
   </header>
-  <nav className="beger-workspace-tabs" aria-label="أقسام إدارة المتجر">
-   {workspaceSections.map(section=><button type="button" key={section.id} onClick={()=>setWorkspace(section.id)} className={"beger-workspace-tab"+(workspace===section.id?" is-current":"")} aria-current={workspace===section.id?"page":undefined}>
+  <nav className="beger-workspace-tabs" aria-label="محطات التشغيل اليومية">
+   {workspaceSections.filter(section=>["orders","kitchen","cashier"].includes(section.id)).map(section=><button type="button" key={section.id} onClick={()=>setWorkspace(section.id)} className={"beger-workspace-tab"+(workspace===section.id?" is-current":"")} aria-current={workspace===section.id?"page":undefined}>
     <span aria-hidden="true" className="beger-workspace-tab-symbol">{section.icon}</span><strong>{section.name}</strong><small>{section.help}</small>
    </button>)}
   </nav>
+  <details className="beger-workspace-more" style={{margin:"12px 0 18px",padding:"12px 16px",border:"1px solid #e0e7db",background:"#fff",borderRadius:14}}>
+   <summary style={{cursor:"pointer",fontWeight:750,color:"#4d6748"}}>بقية الخدمات والإعدادات · البيجر، المنتجات، QR، التقارير والمزيد</summary>
+   <nav aria-label="بقية أدوات إدارة المتجر" className="beger-workspace-tabs" style={{marginTop:12}}>
+    {workspaceSections.filter(section=>!["orders","kitchen","cashier"].includes(section.id)).map(section=><button type="button" key={section.id} onClick={()=>setWorkspace(section.id)} className={"beger-workspace-tab"+(workspace===section.id?" is-current":"")} aria-current={workspace===section.id?"page":undefined}><span aria-hidden="true" className="beger-workspace-tab-symbol">{section.icon}</span><strong>{section.name}</strong><small>{section.help}</small></button>)}
+   </nav>
+  </details>
   <div className="beger-merchant-workspace-card">
    <header className="beger-merchant-workspace-card-header"><div><span>WORKSPACE / {workspace.toUpperCase()}</span><h3>{current.name}</h3><p>{current.help}</p></div><span className="beger-merchant-workspace-branch-chip">{activeName}</span></header>
    {workspace==="qr"?<div id="qr-management">
@@ -96,7 +108,9 @@ export default function HeadquartersCatalog({businessId,country,branches}:Props)
 
     <MerchantTableQr key={activeId} businessId={businessId} branchId={activeId} branchName={activeName}/>
    </div>:null}
-   {workspace==="orders"?<div id="merchant-orders"><MerchantOrderBoard key={"orders-"+activeId} businessId={businessId} branchId={activeId} branchName={activeName}/></div>:null}
+   {workspace==="orders"?<div id="merchant-orders"><MerchantOrderBoard key={"orders-"+activeId} businessId={businessId} branchId={activeId} branchName={activeName} onOpenStation={setWorkspace}/></div>:null}
+   {workspace==="kitchen"?<div id="merchant-kitchen"><MerchantKitchen key={"kitchen-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
+   {workspace==="cashier"?<div id="merchant-cashier"><MerchantCashier key={"cashier-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="pager"?<div id="merchant-pager"><MerchantPager key={"pager-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="reports"?<div id="merchant-reports"><MerchantReport key={"reports-"+activeId} branchId={activeId} branchName={activeName}/></div>:null}
    {workspace==="appearance"?<div id="customer-appearance"><MerchantAppearance businessId={businessId}/></div>:null}
