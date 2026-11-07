@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useState} from "react";
 import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {StationAlertBell,useStationAlerts} from "../../components/beger-station-alerts";
+import {DurableStationNotifications} from "../../components/beger-durable-station-notifications";
 import {browserSupabase} from "../../lib/supabase/browser";
 import "./merchant-kitchen.css";
 type Status="accepted"|"preparing"|"ready";
@@ -47,6 +48,7 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
   <header><div><small>BEGER / KITCHEN</small><h2>محطة المطبخ</h2><p>{branchName} · أصناف وتجهيز فقط، بدون مدفوعات أو إدارة المتجر.</p></div><strong>{orders.filter(o=>o.status!=="ready").length} طلب للتجهيز</strong></header>
   <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("accepted","هذا اختبار تنبيه المطبخ")} labels={{sound:"الصوت",vibration:"الاهتزاز",test:"اختبار صوت المطبخ"}}/>
   <StationAlertBell alerts={stationAlerts.alerts} clear={stationAlerts.clear} actionable={orders.filter(o=>o.status==="accepted").length} label="المطبخ"/>
+  <DurableStationNotifications branchId={branchId} station="kitchen"/>
   <nav aria-label="عرض طلبات المطبخ"><button type="button" aria-pressed={filter==="live"} onClick={()=>setFilter("live")}>بانتظار التجهيز ({orders.filter(o=>o.status!=="ready").length})</button><button type="button" aria-pressed={filter==="ready"} onClick={()=>setFilter("ready")}>جاهزة ({orders.filter(o=>o.status==="ready").length})</button><button type="button" disabled={busy} onClick={()=>void refresh().catch(()=>setError("تعذّر التحديث."))}>تحديث ↻</button></nav>
   {notice?<p role="status" className="beger-kitchen-notice">{notice}</p>:null}
   {error?<p role="alert" className="beger-kitchen-error">{error}</p>:null}
