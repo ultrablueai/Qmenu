@@ -17,14 +17,15 @@ type Order={id:string;table:string;serviceMode?:"dine_in"|"takeaway";paymentStat
 const titles:Record<Status,string>={pending:"بانتظار الموافقة",accepted:"تم قبول الطلب",preparing:"قيد التحضير",ready:"جاهز للتسليم",fulfilled:"تم التسليم",rejected:"مرفوض"};
 function formatOrderTotal(minor:number,currency:string){const factor=currency==="TRY"?100:1;return new Intl.NumberFormat("ar",{minimumFractionDigits:currency==="TRY"?2:0,maximumFractionDigits:currency==="TRY"?2:0}).format(minor/factor)+" "+currency;}
 function orderReference(id:string){return id.replace(/-/g,"").slice(0,10).toUpperCase();}
-const next:Partial<Record<Status,{value:Status;label:string}>>={pending:{value:"accepted",label:"قبول الطلب وإرساله تلقائياً للمطبخ"},ready:{value:"fulfilled",label:"تأكيد التسليم"}};
-export default function MerchantOrderBoard({businessId,branchId,branchName}:{businessId:string;branchId:string;branchName:string}){
+export default function MerchantOrderBoard({businessId,branchId,branchName,onOpenStation}:{businessId:string;branchId:string;branchName:string;onOpenStation?:(station:"kitchen"|"cashier")=>void}){
  const feedback=useBegerFeedback();
  const stationAlerts=useStationAlerts("merchant",branchId,feedback.signal);
  const [historyOpen,setHistoryOpen]=useState(false),[historyBusy,setHistoryBusy]=useState(false),[closedOrders,setClosedOrders]=useState<Order[]>([]),[historyLoaded,setHistoryLoaded]=useState(false);
  const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  const [collectionMethods,setCollectionMethods]=useState<Record<string,string>>({});
  const [printSettings,setPrintSettings]=useState<BranchPrintSettings>(DEFAULT_BRANCH_PRINT_SETTINGS);
+ const [showAdvanced,setShowAdvanced]=useState(false);
+ const [showFilters,setShowFilters]=useState(false);
  const printOrderTicket=(order:Order,branch:string,kind:"kitchen"|"pickup"|"summary")=>printOrderTicketBase(order,branch,kind,printSettings);
  const [activeView,setActiveView]=useState<"live"|"history">("live");
  const [archiveLayout,setArchiveLayout]=useState<"grid"|"list"|"table">("table");
@@ -122,12 +123,18 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
   finally{setBusy(false)}
  }
  return <section id="beger-merchant-orders" className="beger-order-board" dir="rtl" aria-label="إدارة طلبات الطاولات">
-  <header className="beger-order-board-header"><div><span>BEGER · G3 PILOT</span><h2>طلبات الطاولات والمطبخ</h2><p>{branchName} · استقبال الطلب ← موافقة المطعم ← التحضير ← الجاهزية</p></div><div><span className={enabled?"beger-order-enabled":"beger-order-disabled"}>{enabled?"● طلبات الطاولات مفعّلة":"○ طلبات الطاولات متوقفة"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void toggle()}>{enabled?"إيقاف طلبات الطاولات":"تفعيل طلبات الطاولات"}</button><span className={pickupEnabled?"beger-order-enabled":"beger-order-disabled"}>{pickupEnabled?"● طلبات السفري مفعّلة":"○ طلبات السفري متوقفة"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void togglePickup()}>{pickupEnabled?"إيقاف استقبال السفري":"تفعيل استقبال السفري"}</button></div></header>
+  <header className="beger-order-board-header"><div><span>BEGER · ORDERS</span><h2>الطلبات المباشرة</h2><p>{branchName} · قبول واحد ← يصل الطلب للمطبخ تلقائياً ← تجهيز ← تسليم</p></div><div><span className={enabled?"beger-order-enabled":"beger-order-disabled"}>{enabled?"● طلبات الطاولات مفعّلة":"○ طلبات الطاولات متوقفة"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void toggle()}>{enabled?"إيقاف طلبات الطاولات":"تفعيل طلبات الطاولات"}</button><span className={pickupEnabled?"beger-order-enabled":"beger-order-disabled"}>{pickupEnabled?"● طلبات السفري مفعّلة":"○ طلبات السفري متوقفة"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void togglePickup()}>{pickupEnabled?"إيقاف استقبال السفري":"تفعيل استقبال السفري"}</button></div></header>
+  <div className="beger-order-journey" role="navigation" aria-label="خطوات رحلة الطلب" style={{display:"flex",flexWrap:"wrap",gap:9,alignItems:"center",margin:"12px 0 18px"}}>
+   <button type="button" onClick={showLive} style={{padding:"10px 14px",borderRadius:10,border:"1px solid #bfcdb6",background:"#edf4e7",fontWeight:800}}>① استقبال الطلبات</button>
+   <button type="button" onClick={()=>onOpenStation?.("kitchen")} disabled={!onOpenStation} style={{padding:"10px 14px",borderRadius:10,border:"1px solid #bfcdb6",background:"#fff",fontWeight:800}}>② فتح المطبخ · {orders.filter(o=>o.status==="accepted"||o.status==="preparing").length}</button>
+   <button type="button" onClick={()=>onOpenStation?.("cashier")} disabled={!onOpenStation} style={{padding:"10px 14px",borderRadius:10,border:"1px solid #bfcdb6",background:"#fff",fontWeight:800}}>③ الكاشير والتسليم · {orders.filter(o=>o.status==="ready").length}</button>
+  </div>
   <nav className="beger-board-view-tabs" aria-label="مساحات الطلبات">
    <button type="button" className={activeView==="live"?"is-active":""} aria-current={activeView==="live"?"page":undefined} onClick={showLive}>الطلبات المباشرة</button>
    <button type="button" className={activeView==="history"?"is-active":""} aria-current={activeView==="history"?"page":undefined} onClick={()=>{if(activeView!=="history")void toggleHistory();}}>سجل الطلبات السابقة</button>
   </nav>
-  <section className="beger-order-filterbar" aria-label="تصفية الطلبات">
+  <button type="button" aria-expanded={showFilters} onClick={()=>setShowFilters(v=>!v)} style={{padding:"8px 13px",border:"1px solid #d9e2d0",background:"#fff",borderRadius:9,margin:"8px 0"}}>⌕ {showFilters?"إخفاء البحث والفلاتر":"بحث وتصفية متقدمة"}</button>
+  {showFilters?<section className="beger-order-filterbar" aria-label="تصفية الطلبات">
    <label>بحث برقم الطلب أو الطاولة<input type="search" value={searchQuery} onChange={event=>setSearchQuery(event.target.value)} placeholder="رقم الطلب أو الطاولة" /></label>
    <label>نوع الطلب<select value={serviceFilter} onChange={event=>setServiceFilter(event.target.value as typeof serviceFilter)}><option value="all">كل الخدمات</option><option value="dine_in">الطاولات</option><option value="takeaway">السفري</option></select></label>
    <label>التحصيل<select value={paymentFilter} onChange={event=>setPaymentFilter(event.target.value as typeof paymentFilter)}><option value="all">الكل</option><option value="paid">محصّل</option><option value="unpaid">غير محصّل</option></select></label>
@@ -136,19 +143,23 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
    <button type="button" className="beger-board-filter-print" disabled={activeView==="live"?!loaded:!historyLoaded} onClick={()=>{if(!printFilteredOrderList(activeView==="live"?filteredLive:filteredHistory,branchName,activeView))setError("المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة للموقع.");}}>طباعة النتائج المفلترة</button>
    <button type="button" className="beger-board-filter-export" disabled={activeView==="live"?!loaded||filteredLive.length===0:!historyLoaded||filteredHistory.length===0} onClick={()=>{downloadOrderCsv(activeView==="live"?filteredLive:filteredHistory,activeView);}}>تصدير CSV</button>
    <span className="beger-board-result-count" role="status">المعروض: {activeView==="live"?filteredLive.length:filteredHistory.length} طلب</span>
-  </section>
+  </section>:null}
   {activeView==="live"?<section className="beger-order-board-kpis" aria-label="ملخص بيانات الطلبات الحالية">
    {([{label:"بانتظار الموافقة",value:orders.filter(o=>o.status==="pending").length},
-      {label:"قيد التحضير",value:orders.filter(o=>o.status==="preparing").length},
+      {label:"وصلت إلى المطبخ",value:orders.filter(o=>o.status==="accepted"||o.status==="preparing").length},
       {label:"جاهزة للاستلام",value:orders.filter(o=>o.status==="ready").length},
       {label:"لم يُسجّل تحصيلها",value:orders.filter(o=>o.paymentStatus!=="paid").length}
     ]).map(stat=><div className="beger-order-board-kpi" key={stat.label}><span>{stat.label}</span><strong>{loaded?stat.value:"—"}</strong></div>)}
   </section>:null}
-  <MerchantPrintSettings branchId={branchId} onSettings={setPrintSettings}/>
-  <MerchantPrintQueue branchId={branchId} branchName={branchName} settings={printSettings}/>
-  <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("new-order","هذا تنبيه اختبار، وليس طلباً جديداً")}/>
+  <button type="button" aria-expanded={showAdvanced} onClick={()=>setShowAdvanced(v=>!v)} style={{padding:"10px 14px",border:"1px solid #cedbc9",background:"#fff",borderRadius:11,margin:"10px 0",fontWeight:750}}>⚙ {showAdvanced?"إخفاء أدوات الطباعة والتنبيهات":"الطباعة والتنبيهات والإعدادات المتقدمة"}</button>
+  {showAdvanced?<div className="beger-order-advanced" style={{padding:"12px 14px",border:"1px solid #dce6d6",borderRadius:14,marginBottom:13}}>
+   <MerchantPrintSettings branchId={branchId} onSettings={setPrintSettings}/>
+   <MerchantPrintQueue branchId={branchId} branchName={branchName} settings={printSettings}/>
+   <BegerFeedbackControls settings={feedback.settings} onChange={feedback.change} onTest={()=>feedback.signal("new-order","هذا تنبيه اختبار، وليس طلباً جديداً")}/>
+   <p style={{fontSize:12,color:"#64715f"}}>إيقاف استقبال طلبات الطاولات والسفري من إعدادات التشغيل في أعلى اللوحة، وليس من داخل بطاقة الطلب.</p>
+  </div>:null}
   <StationAlertBell alerts={stationAlerts.alerts} clear={stationAlerts.clear} actionable={orders.filter(o=>o.status==="pending").length} label="التاجر"/>
-  <DurableStationNotifications branchId={branchId} station="merchant"/>
+  {showAdvanced?<DurableStationNotifications branchId={branchId} station="merchant"/>:null}
   {feedback.message?<p role="status" className="beger-feedback-toast">{feedback.message}</p>:null}
   {error?<p role="alert" className="beger-order-board-error">{error}</p>:null}
   {notice?<p role="status" className="beger-order-board-notice">{notice}</p>:null}
@@ -160,24 +171,30 @@ export default function MerchantOrderBoard({businessId,branchId,branchName}:{bus
       <div className="beger-order-ticket-head"><strong>⌗ {o.serviceMode==="takeaway"?"سفري · استلام من المحل":o.table}</strong><span className="beger-order-reference" aria-label={"رقم الطلب "+orderReference(o.id)}>طلب #{orderReference(o.id)}</span><time dateTime={o.createdAt}>{new Date(o.createdAt).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</time></div>
       <ul>{o.items.map((item,index)=><li key={index}><strong>{item.quantity}× {item.name}</strong><small>{(item.selections?.options??[]).map(opt=>opt.name_ar).filter(Boolean).join(" · ")}{(item.selections?.removedIngredients??[]).length?" · بدون "+(item.selections?.removedIngredients??[]).join("، "):""}</small></li>)}</ul>
       <div className="beger-order-ticket-price">{formatOrderTotal(o.totalMinor,o.currency)}</div>
-      <div className="beger-order-payment" aria-label="حالة تحصيل الطلب">
-       <strong className={o.paymentStatus==="paid"?"is-paid":"is-unpaid"}>{o.paymentStatus==="paid"?"✓ تم تسجيل التحصيل":"◯ لم يُسجّل التحصيل"}</strong>
-       {o.paymentStatus==="paid"?<small>{o.paymentMethod==="cash"?"نقداً":o.paymentMethod==="external_card"?"بطاقة التاجر":o.paymentMethod==="external_transfer"?"تحويل خارجي":""}</small>:<div className="beger-order-payment-actions">
-        <label htmlFor={"collection-"+o.id}>طريقة التحصيل</label>
-        <select id={"collection-"+o.id} disabled={busy} value={collectionMethods[o.id]??"cash"} onChange={event=>setCollectionMethods(current=>({...current,[o.id]:event.target.value}))}>
-         <option value="cash">نقداً</option><option value="external_card">بطاقة على جهاز التاجر</option><option value="external_transfer">تحويل خارجي</option>
-        </select>
-        <button type="button" disabled={busy} onClick={()=>void recordPayment(o)}>تأكيد المبلغ المستلم</button>
-       </div>}
-      </div>
-      <div className="beger-order-ticket-print" role="group" aria-label={"طباعة مستندات الطلب "+orderReference(o.id)}>
-       <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"kitchen"))setError("المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة للموقع.")}}>طباعة المطبخ</button>
-       <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"pickup"))setError("المتصفح منع نافذة الطباعة.")}}>ملصق الاستلام</button>
-       <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"summary"))setError("المتصفح منع نافذة الطباعة.")}}>كشف حساب داخلي</button>
-      </div>
-      <div className="beger-order-pager-signal" aria-label="حالة المتابعة العامة">متابعة الزبون: {publicSignalLabels[publicServiceSignal("table_order",o.status)].ar}</div>
-      {next[o.status]?<button disabled={busy} type="button" onClick={()=>void transition(o,next[o.status]!.value)}>{next[o.status]!.label}</button>:null}
-      {(o.status==="pending"||o.status==="accepted")?<button className="beger-order-reject" disabled={busy} type="button" onClick={()=>{if(confirm("رفض الطلب؟ سيتم إبلاغ الزبون بحالة الرفض."))void transition(o,"rejected")}}>رفض الطلب</button>:null}
+      <p className="beger-order-stage-hint" style={{margin:"10px 0",padding:"10px 12px",borderRadius:10,background:"#eff5e9",color:"#3d6436",fontSize:13,fontWeight:700}}>
+       {o.status==="pending"?"الخطوة الآن: وافق على الطلب ليظهر في المطبخ تلقائياً.":o.status==="accepted"?"✓ وصل للمطبخ · بانتظار أن يبدأ الموظف التحضير":o.status==="preparing"?"المطبخ يحضّر الطلب · لا تحتاج لاتخاذ إجراء": "✓ جاهز · حوّله للكاشير لتأكيد التسليم"}
+      </p>
+      {o.status==="pending"?<button className="beger-order-primary-action" disabled={busy} type="button" onClick={()=>void transition(o,"accepted")}>✓ قبول وإرسال تلقائي للمطبخ</button>:null}
+      {(o.status==="accepted"||o.status==="preparing")?<button type="button" className="beger-order-primary-action" disabled={!onOpenStation} onClick={()=>onOpenStation?.("kitchen")}>فتح محطة المطبخ ←</button>:null}
+      {o.status==="ready"?<button type="button" className="beger-order-primary-action" disabled={!onOpenStation} onClick={()=>onOpenStation?.("cashier")}>فتح الكاشير للتسليم ←</button>:null}
+      <details className="beger-order-ticket-more" style={{marginTop:11,padding:"8px 10px",border:"1px solid #e0e7d8",borderRadius:10}}>
+       <summary style={{cursor:"pointer",color:"#697366",fontSize:12}}>التحصيل والطباعة وإجراءات إضافية</summary>
+       <div className="beger-order-payment" aria-label="حالة تحصيل الطلب">
+        <strong className={o.paymentStatus==="paid"?"is-paid":"is-unpaid"}>{o.paymentStatus==="paid"?"✓ تم تسجيل التحصيل":"◯ لم يُسجّل التحصيل"}</strong>
+        {o.paymentStatus==="paid"?<small>{o.paymentMethod==="cash"?"نقداً":o.paymentMethod==="external_card"?"بطاقة التاجر":o.paymentMethod==="external_transfer"?"تحويل خارجي":""}</small>:<div className="beger-order-payment-actions">
+         <label htmlFor={"collection-"+o.id}>طريقة التحصيل</label>
+         <select id={"collection-"+o.id} disabled={busy} value={collectionMethods[o.id]??"cash"} onChange={event=>setCollectionMethods(current=>({...current,[o.id]:event.target.value}))}><option value="cash">نقداً</option><option value="external_card">بطاقة على جهاز التاجر</option><option value="external_transfer">تحويل خارجي</option></select>
+         <button type="button" disabled={busy} onClick={()=>void recordPayment(o)}>تسجيل المبلغ المستلم</button>
+        </div>}
+       </div>
+       <div className="beger-order-ticket-print" role="group" aria-label={"طباعة مستندات الطلب "+orderReference(o.id)}>
+        <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"kitchen"))setError("اسمح بنوافذ الطباعة.")}}>تذكرة المطبخ</button>
+        <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"pickup"))setError("اسمح بنوافذ الطباعة.")}}>بطاقة الاستلام</button>
+        <button type="button" onClick={()=>{if(!printOrderTicket(o,branchName,"summary"))setError("اسمح بنوافذ الطباعة.")}}>كشف داخلي</button>
+       </div>
+       <div className="beger-order-pager-signal" aria-label="حالة متابعة الزبون">متابعة الزبون: {publicSignalLabels[publicServiceSignal("table_order",o.status)].ar}</div>
+       {(o.status==="pending"||o.status==="accepted")?<button className="beger-order-reject" disabled={busy} type="button" onClick={()=>{if(confirm("رفض الطلب؟ سيتم إبلاغ الزبون بحالة الرفض."))void transition(o,"rejected")}}>رفض الطلب</button>:null}
+      </details>
     </article>)}
     {!filteredLive.some(o=>o.status===stage)?<p className="beger-order-board-empty">لا توجد طلبات بهذه الحالة</p>:null}
    </section>)}</div></>:null}
