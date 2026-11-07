@@ -21,7 +21,7 @@ test("G22 creates per-branch station notification snapshots, never arbitrary bac
  assert.doesNotMatch(bell,/Notification\.requestPermission|serviceWorker\.register|PushManager/);
 });
 test("G22 merchant, cashier and kitchen have bell counters and station status polling",()=>{
- for(const [page,role] of [[owner,"merchant"],[cashier,"cashier"],[kitchen,"kitchen"]] as const){
+ for(const [page,role] of [[owner,"merchant"],[cashier,"cashier"],[kitchen,"kitchen"]]){
   assert.ok(page.includes('useStationAlerts("'+role+'",branchId,feedback.signal)'),role);
   assert.match(page,/<StationAlertBell alerts=\{stationAlerts\.alerts\} clear=\{stationAlerts\.clear\}/);
   assert.match(page,/stationAlerts\.observe\(/);
