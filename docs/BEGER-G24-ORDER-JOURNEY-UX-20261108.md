@@ -31,3 +31,7 @@
 - Need to validate real UX visually after deployment (simple cards and responsive mobile); CI passing is not proof of user-experience acceptance.
 - No physical silent printer bridge; no production fiscal integration, paid subscription or commercial release GO.
 - All work on `feat/g1-foundation` and Supabase Staging; no Supabase Production mutation.
+
+## Release verification update
+- First staging CI run of G24 reported 410/413 tests passing; failures were three source-contract assertions expecting previous implementation details (old pre-G24 KPI category, old workspace type union and a regex typo for optional function invocation). Source assertions were corrected to require the new real station navigation and combined kitchen load. The branch reception toggles were folded into a compact disclosure without removing controls.
+- Next guarded deployment uses exact repository HEAD. No order records or Production data were modified by these UI changes.
