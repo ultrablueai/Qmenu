@@ -22,3 +22,7 @@
 
 ## CI compatibility follow-up
 - First guarded G22 CI attempt detected obsolete assertions for merchant/cashier in-memory dedupe and a Node `.mjs` test mistakenly containing a TypeScript-only annotation. The tests were updated to assert the newer branch-scoped stored snapshot semantics instead. No order/business permissions were relaxed. A fresh full test+Next build on the exact guarded HEAD must verify these repairs before marking G22 deployed.
+
+## Final regression repairs
+- After fixing the G22 Node `.mjs` syntax and replacing outdated merchant/cashier implementation assertions, the CI improved to 405/406 tests. The last failure came from G4 history test expecting removed `seen.current` internals. Replaced it with a guard ensuring archived-order reads cannot fire live-order station alerts. Existing historical order security and reprint assertions remain intact.
+- Next guarded Staging deployment should run the full suite and Next build, and alias mapping must be checked before declaring READY.
