@@ -17,7 +17,7 @@ test("merchant dashboard is routed into separate workspaces instead of rendering
  assert.match(page,/encodeURIComponent\(primary\?\.id\?\?""\)/);
 });
 test("merchant workspace exposes independent editable panels without mixing queues, QR, catalog and design",()=>{
- assert.match(hq,/type Workspace="orders"\|"pager"\|"reports"\|"catalog"\|"qr"\|"appearance"\|"reviews"\|"loyalty"\|"staff"\|"legacy"/);
+ assert.match(hq,/type Workspace="orders"\|"kitchen"\|"cashier"\|"pager"\|"reports"\|"catalog"\|"qr"\|"appearance"\|"reviews"\|"loyalty"\|"staff"\|"legacy"/);
  assert.match(hq,/useState<Workspace>\("orders"\)/);
  assert.match(hq,/className="beger-workspace-tabs"/);
  assert.match(hq,/onClick=\{\(\)=>setWorkspace\(section\.id\)\}/);
