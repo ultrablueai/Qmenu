@@ -206,3 +206,14 @@
 
 .beger-board-filter-export{border:1px solid #cab695;background:#fff8ee;color:#7f5b36}
 .beger-board-filter-export:disabled{opacity:.55;cursor:not-allowed}
+
+/* G24: one clear primary action per order; supporting actions remain expandable. */
+.beger-order-journey button{flex:1 1 180px;min-height:44px;cursor:pointer;color:#3f6038}
+.beger-order-journey button:disabled{opacity:.55;cursor:not-allowed}
+.beger-order-ticket .beger-order-primary-action{background:#53763c;color:#fff;border:1px solid #496b37;font-weight:900;min-height:47px}
+.beger-order-ticket-more{background:#fefdf9}
+.beger-order-ticket-more>summary{list-style:disclosure-closed;line-height:1.6}
+.beger-order-ticket-more[open]>summary{margin-bottom:10px}
+.beger-order-ticket-more .beger-order-payment{margin-top:8px}
+.beger-order-advanced>.beger-order-board-error{margin-top:10px}
+@media(max-width:580px){.beger-order-journey{display:grid!important;grid-template-columns:minmax(0,1fr)}.beger-order-journey button{flex:auto}}
