@@ -79,9 +79,9 @@ export function useBegerFeedback(){
 }
 export function BegerFeedbackControls({settings,onChange,onTest,labels}:{settings:FeedbackSettings;onChange:(next:FeedbackSettings)=>void;onTest?:()=>void;labels?:{sound:string;vibration:string;test?:string}}){
  const heading=labels?.sound==="Sound"?"Notifications":labels?.sound==="Ses"?"Bildirimler":"التنبيهات";
- return <details className="beger-feedback-panel">
-  <summary className="beger-feedback-summary" aria-label={heading}>
-   <svg className="beger-feedback-bell" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+ return <details className="beger-feedback-panel" style={{width:"100%",maxWidth:390,minWidth:0,border:"1px solid #dfe6d8",borderRadius:12,background:"#fff",overflow:"hidden"}}>
+  <summary className="beger-feedback-summary" aria-label={heading} style={{display:"flex",alignItems:"center",gap:10,minHeight:46,padding:"9px 13px",cursor:"pointer",listStyle:"none",fontSize:13,color:"#506a3d"}}>
+   <svg className="beger-feedback-bell" aria-hidden="true" width="20" height="20" style={{display:"block",width:20,height:20,minWidth:20,minHeight:20,maxWidth:20,maxHeight:20,flex:"0 0 20px",overflow:"hidden"}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
     <path d="M10 21h4"/>
    </svg>
