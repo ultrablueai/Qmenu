@@ -7,8 +7,8 @@ const cart=readFileSync("components/guest-cart.tsx","utf8");
 const submit=readFileSync("components/guest-order-submission.tsx","utf8");
 
 test("notifications appear as a compact accessible bell, settings open on demand",()=>{
- assert.match(feedback,/<details className="beger-feedback-panel">/);
- assert.match(feedback,/<summary className="beger-feedback-summary" aria-label=\{heading\}>/);
+ assert.match(feedback,/<details className="beger-feedback-panel" style=\{\{width:"100%",maxWidth:390/);
+ assert.match(feedback,/<summary className="beger-feedback-summary" aria-label=\{heading\} style=\{\{display:"flex"/);
  assert.match(feedback,/className="beger-feedback-bell"/);
  assert.match(feedback,/<fieldset className="beger-feedback-controls">/);
  assert.match(feedback,/checked=\{settings\.sound\}/);
