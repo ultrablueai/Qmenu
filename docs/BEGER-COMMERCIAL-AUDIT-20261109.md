@@ -64,3 +64,11 @@ Draft only, no prices or legal claims:
 Perform a per-function threat classification and test verified guest/customer/merchant/staff boundaries, then implement the smallest justified security fix on Staging. In parallel, prepare a restore rehearsal and a proposed billing state machine for sign-off. Re-run exact-head tests/build after any code changes. Document each verification, deployment SHA, remaining blocker and GO/NO-GO.
 
 **This document is an execution record, not a claim that the commercial launch is completed.**
+
+## 2026-11-09 — Follow-up security verification
+
+- Added and **executed** read-only `scripts/security-public-functions-audit.sql` against the live isolated Staging database. Result: `anonymous_definer_count=16`, `unexpected_exposures=0`, `missing_expected_public_functions=0`, `unlocked_search_paths=0`, `public_function_baseline_pass=true`. This is **exposure drift verification**, not a complete vulnerability review. The allowlist reflects currently observed intended public endpoints and must be reviewed for semantic correctness.
+- Added `supabase/tests/beger-public-invalid-token-smoke.sql`. An equivalent `BEGIN READ ONLY; SET LOCAL ROLE anon; ... ROLLBACK;` query executed successfully against Staging: four booleans `order_token_denied`, `pager_token_denied`, `display_token_denied`, `rating_token_denied` were all `true` for the reserved all-zero UUID.
+- No keys, personal order data, private tokens or user-created test records were read into a report. No grants revoked, migrations applied or production data changed.
+- **Open:** valid-token least-data/authorization checks, signed-in JWT cross-tenant negative cases, meaningful abuse/load testing of public mutation endpoints, reviews of the 83 authenticated-executable definer functions, actual encrypted restore on isolated disposable target, approved billing rules and legal/regulatory sign-off.
+- Security Advisor references: [anonymous definer lint](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), [authenticated definer lint](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable). The current baseline pass does **not** resolve those warning categories by itself.
