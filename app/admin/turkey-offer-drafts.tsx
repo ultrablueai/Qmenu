@@ -7,7 +7,8 @@ export type TurkeyOfferDraft = {
  promo_months:number|null; published:boolean; billing_enabled:boolean;
 };
 function lira(value:number|string){return new Intl.NumberFormat("tr-TR",{style:"currency",currency:"TRY",maximumFractionDigits:0}).format(Number(value)/100)}
-export default function TurkeyOfferDrafts({offers,loadFailed}:{offers:TurkeyOfferDraft[];loadFailed:boolean}){
+export type FounderDryRunStatus={max_slots:number;used_slots:number;remaining_slots:number;kind:string;billing_enabled:boolean;promo_live:boolean};
+export default function TurkeyOfferDrafts({offers,loadFailed,founderStatus,founderStatusFailed}:{offers:TurkeyOfferDraft[];loadFailed:boolean;founderStatus:FounderDryRunStatus|null;founderStatusFailed:boolean}){
  return <section id="turkey-pricing" className={styles.panel} aria-labelledby="turkey-pricing-title">
   <div className={styles.panelHead}><div>
    <h2 id="turkey-pricing-title" className={styles.panelTitle}>باقات Beger تركيا — اعتماد مبدئي</h2>
@@ -24,6 +25,7 @@ export default function TurkeyOfferDrafts({offers,loadFailed}:{offers:TurkeyOffe
     <td>{o.published||o.billing_enabled?<span role="alert">يتطلب مراجعة حالة النشر</span>:<span className={styles.noPlan}>مسودة · الدفع معطّل</span>}</td>
    </tr>)}</tbody>
   </table></div>}
+  <div role="status" className={styles.panelDesc}>فحص العرض التأسيسي التجريبي: {founderStatusFailed || !founderStatus ? "تعذّر التحقق من السعة التجريبية" : `المقاعد المحجوزة في محاكاة Staging: ${founderStatus.used_slots} / ${founderStatus.max_slots} · المتبقي ${founderStatus.remaining_slots}.`} هذه ليست حجوزات حقيقية، ولا تعني تفعيل خصم أو اشتراك.</div>
   <p className={styles.panelDesc}>مهم: حصة أول 30 متجراً تحتاج تخصيصاً ذرياً على الخادم قبل البيع. لا تُحسب الحجوزات أو الفوترة تلقائياً من هذا الجدول.</p>
  </section>;
 }
