@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { browserSupabase } from "../../lib/supabase/browser";
 import styles from "./admin.module.css";
 
-type Business = {business_id:string;business_name:string;subscription_status:string|null};
+type Business = {business_id:string;business_name:string;country_code:string;subscription_status:string|null};
 type Plan = {id:string;code:string;name:string;active:boolean};
 type Trial = {business_id:string;plan_code:string;starts_at:string;ends_at:string|null;effective_status:string};
 
@@ -25,7 +25,7 @@ export default function TrialManager({businesses,plans,trials,canManage}: {
 
  async function start(event:FormEvent<HTMLFormElement>){
   event.preventDefault();
-  if(!canManage||busy||!selected||!activePlans.some(p=>p.id===plan)||![7,14,30].includes(days))return;
+  if(!canManage||busy||!selected||!activePlans.some(p=>p.id===plan)||![7,14,30].includes(days)||(selected.country_code==="TR"&&days!==14))return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("platform_owner_start_trial",{
@@ -41,12 +41,12 @@ export default function TrialManager({businesses,plans,trials,canManage}: {
  return <section id="trials" className={styles.panel} aria-labelledby="trial-heading">
   <div className={styles.panelHead}>
    <div><h2 id="trial-heading" className={styles.panelTitle}>اشتراكات التجربة للتجار</h2>
-    <p className={styles.panelDesc}>تجربة واحدة لكل تاجر بإحدى الباقات النشطة، دون تحصيل أو تجديد تلقائي. الأسعار والفوترة غير متاحة بعد.</p>
+    <p className={styles.panelDesc}>تجربة واحدة لكل تاجر بإحدى الباقات النشطة، 14 يوماً في تركيا، دون تحصيل أو تجديد تلقائي. الأسعار والفوترة غير متاحة بعد.</p>
    </div><span className={styles.panelCount}>{trials.length} سجل</span>
   </div>
   {canManage&&<form onSubmit={start} style={{display:"grid",gap:12,gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",alignItems:"end",marginBottom:20}}>
    <label style={{fontSize:12,fontWeight:800,display:"grid",gap:7}} htmlFor="trial-business">النشاط
-    <select id="trial-business" value={business} onChange={e=>setBusiness(e.target.value)} required disabled={busy||available.length===0}
+    <select id="trial-business" value={business} onChange={e=>{setBusiness(e.target.value);setDays(14);}} required disabled={busy||available.length===0}
      style={{font:"inherit",padding:11,borderRadius:10,border:"1px solid #d8e3e8",background:"white",minWidth:0}}>
      <option value="">اختر نشاطاً دون اشتراك</option>{available.map(b=><option key={b.business_id} value={b.business_id}>{b.business_name}</option>)}
     </select>
@@ -60,7 +60,7 @@ export default function TrialManager({businesses,plans,trials,canManage}: {
    <label style={{fontSize:12,fontWeight:800,display:"grid",gap:7}} htmlFor="trial-duration">المدة
     <select id="trial-duration" value={days} onChange={e=>setDays(Number(e.target.value))} disabled={busy}
      style={{font:"inherit",padding:11,borderRadius:10,border:"1px solid #d8e3e8",background:"white"}}>
-     <option value={7}>7 أيام</option><option value={14}>14 يوم</option><option value={30}>30 يوم</option>
+     {selected?.country_code!=="TR"&&<option value={7}>7 أيام</option>}<option value={14}>14 يوم</option>{selected?.country_code!=="TR"&&<option value={30}>30 يوم</option>}
     </select>
    </label>
    <button type="submit" disabled={busy||!selected||!plan} style={{background:"#17646b",color:"white",border:0,padding:12,borderRadius:10,fontWeight:800,cursor:"pointer",font:"inherit"}}>
