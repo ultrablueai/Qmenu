@@ -25,3 +25,7 @@
 5. **Commercial:** Turkish invoicing/tax entity, PSP contract, KVKK/ETBIS review and explicit release signoff.
 
 **Commercial GO: false. Do not report stages closed unless their evidence gates have passed.**
+
+## 2026-11-10 — Independent Preview build investigation
+
+An explicit Vercel Preview build from commit `e417bf0efe370d800b7d90a357e1283d7b0a1856` was canceled before npm/Next began: the project's configured **Ignored Build Step** rejects branch commits whose message lacks `[beger-deploy]`. Vercel build events confirmed this exact reason; it is not a Next build failure. This follow-up commit intentionally contains the required marker to request the guarded Staging build. GitHub Actions runner-level failures are a distinct unresolved issue. Verify a READY build at the exact resulting SHA before trusting the new preview.
