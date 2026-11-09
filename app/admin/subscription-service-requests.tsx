@@ -6,6 +6,7 @@ type RequestRow={
  id:string;businessId:string;businessName:string;
  kind:"trial"|"plan_review"|"renewal"|"cancellation";
  status:"pending"|"acknowledged"|"declined"|"withdrawn";createdAt:string;
+ planCode:string|null;period:"monthly"|"yearly"|null;
 };
 const kinds:Record<RequestRow["kind"],string>={trial:"طلب تجربة",plan_review:"مراجعة الباقة",renewal:"طلب تجديد",cancellation:"طلب إلغاء"};
 const states:Record<RequestRow["status"],string>={pending:"بانتظار المراجعة",acknowledged:"تمت المراجعة",declined:"تعذّرت الموافقة",withdrawn:"سُحب الطلب"};
@@ -20,6 +21,19 @@ export default function PlatformSubscriptionRequests({canReview}:{canReview:bool
   setRequests(data as RequestRow[]);setError("");
  },[]);
  useEffect(()=>{let active=true;void refresh().catch(()=>{if(active)setError("تعذّر التحقق من طلبات الاشتراكات. لا يجوز إصدار قرارات دون بيانات مؤكدة.")}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[refresh]);
+ async function approveTrial(request:RequestRow){
+  if(!canReview||busy||request.kind!=="trial"||request.status!=="pending"||!request.planCode)return;
+  if(!window.confirm(`تفعيل تجربة مجانية لمدة 14 يوماً لباقة ${request.planCode} للمتجر ${request.businessName}؟ لا يوجد تحصيل أو تجديد تلقائي.`))return;
+  setBusy(request.id);setError("");setNotice("");
+  try{
+   const {data,error:rpcError}=await browserSupabase().rpc("beger_g32_approve_trial_request",{p_request:request.id});
+   if(rpcError||data?.state!=="trial"||data?.trial_days!==14||data?.billing_enabled!==false)
+    throw Error("Trial not activated");
+   await refresh();
+   setNotice("تم تفعيل التجربة المجانية لمدة 14 يوماً للباقة المختارة، دون تحصيل أو تجديد تلقائي.");
+  }catch{setError("تعذّر تفعيل التجربة. تحقّق أن التاجر بلا اشتراك سابق وأن الطلب معلّق والباقة متاحة.");}
+  finally{setBusy(null);}
+ }
  async function review(request:RequestRow,decision:"acknowledged"|"declined"){
   if(!canReview||busy||!window.confirm(decision==="acknowledged"?"تسجيل مراجعة الطلب فقط؟ لن يُفعّل أو يتغير أي اشتراك.":"تسجيل تعذّر الموافقة على هذا الطلب دون تغيير الاشتراك؟"))return;
   setBusy(request.id);setError("");setNotice("");
@@ -41,7 +55,9 @@ export default function PlatformSubscriptionRequests({canReview}:{canReview:bool
   {!loading&&requests.length>0?<div style={{display:"grid",gap:10}}>{requests.map(request=><article key={request.id} style={{border:"1px solid #e3e8ea",borderRadius:12,padding:14,display:"grid",gap:7}}>
    <div style={{display:"flex",alignItems:"center",gap:12,justifyContent:"space-between",flexWrap:"wrap"}}><strong>{request.businessName}</strong><span style={{fontSize:12,color:request.status==="pending"?"#986d30":"#577265"}}>{states[request.status]}</span></div>
    <p style={{margin:0,fontSize:13,color:"#697985"}}>{kinds[request.kind]} · {new Date(request.createdAt).toLocaleDateString("ar")}</p>
+   {request.planCode?<p style={{margin:0,fontSize:13,color:"#315e51",fontWeight:750}}>الباقة المختارة: {request.planCode} · {request.period==="yearly"?"سنوي":"شهري"}</p>:null}
    {canReview&&request.status==="pending"?<div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+    {request.kind==="trial"&&request.planCode?<button type="button" disabled={Boolean(busy)} onClick={()=>void approveTrial(request)} style={{minHeight:42,padding:"9px 13px",background:"#286c56",color:"#fff",border:0,borderRadius:9,fontWeight:800,cursor:"pointer"}}>{busy===request.id?"جارٍ التفعيل…":"تفعيل تجربة 14 يوم"}</button>:null}
     <button type="button" disabled={Boolean(busy)} onClick={()=>void review(request,"acknowledged")} style={{minHeight:42,padding:"9px 13px",background:"#e6f2e7",border:"1px solid #b5d8bb",borderRadius:9,color:"#356949",cursor:"pointer"}}>{busy===request.id?"جارٍ الحفظ…":"تسجيل المراجعة"}</button>
     <button type="button" disabled={Boolean(busy)} onClick={()=>void review(request,"declined")} style={{minHeight:42,padding:"9px 13px",background:"#fff",border:"1px solid #dcb9b0",borderRadius:9,color:"#8b4f42",cursor:"pointer"}}>تعذّرت الموافقة</button>
    </div>:null}
