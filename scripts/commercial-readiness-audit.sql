@@ -22,7 +22,7 @@ with exposure as (
   where n.nspname = 'public'
 )
 select
-  pg_catalog.current_timestamp as checked_at,
+  current_timestamp as checked_at,
   (select count(*) from public.businesses) as businesses,
   (select count(*) from public.branches) as branches,
   (select count(*) from public.plans) as plans,
