@@ -2,7 +2,7 @@ name: G1 validation
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, feat/g1-foundation]
 concurrency:
   group: beger-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
