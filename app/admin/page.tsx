@@ -53,7 +53,7 @@ export default async function PlatformAdminDashboard() {
   .select("business_id").eq("user_id",user.id).limit(1);
  const canOpenBusiness = !merchantMembershipError && Boolean(merchantMembership?.length);
 
- const [summaryResult,directoryResult,plansResult,trialsResult,auditResult,rosterResult,rateResult,preflightResult,turkeyOffersResult] = await Promise.all([
+ const [summaryResult,directoryResult,plansResult,trialsResult,auditResult,rosterResult,rateResult,preflightResult,turkeyOffersResult,founderDryRunResult] = await Promise.all([
   supabase.rpc("platform_admin_overview"),
   supabase.rpc("platform_admin_business_directory"),
   supabase.from("plans").select("id,code,name,active").order("code",{ascending:true}),
@@ -62,7 +62,8 @@ export default async function PlatformAdminDashboard() {
   account.role==="platform_owner" ? supabase.rpc("platform_owner_access_roster") : Promise.resolve({data:[],error:null}),
   supabase.from("beger_subscription_rate_drafts").select("country,rate_key,monthly_minor,updated_at").order("country").order("rate_key"),
   supabase.rpc("g14_platform_launch_preflight"),
-  supabase.from("beger_tr_offer_drafts").select("code,name,currency,monthly_gross_minor,annual_gross_minor,trial_days,included_branches,promo_monthly_gross_minor,promo_max_merchants,promo_months,published,billing_enabled").order("monthly_gross_minor")
+  supabase.from("beger_tr_offer_drafts").select("code,name,currency,monthly_gross_minor,annual_gross_minor,trial_days,included_branches,promo_monthly_gross_minor,promo_max_merchants,promo_months,published,billing_enabled").order("monthly_gross_minor"),
+  supabase.rpc("beger_g28_founder_dry_run_status")
  ]);
  const summary = (summaryResult.data?.[0] ?? null) as
   {merchant_count: number | string;branch_count:number | string;account_memberships:number | string} | null;
@@ -142,7 +143,7 @@ export default async function PlatformAdminDashboard() {
     </section>
     {plansResult.error ? <p className={styles.error} role="alert">تعذّر تحميل الباقات. لا يمكن إدارة الباقات في هذه الحالة.</p> : <PlanManager plans={plans} canManage={owner} />}
     <SubscriptionRateDraftManager rates={rateDrafts} canManage={owner} loadFailed={Boolean(rateResult.error)}/>
-    <TurkeyOfferDrafts offers={(turkeyOffersResult.data??[]) as TurkeyOfferDraft[]} loadFailed={Boolean(turkeyOffersResult.error)}/>
+    <TurkeyOfferDrafts offers={(turkeyOffersResult.data??[]) as TurkeyOfferDraft[]} loadFailed={Boolean(turkeyOffersResult.error)} founderStatus={(founderDryRunResult.data??null) as {max_slots:number;used_slots:number;remaining_slots:number;kind:string;billing_enabled:boolean;promo_live:boolean}|null} founderStatusFailed={Boolean(founderDryRunResult.error)}/>
     {(plansResult.error || directoryResult.error || trialsResult.error) ? <p role="alert" className={styles.error}>لا يمكن إدارة التجارب حتى يتم تحميل الأنشطة والباقات والاشتراكات بشكل موثوق.</p> : <TrialManager businesses={directory} plans={plans} trials={trials} canManage={owner} />}
     <PlatformSubscriptionRequests canReview={owner}/>
     <section id="security" className={styles.panel} aria-labelledby="security-heading">
