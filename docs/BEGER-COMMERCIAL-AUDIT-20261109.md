@@ -85,3 +85,26 @@ Live Staging security classification at 14:13 UTC:
 - **Still open**: exact-token real user session tests, adversarial same-role cross-business calls for all privileged mutations, function return-field disclosure checks, actual restore, plan pricing/tax/invoicing, and independent release certification.
 - Vercel check on 2026-11-09: newest observed Staging deployment remains `dpl_FCprekXoYutZ9UUFpJtmAkT6WHw3` (`READY`, SHA `973300d...`, 2026-11-08); subsequent documentation and SQL audit commits were **not deployed** and do not require deploying app code just to record findings.
 - No DDL, data deletion, payment activation, production changes or `main` branch modifications were made.
+
+## 2026-11-09 — Phased commercial closure execution (evening)
+
+### Phase 1 — Tenant and station permissions
+Executed the existing `supabase/tests/beger-g15-tenant-role-smoke.sql` in three separately recorded transactions on isolated Staging, with all writes rolled back. Observed:
+- merchant owner: **5/5 PASS** (own access, foreign tenant denied, platform preflight denied)
+- cashier worker: **4/4 PASS** (own station positive, foreign/kitchen negatives)
+- pager worker: **4/4 PASS** (own station positive, foreign/cashier/kitchen negatives)
+- **13/13 DB role-simulation checks PASS**; not live authenticated JWT E2E. Do not mark security phase production-certified without real distinct authenticated-user tests, sensitive RPC negative paths and abuse controls.
+
+### Phase 2 — Recovery integrity preparation
+- Added `scripts/verify-backup-manifest.mjs`: offline verifier for staging-only `roles.sql`, `schema.sql` and `data.sql`; checks project ref, documented export status, Git SHA/timestamp, exact filenames, nonzero sizes, regular-file type, and SHA256 integrity. Returns `restoreVerified:false` explicitly. No SQL data is sent to GitHub.
+- Added `tests/beger-backup-manifest-integrity.test.mjs` with valid synthetic export, tampered data, and wrong-project regression scenarios. Local Node 22 tests **3/3 pass** on synthetically generated files; remote exact-head CI/build not yet observed.
+- A real encrypted export, isolated restore rehearsal, database/RLS verification, RPO/RTO measurement and operator sign-off remain **OPEN**. Do not treat checksum-only tests as backup/recovery completion.
+
+### Remaining sequence and stop conditions
+- **Phase 1 OPEN** until authentic browser/JWT tests across separate merchants and station roles, external endpoint rate/abuse review and authorization audit results are recorded.
+- **Phase 2 OPEN** until owner-approved disposable restore target and encrypted dump undergo genuine import + post-restore checks. Existing Staging and Production are NOT restore targets.
+- **Phase 3 NOT ACTIVATED**: pricing and jurisdiction-specific tax/invoicing policy approval required; no plan, paid subscription, invoice or live payment mutation permitted by this audit.
+- **Phase 4 OPEN**: legal privacy, terms, monitoring, support operations, data retention and billing notices need release evidence.
+- **Phase 5 NO-GO**: same-SHA CI/build/staging, rollback evidence and explicit owner release sign-off required.
+
+The repository contains test and audit additions only. No Production changes, no `main` merge, no merchant data edits, no payment activations, and no change to the validated device workflows.
