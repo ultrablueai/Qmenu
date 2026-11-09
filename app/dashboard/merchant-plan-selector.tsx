@@ -27,7 +27,7 @@ export default function MerchantPlanSelector({businessId,canRequest,hasSubscript
   if(current!==seq.current)return;
   if(catalog.error||!Array.isArray(catalog.data)||catalog.data.length!==3||requests.error||!Array.isArray(requests.data))
    throw Error("Unable to validate plan catalog or request state");
-  const codes=new Set(catalog.data.map((o:Offer)=>o.code));
+  const codes=new Set<string>(catalog.data.map((o:Offer)=>o.code));
   if(codes.size!==3||!["start","pro","business"].every(k=>codes.has(k)))throw Error("Incomplete catalog");
   setOffers(catalog.data as Offer[]);
   setPending(requests.data.some((r:{status:string})=>r.status==="pending"));
