@@ -72,3 +72,16 @@ Perform a per-function threat classification and test verified guest/customer/me
 - No keys, personal order data, private tokens or user-created test records were read into a report. No grants revoked, migrations applied or production data changed.
 - **Open:** valid-token least-data/authorization checks, signed-in JWT cross-tenant negative cases, meaningful abuse/load testing of public mutation endpoints, reviews of the 83 authenticated-executable definer functions, actual encrypted restore on isolated disposable target, approved billing rules and legal/regulatory sign-off.
 - Security Advisor references: [anonymous definer lint](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), [authenticated definer lint](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable). The current baseline pass does **not** resolve those warning categories by itself.
+
+## 2026-11-09 G26 — Authenticated elevated function baseline
+
+Live Staging security classification at 14:13 UTC:
+- 83 `SECURITY DEFINER` functions executable by the `authenticated` role.
+- 16 also available to `anon`, whose intended guest token/menu/order behavior is a separate review stream.
+- 58 include a literal `auth.uid()` reference; 8 appear to delegate authorization to another helper; 1 `g17_print_job_action` delegates to `g18_print_job_action`.
+- 0 unclassified by this rule-based audit; 0 missing explicit locked empty search path.
+- `scripts/security-authenticated-functions-audit.sql` executed on live Staging and returned `baseline_pass=true`. A textual classification **does not prove** role/tenant checks are correct.
+- Inspected `g18_print_job_action` SQL: requires a signed-in identity plus membership `owner/manager` in the print job business before mutating. An actual read-only transaction with role `authenticated` but no `auth.uid()` confirmed `g17_print_job_action` raises SQLSTATE `42501` as expected. Saved executable test at `supabase/tests/beger-g26-print-auth-negative.sql`.
+- **Still open**: exact-token real user session tests, adversarial same-role cross-business calls for all privileged mutations, function return-field disclosure checks, actual restore, plan pricing/tax/invoicing, and independent release certification.
+- Vercel check on 2026-11-09: newest observed Staging deployment remains `dpl_FCprekXoYutZ9UUFpJtmAkT6WHw3` (`READY`, SHA `973300d...`, 2026-11-08); subsequent documentation and SQL audit commits were **not deployed** and do not require deploying app code just to record findings.
+- No DDL, data deletion, payment activation, production changes or `main` branch modifications were made.
