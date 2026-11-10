@@ -34,6 +34,20 @@ export default function PlatformSubscriptionRequests({canReview}:{canReview:bool
   }catch{setError("تعذّر تفعيل التجربة. تحقّق أن التاجر بلا اشتراك سابق وأن الطلب معلّق والباقة متاحة.");}
   finally{setBusy(null);}
  }
+ async function cancelTrial(request:RequestRow){
+  if(!canReview||busy||request.kind!=="cancellation"||request.status!=="pending")return;
+  if(!window.confirm(`تأكيد إلغاء التجربة المجانية للمتجر ${request.businessName} فوراً؟ الطلبات والبيانات لا تُحذف، ولا يشمل هذا الإجراء الاشتراكات المدفوعة.`))return;
+  setBusy(request.id);setError("");setNotice("");
+  try{
+   const {data,error:rpcError}=await browserSupabase().rpc("beger_g34_approve_trial_cancellation",{p_request:request.id});
+   if(rpcError||data?.status!=="cancelled"||data?.data_retained!==true||data?.billing_enabled!==false)
+    throw Error("Trial cancellation was not confirmed");
+   await refresh();
+   setNotice("تم إلغاء التجربة المجانية وتوثيق العملية. بيانات المتجر محفوظة، ولم تُغيَّر أي مدفوعات.");
+  }catch{
+   setError("تعذّر إلغاء التجربة. لا يُسمح بإلغاء الاشتراك المدفوع بهذا الإجراء؛ افحص نوع الاشتراك وحالة الطلب.");
+  }finally{setBusy(null);}
+ }
  async function review(request:RequestRow,decision:"acknowledged"|"declined"){
   if(!canReview||busy||!window.confirm(decision==="acknowledged"?"تسجيل مراجعة الطلب فقط؟ لن يُفعّل أو يتغير أي اشتراك.":"تسجيل تعذّر الموافقة على هذا الطلب دون تغيير الاشتراك؟"))return;
   setBusy(request.id);setError("");setNotice("");
@@ -57,6 +71,7 @@ export default function PlatformSubscriptionRequests({canReview}:{canReview:bool
    <p style={{margin:0,fontSize:13,color:"#697985"}}>{kinds[request.kind]} · {new Date(request.createdAt).toLocaleDateString("ar")}</p>
    {request.planCode?<p style={{margin:0,fontSize:13,color:"#315e51",fontWeight:750}}>الباقة المختارة: {request.planCode} · {request.period==="yearly"?"سنوي":"شهري"}</p>:null}
    {canReview&&request.status==="pending"?<div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+    {request.kind==="cancellation"?<button type="button" disabled={Boolean(busy)} onClick={()=>void cancelTrial(request)} style={{minHeight:42,padding:"9px 13px",background:"#fff0ec",border:"1px solid #d4a294",borderRadius:9,color:"#944536",fontWeight:800,cursor:"pointer"}}>{busy===request.id?"جارٍ الإلغاء…":"اعتماد إلغاء التجربة"}</button>:null}
     {request.kind==="trial"&&request.planCode?<button type="button" disabled={Boolean(busy)} onClick={()=>void approveTrial(request)} style={{minHeight:42,padding:"9px 13px",background:"#286c56",color:"#fff",border:0,borderRadius:9,fontWeight:800,cursor:"pointer"}}>{busy===request.id?"جارٍ التفعيل…":"تفعيل تجربة 14 يوم"}</button>:null}
     <button type="button" disabled={Boolean(busy)} onClick={()=>void review(request,"acknowledged")} style={{minHeight:42,padding:"9px 13px",background:"#e6f2e7",border:"1px solid #b5d8bb",borderRadius:9,color:"#356949",cursor:"pointer"}}>{busy===request.id?"جارٍ الحفظ…":"تسجيل المراجعة"}</button>
     <button type="button" disabled={Boolean(busy)} onClick={()=>void review(request,"declined")} style={{minHeight:42,padding:"9px 13px",background:"#fff",border:"1px solid #dcb9b0",borderRadius:9,color:"#8b4f42",cursor:"pointer"}}>تعذّرت الموافقة</button>
