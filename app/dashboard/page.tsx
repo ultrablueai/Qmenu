@@ -6,6 +6,7 @@ import HeadquartersCatalog from "./headquarters-catalog";
 import HqReferenceOverview from "./hq-reference-overview";
 import MerchantSubscriptionStatusPanel,{type MerchantSubscriptionStatus} from "./merchant-subscription-status";
 import type {EntitlementsPreview} from "./merchant-entitlement-preview";
+import type {RenewalPreflight} from "./merchant-renewal-preflight";
 import BegerSectorConfigurator from "../../components/beger-sector-configurator";
 import "../../components/beger-sector-configurator.css";
 import { serverSupabase } from "../../lib/supabase/server";
@@ -84,6 +85,11 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
    :null;
   const entitlementData=(entitlementResult?.data??null) as EntitlementsPreview|null;
   const entitlementError=Boolean(entitlementResult?.error);
+  const renewalResult=workspaceView==="subscription"&&primary&&canManageBranches&&!loadError&&country==="TR"&&subscriptionData?.has_subscription
+   ?await supabase.rpc("beger_g36_renewal_preflight",{p_business:primary.id})
+   :null;
+  const renewalData=(renewalResult?.data??null) as RenewalPreflight|null;
+  const renewalError=Boolean(renewalResult?.error);
 
   return (
     <div className={styles.shell}>
@@ -222,7 +228,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
           {workspaceView==="operations"&&!loadError && primary && canManageBranches && <HeadquartersCatalog businessId={primary.id} country={primary.country_code} branches={primaryBranches.map(b => ({id:b.id,name:b.name}))}/>}
 
           {workspaceView==="settings"&&!loadError && primary && canManageBranches ? <div id="business-model" style={{margin:"26px 0"}}><BegerSectorConfigurator key={primary.id} draftKey={primary.id} businessId={primary.id} canSave={currentRole==="owner"}/></div>:null}
-          {workspaceView==="subscription"&&canManageBranches&&!loadError&&primary?<MerchantSubscriptionStatusPanel data={subscriptionData} error={subscriptionError} businessId={primary.id} countryCode={primary.country_code} canRequest={currentRole==="owner"} entitlements={entitlementData} entitlementsError={entitlementError}/>:null}
+          {workspaceView==="subscription"&&canManageBranches&&!loadError&&primary?<MerchantSubscriptionStatusPanel data={subscriptionData} error={subscriptionError} businessId={primary.id} countryCode={primary.country_code} canRequest={currentRole==="owner"} entitlements={entitlementData} entitlementsError={entitlementError} renewal={renewalData} renewalError={renewalError}/>:null}
           {workspaceView==="modules"?<section className={styles.modules} aria-labelledby="modules-heading">
             <div className={styles.panelHead}>
               <div><h2 className={styles.panelTitle} id="modules-heading">أدوات أعمالك</h2><p className={styles.panelSubtitle}>وحدات ستُفعّل بحسب نوع النشاط بعد استكمال البناء والاختبارات</p></div>
