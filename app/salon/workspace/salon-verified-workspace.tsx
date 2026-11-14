@@ -1,6 +1,6 @@
 "use client";
 import {useRouter} from "next/navigation";
-import {useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import {browserSupabase} from "../../../lib/supabase/browser";
 type SalonStaff={id:string;display_name:string;kind:string;branch_id:string;accepts_bookings:boolean;start_local:string|null;end_local:string|null};
 type SalonLine={service_id:string;staff_id:string;chair_id:string|null;line_number:number;duration_minutes:number;price_minor:number};
@@ -12,12 +12,65 @@ const boxStyle={background:"#fff",border:"1px solid #e0e9e1",borderRadius:15,pad
 export default function SalonVerifiedWorkspace({businessId,initial}:{businessId:string;initial:SalonWorkspaceData}){
  const router=useRouter();
  const [busy,setBusy]=useState<string|null>(null),[error,setError]=useState(""),[notice,setNotice]=useState("");
+ const [snapshot,setSnapshot]=useState<SalonWorkspaceData>(initial);
+ const [syncState,setSyncState]=useState<"syncing"|"live"|"offline">("live");
+ const [lastSynced,setLastSynced]=useState("");
+ const [alertsAllowed,setAlertsAllowed]=useState(false);
+ const [latestChange,setLatestChange]=useState("");
+ const viewRef=useRef<SalonWorkspaceData>(initial);
+ const runningRef=useRef(false);
+ const aliveRef=useRef(true);
  const [filter,setFilter]=useState("all");
  const [search,setSearch]=useState("");
  const valid=initial?.business_id===businessId&&["whole_business","assigned_staff"].includes(initial.scope)&&initial.billing_enabled===false;
+ const refresh=useCallback(async()=>{
+  if(!valid||runningRef.current||!aliveRef.current)return;
+  runningRef.current=true;
+  setSyncState("syncing");
+  try{
+   const {data,error:rpcError}=await browserSupabase().rpc("beger_g47_salon_workspace",{p_business:businessId});
+   if(rpcError||!data||data.business_id!==businessId||
+      data.role!==initial.role||data.scope!==initial.scope||
+      data.billing_enabled!==false||!Array.isArray(data.bookings)||!Array.isArray(data.staff)){
+    throw new Error("Invalid authenticated workspace");
+   }
+   if(!aliveRef.current)return;
+   const next=data as SalonWorkspaceData;
+   const previous=new Map(viewRef.current.bookings.map(b=>[b.id,b.status]));
+   const added=next.bookings.filter(b=>!previous.has(b.id)&&b.status==="pending");
+   const updated=next.bookings.filter(b=>previous.has(b.id)&&previous.get(b.id)!==b.status);
+   if(added.length||updated.length){
+    const changed=added[0]??updated[0];
+    const text=added.length?`وصل حجز جديد: ${changed.customer_name}`:
+      `تغيّرت حالة موعد ${changed.customer_name}: ${statusText[changed.status]??changed.status}`;
+    setLatestChange(text);
+    if(typeof Notification!=="undefined"&&Notification.permission==="granted"&&document.visibilityState==="visible"){
+     new Notification("Beger Salon — تحديث الحجوزات",{body:text});
+    }
+   }
+   viewRef.current=next;setSnapshot(next);setSyncState("live");
+   setLastSynced(new Date().toLocaleTimeString("ar",{timeZone:"Europe/Istanbul",hour:"2-digit",minute:"2-digit"}));
+  }catch{if(aliveRef.current)setSyncState("offline");}
+  finally{runningRef.current=false;}
+ },[businessId,initial.role,initial.scope,valid]);
+ useEffect(()=>{
+  aliveRef.current=true;viewRef.current=initial;setSnapshot(initial);
+  setAlertsAllowed(typeof Notification!=="undefined"&&Notification.permission==="granted");
+  const run=()=>{if(document.visibilityState==="visible")void refresh()};
+  const timer=window.setInterval(run,15000);
+  window.addEventListener("focus",run);
+  document.addEventListener("visibilitychange",run);
+  return()=>{aliveRef.current=false;window.clearInterval(timer);window.removeEventListener("focus",run);document.removeEventListener("visibilitychange",run)};
+ },[initial,refresh]);
+ async function allowAlerts(){
+  if(typeof Notification==="undefined"){setNotice("المتصفح الحالي لا يدعم إشعارات سطح المكتب");return;}
+  try{const p=await Notification.requestPermission();setAlertsAllowed(p==="granted");
+   if(p!=="granted")setNotice("ما تم تفعيل إشعارات المتصفح. تحديث الحجوزات داخل اللوحة ما زال يعمل.");
+  }catch{setNotice("تعذّر تفعيل إشعارات المتصفح");}
+ }
  if(!valid)return <p role="alert">تعذّر التحقق من نطاق بيانات الصالون. تم إيقاف العرض.</p>;
- const owner=initial.scope==="whole_business";
- const filtered=initial.bookings.filter(b=>(filter==="all"||b.status===filter)&&
+ const owner=snapshot.scope==="whole_business";
+ const filtered=snapshot.bookings.filter(b=>(filter==="all"||b.status===filter)&&
   (b.customer_name.toLocaleLowerCase().includes(search.toLocaleLowerCase())||b.id.toLowerCase().includes(search.toLowerCase())));
  async function approve(id:string){
   if(busy)return;
@@ -26,29 +79,40 @@ export default function SalonVerifiedWorkspace({businessId,initial}:{businessId:
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("beger_g47_approve_salon_booking",{p_business:businessId,p_booking:id});
    if(rpcError||data?.status!=="confirmed"||data?.audit_recorded!==true)throw Error("Could not verify approval");
-   setNotice("تم تأكيد الحجز وتسجيل الموافقة على الخادم. التحديث ظاهر عند إعادة تحميل اللوحة.");
+   setNotice("تم تأكيد الحجز على الخادم وتسجيل الموافقة.");
+   await refresh();
    router.refresh();
   }catch{
    setError("تعذّر تأكيد الحجز. قد يكون تغيّر، أو أُسند لمعلم آخر، أو انتهت صلاحية الجلسة.");
   }finally{setBusy(null);}
  }
  const stats=[
-  {label:owner?"الحجوزات المسجلة":"حجوزاتي المسندة",value:initial.summary.assigned_bookings},
-  {label:"بانتظار التأكيد",value:initial.summary.pending_bookings},
-  {label:"الخدمات المكتملة",value:initial.summary.completed_bookings},
-  {label:owner?"الخدمات المحصّلة":"خدماتي المحصّلة",value:money(initial.summary.settled_service_minor)}
+  {label:owner?"الحجوزات المسجلة":"حجوزاتي المسندة",value:snapshot.summary.assigned_bookings},
+  {label:"بانتظار التأكيد",value:snapshot.summary.pending_bookings},
+  {label:"الخدمات المكتملة",value:snapshot.summary.completed_bookings},
+  {label:owner?"الخدمات المحصّلة":"خدماتي المحصّلة",value:money(snapshot.summary.settled_service_minor)}
  ];
  return <div style={{display:"grid",gap:17}}>
   <section style={{...boxStyle,background:"#e8f4eb",borderColor:"#cee2d1",display:"flex",alignItems:"center",justifyContent:"space-between",gap:15,flexWrap:"wrap"}}>
    <div><strong style={{fontSize:19}}>{owner?"إدارة كل الصالون":"مساحة المعلم الخاصة"}</strong><p style={{fontSize:12,color:"#55715e",margin:"6px 0 0"}}>{owner?"يمكنك مراجعة فريقك وجميع حجوزات النشاط.":"لا تظهر إلا الحجوزات المسندة إليك؛ ولا يمكنك تأكيد حجوزات زملائك."}</p></div>
    <span style={{fontSize:12,fontWeight:900,color:"#276948",background:"#fff",borderRadius:22,padding:"9px 12px"}}>{initial.role==="owner"?"مالك":initial.role==="manager"?"مدير":"معلم"}</span>
   </section>
+  <section style={{...boxStyle,padding:13,display:"flex",gap:12,alignItems:"center",justifyContent:"space-between",flexWrap:"wrap"}}>
+    <div style={{display:"grid",gap:5}}><strong style={{fontSize:12,color:syncState==="offline"?"#a2553b":"#28654a"}}>
+      {syncState==="live"?"تحديث تلقائي مفعّل":syncState==="syncing"?"جارٍ جلب التغييرات…":"تعذّر التحديث — ستُعاد المحاولة"}
+     </strong><small style={{fontSize:11,color:"#6e7e71"}}>مزامنة آمنة كل 15 ثانية أثناء فتح الصفحة {lastSynced?"· آخر فحص "+lastSynced:""}</small></div>
+    <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+      <button type="button" onClick={()=>void refresh()} style={{border:"1px solid #d1e2d4",background:"#f3faf4",borderRadius:9,padding:"9px 12px",color:"#215f44",cursor:"pointer"}}>تحديث الآن</button>
+      <button type="button" onClick={()=>void allowAlerts()} disabled={alertsAllowed} style={{border:"1px solid #d1e2d4",background:"#f3faf4",borderRadius:9,padding:"9px 12px",color:"#215f44",cursor:"pointer"}}>{alertsAllowed?"تنبيهات المتصفح مفعلة":"تفعيل تنبيهات المتصفح"}</button>
+    </div>
+   </section>
+  {latestChange?<p role="status" style={{margin:0,color:"#1d7050",fontSize:13,fontWeight:750}}>{latestChange}</p>:null}
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,190px),1fr))",gap:12}}>{stats.map(s=><section key={s.label} style={boxStyle}><small style={{color:"#6b826f"}}>{s.label}</small><div style={{fontSize:24,fontWeight:900,marginTop:12,color:"#226145"}}>{s.value}</div></section>)}</div>
   <section style={boxStyle}><h2 style={{fontSize:19,marginTop:0}}>{owner?"المعلمين المسجلين":"ملفي المهني"}</h2>
-    {initial.staff.length?<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,210px),1fr))",gap:10}}>{initial.staff.map(s=><div key={s.id} style={{border:"1px solid #e3ece4",borderRadius:10,padding:12}}><strong>{s.display_name}</strong><p style={{margin:"7px 0",fontSize:12,color:"#647d6d"}}>{s.kind==="barber"?"حلاق":s.kind==="stylist"?"مصفف":"اختصاصي"} · {s.accepts_bookings?"يستقبل حجوزات":"الحجوزات متوقفة"}</p><small>{s.start_local&&s.end_local?s.start_local+" — "+s.end_local:"دوام غير محدد"}</small></div>)}</div>:<p style={{fontSize:13,color:"#8a7364"}}>لم يتم إضافة معلمين بعد. الإعداد الأولي قيد التجهيز.</p>}
+    {snapshot.staff.length?<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,210px),1fr))",gap:10}}>{snapshot.staff.map(s=><div key={s.id} style={{border:"1px solid #e3ece4",borderRadius:10,padding:12}}><strong>{s.display_name}</strong><p style={{margin:"7px 0",fontSize:12,color:"#647d6d"}}>{s.kind==="barber"?"حلاق":s.kind==="stylist"?"مصفف":"اختصاصي"} · {s.accepts_bookings?"يستقبل حجوزات":"الحجوزات متوقفة"}</p><small>{s.start_local&&s.end_local?s.start_local+" — "+s.end_local:"دوام غير محدد"}</small></div>)}</div>:<p style={{fontSize:13,color:"#8a7364"}}>لم يتم إضافة معلمين بعد. الإعداد الأولي قيد التجهيز.</p>}
   </section>
   <section style={boxStyle}>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}><h2 style={{fontSize:19,margin:0}}>{owner?"جميع الحجوزات":"حجوزاتي"}</h2><span style={{fontSize:12,color:"#68816d"}}>آخر {initial.limited_results} حجز كحد أقصى</span></div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}><h2 style={{fontSize:19,margin:0}}>{owner?"جميع الحجوزات":"حجوزاتي"}</h2><span style={{fontSize:12,color:"#68816d"}}>آخر {snapshot.limited_results} حجز كحد أقصى</span></div>
     <div style={{display:"flex",flexWrap:"wrap",gap:10,margin:"16px 0"}}>
      <input aria-label="بحث عن اسم أو رقم حجز" value={search} onChange={e=>setSearch(e.target.value)} placeholder="بحث عن زبون أو رقم الحجز" style={{minWidth:180,flex:1,border:"1px solid #d8e7d9",borderRadius:10,padding:11}}/>
      <select aria-label="تصفية حسب الحالة" value={filter} onChange={e=>setFilter(e.target.value)} style={{border:"1px solid #d8e7d9",borderRadius:10,padding:11}}><option value="all">كل الحالات</option>{Object.entries(statusText).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select>
@@ -63,6 +127,6 @@ export default function SalonVerifiedWorkspace({businessId,initial}:{businessId:
      {!filtered.length?<p style={{color:"#718274",fontSize:13}}>لا يوجد حجز مطابق. عند بدء استقبال الحجوزات الحقيقية ستظهر هنا بعد التحقق من الصلاحيات.</p>:null}
     </div>
   </section>
-  <p style={{fontSize:12,color:"#7c887f",margin:0}}>تعمل هذه اللوحة من خلال وظائف Supabase المحمية. استقبال الحجز العام من QR والتنبيهات الحقيقية لم يكتمل بعد، ولا يتم تحصيل الأموال هنا.</p>
+  <p style={{fontSize:12,color:"#7c887f",margin:0}}>تعمل هذه اللوحة من خلال وظائف Supabase المحمية. تحديث هذه اللوحة يعمل دورياً بين الأجهزة المسجّلة. إشعارات الخلفية وQR للحجز العام لم يكتمل تفعيلهما بعد، ولا يتم تحصيل الأموال هنا.</p>
  </div>;
 }
