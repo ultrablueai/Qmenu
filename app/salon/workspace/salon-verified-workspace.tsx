@@ -101,6 +101,20 @@ export default function SalonVerifiedWorkspace({businessId,initial}:{businessId:
   }catch{setError("تعذّر تحديث الحالة. تحقق من مرحلة الموعد وصلاحياتك وجلسة حسابك.");}
   finally{setBusy(null)}
  }
+ async function recordManualCollection(id:string){
+  if(busy||!owner)return;
+  if(!window.confirm("تسجيل تحصيل نقدي/خارجي تم استلامه بالفعل؟ هذا توثيق يدوي فقط، ولن يخصم النظام أموالاً أو يحوّل مستحقات."))return;
+  setBusy(id);setError("");setNotice("");
+  try{
+   const {data,error:rpcError}=await browserSupabase().rpc("beger_g54_record_manual_collection",
+    {p_business:businessId,p_booking:id});
+   if(rpcError||data?.status!=="recorded_manual_collection"||
+      data?.audit_recorded!==true||data?.payment_provider_charged!==false)throw new Error("collection rejected");
+   setNotice("تم توثيق التحصيل اليدوي. لم تُجرَ معاملة مع مزوّد دفع.");
+   await refresh();router.refresh();
+  }catch{setError("تعذّر تسجيل التحصيل. يلزم إكمال الخدمة واتفاق معلم ساري وحساب إداري مخوّل.")}
+  finally{setBusy(null)}
+ }
  const stats=[
   {label:owner?"الحجوزات المسجلة":"حجوزاتي المسندة",value:snapshot.summary.assigned_bookings},
   {label:"بانتظار التأكيد",value:snapshot.summary.pending_bookings},
@@ -144,6 +158,8 @@ export default function SalonVerifiedWorkspace({businessId,initial}:{businessId:
       {["pending","confirmed","arrived"].includes(b.status)?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"cancelled")} style={{border:"1px solid #edcdc7",borderRadius:9,padding:10,background:"#fff5f1",color:"#8d4840"}}>إلغاء</button>:null}
       {b.status==="confirmed"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"no_show")} style={{border:"1px solid #e4d5bd",borderRadius:9,padding:10,background:"#fffaf1",color:"#8a6934"}}>لم يحضر</button>:null}
       </div>
+      {owner&&b.status==="completed"&&b.total_minor!==null&&b.total_minor>0&&b.collected_minor===0?
+       <button type="button" disabled={Boolean(busy)} onClick={()=>void recordManualCollection(b.id)} style={{border:0,borderRadius:9,padding:10,background:"#256e55",color:"#fff"}}>تسجيل تحصيل يدوي</button>:null}
       {b.status==="pending"?<button type="button" disabled={Boolean(busy)} onClick={()=>void approve(b.id)} style={{border:0,borderRadius:10,padding:"11px 15px",background:"#1b7653",color:"#fff",fontWeight:800,cursor:"pointer"}}>{busy===b.id?"جارٍ التأكيد…":"تأكيد الحجز"}</button>:null}
      </article>)}
      {!filtered.length?<p style={{color:"#718274",fontSize:13}}>لا يوجد حجز مطابق. عند بدء استقبال الحجوزات الحقيقية ستظهر هنا بعد التحقق من الصلاحيات.</p>:null}
