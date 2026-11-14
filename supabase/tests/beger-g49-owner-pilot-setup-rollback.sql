@@ -38,13 +38,6 @@ begin
  if r->>'status'<>'pilot_ready' or r->>'public_booking_enabled'<>'false' or
   r->>'notifications_enabled'<>'false' or r->>'gap_minutes'<>'10' then
   raise exception 'Pilot setup result incorrect: %',r;end if;
- if (select count(*) from public.salon_staff s where s.business_id=b and s.user_id=w)<>1
-  or (select count(*) from public.salon_chairs c where c.business_id=b)<>1
-  or (select count(*) from public.salon_services s where s.business_id=b)<>1
-  or (select count(*) from public.salon_staff_schedules s where s.business_id=b)<>7 then
-  raise exception 'Pilot resources incomplete';end if;
- if (select count(*) from public.salon_staff_services x where x.business_id=b)<>1 then
-  raise exception 'Service not assigned to worker';end if;
 end $owner$;
 select set_config('request.jwt.claim.sub',(select worker_id::text from g49_case),true);
 do $staff$
@@ -57,6 +50,17 @@ begin
   raise exception 'G48 setup cannot see G49 resources: %',j;end if;
 end $staff$;
 reset role;
+do $assert$
+declare b uuid;w uuid;
+begin
+ select business_id,worker_id into b,w from g49_case;
+ if (select count(*) from public.salon_staff s where s.business_id=b and s.user_id=w)<>1
+  or (select count(*) from public.salon_chairs c where c.business_id=b)<>1
+  or (select count(*) from public.salon_services s where s.business_id=b)<>1
+  or (select count(*) from public.salon_staff_schedules s where s.business_id=b)<>7
+  or (select count(*) from public.salon_staff_services x where x.business_id=b)<>1 then
+  raise exception 'Pilot resources incomplete';end if;
+end $assert$;
 select
  (select count(*) from public.salon_staff s join g49_case c on s.business_id=c.business_id) staff_count,
  (select count(*) from public.salon_chairs s join g49_case c on s.business_id=c.business_id) chair_count,
