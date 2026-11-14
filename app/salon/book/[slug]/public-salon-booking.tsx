@@ -1,11 +1,29 @@
 "use client";
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useMemo,useRef,useState} from "react";
 import {browserSupabase} from "../../../../lib/supabase/browser";
 type Catalog={salon_name:string;slug:string;public_booking_enabled:boolean;timezone:string;
  branches:{id:string;name:string}[];staff:{id:string;name:string;branch_id:string}[];
  chairs:{id:string;label:string;branch_id:string}[];services:{id:string;name:string;duration_minutes:number;price_minor:number;currency:string}[];
  offers:{staff_id:string;service_id:string}[]};
 type Track={id:string;status:string;starts_at:string;ends_at:string;total_minor:number;currency:string;last_update:string};
+type EarlyOffer={offer_id?:string;status:string;proposed_start?:string;original_start?:string;expires_at?:string;requires_response?:boolean};
+function ringPhone(ctx:AudioContext){
+ if(ctx.state==="suspended")void ctx.resume();
+ const start=ctx.currentTime+0.05;
+ // Original two-tone phone-like signal; three distinct bursts, not a system ringtone.
+ for(let i=0;i<3;i++){
+  const begin=start+i*1.15;
+  for(const frequency of [425,480]){
+   const tone=ctx.createOscillator(),gain=ctx.createGain();
+   tone.type="sine";tone.frequency.value=frequency;
+   gain.gain.setValueAtTime(0.0001,begin);
+   gain.gain.linearRampToValueAtTime(0.09,begin+0.04);
+   gain.gain.setValueAtTime(0.09,begin+0.57);
+   gain.gain.exponentialRampToValueAtTime(0.0001,begin+0.66);
+   tone.connect(gain);gain.connect(ctx.destination);tone.start(begin);tone.stop(begin+0.7);
+  }
+ }
+}
 const statuses:Record<string,string>={pending:"بانتظار تأكيد المعلم",confirmed:"تم تأكيد الحجز",arrived:"تم تسجيل وصولك",in_service:"الخدمة جارية",completed:"تم إنهاء الخدمة",cancelled:"الحجز ملغى",no_show:"لم يتم الحضور"};
 const cStyle={minHeight:44,border:"1px solid #dae7db",background:"#fff",borderRadius:10,padding:"10px 12px",width:"100%"};
 const money=(n:number)=>new Intl.NumberFormat("tr-TR",{style:"currency",currency:"TRY",maximumFractionDigits:0}).format(n/100);
@@ -16,6 +34,11 @@ export default function PublicSalonBooking({slug}:{slug:string}){
  const [services,setServices]=useState<string[]>([]),[name,setName]=useState(""),[when,setWhen]=useState("");
  const [busy,setBusy]=useState(false),[token,setToken]=useState(""),[track,setTrack]=useState<Track|null>(null);
  const [arrivalMode,setArrivalMode]=useState(false),[arrivalBusy,setArrivalBusy]=useState(false),[arrivalNotice,setArrivalNotice]=useState("");
+ const [early,setEarly]=useState<EarlyOffer|null>(null);
+ const [earlyBusy,setEarlyBusy]=useState(false),[earlyNotice,setEarlyNotice]=useState("");
+ const [ringEnabled,setRingEnabled]=useState(false);
+ const ringContext=useRef<AudioContext|null>(null),lastRang=useRef("");
+ const [clock,setClock]=useState(Date.now());
  useEffect(()=>{let alive=true;
   const raw=window.location.hash.slice(1);
   const t=new URLSearchParams(raw).get("t");
@@ -44,11 +67,14 @@ export default function PublicSalonBooking({slug}:{slug:string}){
   if(!token)return;
   let alive=true;
   const load=async()=>{try{
-   const {data,error:e}=await browserSupabase().rpc("beger_g51_public_track",{p_token:token});
-   if(e||!data)return;
-   if(alive)setTrack(data as Track);
+   const [tracked,offered]=await Promise.all([
+    browserSupabase().rpc("beger_g51_public_track",{p_token:token}),
+    browserSupabase().rpc("beger_g56_customer_early_offer",{p_token:token})
+   ]);
+   if(!tracked.error&&tracked.data&&alive)setTrack(tracked.data as Track);
+   if(!offered.error&&offered.data&&alive)setEarly(offered.data as EarlyOffer);
   }catch{/* keep previous displayed status */}};
-  void load();const timer=window.setInterval(()=>{if(document.visibilityState==="visible")void load()},15000);
+  void load();const timer=window.setInterval(()=>{setClock(Date.now());if(document.visibilityState==="visible")void load()},5000);
   return()=>{alive=false;window.clearInterval(timer)};
  },[token]);
  async function submit(){
@@ -69,6 +95,38 @@ export default function PublicSalonBooking({slug}:{slug:string}){
    setNotice("تم إنشاء الطلب! احتفظ برابط هذه الصفحة لتتابع تأكيد المعلم.");
   }catch{setError("تعذّر إرسال الحجز. ربما الوقت مشغول أو خارج الدوام، أو الخدمة لا يقدمها المعلم، أو بلغ الصالون حد الحجوزات التجريبية. جرّب وقتاً آخر.");}
   finally{setBusy(false)}
+ }
+ async function enableRing(){
+  try{
+   const ctx=ringContext.current??new AudioContext();
+   ringContext.current=ctx;await ctx.resume();setRingEnabled(true);
+   setEarlyNotice("الرنّة مفعّلة لهذه الصفحة. رح تسمع ثلاث رنّات عند وصول عرض جديد وهي مفتوحة.");
+  }catch{setEarlyNotice("الجهاز أو المتصفح منع الصوت. افتح الصفحة واضغط تفعيل الرنّة بعد منح إذن الصوت.");}
+ }
+ useEffect(()=>{
+  if(!ringEnabled||!ringContext.current||!early?.offer_id||early.status!=="pending"||
+    !early.expires_at||new Date(early.expires_at).getTime()<=Date.now()||
+    lastRang.current===early.offer_id)return;
+  lastRang.current=early.offer_id;
+  if(document.visibilityState==="visible")ringPhone(ringContext.current);
+ },[ringEnabled,early]);
+ useEffect(()=>()=>{void ringContext.current?.close()},[]);
+ async function answerEarly(accept:boolean){
+  if(!token||!early?.offer_id||earlyBusy)return;
+  setEarlyBusy(true);setEarlyNotice("");
+  try{
+   const {data,error:e}=await browserSupabase().rpc("beger_g56_respond_early_offer",{
+    p_token:token,p_offer:early.offer_id,p_accept:accept
+   });
+   if(e||!["accepted","declined","expired"].includes(String(data?.status)))throw new Error("Offer unavailable");
+   const status=String(data.status);
+   setEarly(p=>p?{...p,status,requires_response:false}:p);
+   setEarlyNotice(status==="accepted"?"تم تقديم موعدك بموافقتك! راجع وقت الحجز الجديد.":
+    status==="declined"?"تم رفض العرض، وموعدك الأصلي باقي كما هو.":"انتهت مهلة العرض؛ موعدك الأصلي محفوظ.");
+   const current=await browserSupabase().rpc("beger_g51_public_track",{p_token:token});
+   if(!current.error&&current.data)setTrack(current.data as Track);
+  }catch{setEarlyNotice("تعذّر تأكيد القرار. ربما انتهت المهلة أو صار الوقت غير متاح؛ موعدك الأصلي محفوظ.");}
+  finally{setEarlyBusy(false)}
  }
  async function requestArrival(){
   if(!token||arrivalBusy)return;
@@ -94,6 +152,25 @@ export default function PublicSalonBooking({slug}:{slug:string}){
    {token?<section style={{background:"#fff",border:"1px solid #dce9df",borderRadius:16,padding:22,display:"grid",gap:11}}>
     <h2 style={{fontSize:20,margin:0}}>متابعة حجزك</h2><p style={{fontSize:12,color:"#6e8073"}}>احتفظ بالرابط الحالي. رمز المتابعة خاص بك ولا تشاركه علناً.</p>
     {track?<><strong style={{color:"#22724e",fontSize:19}}>{statuses[track.status]??track.status}</strong><p style={{margin:0}}>وقت الموعد: {new Date(track.starts_at).toLocaleString("ar",{timeZone:"Europe/Istanbul",dateStyle:"full",timeStyle:"short"})}</p><p style={{margin:0}}>المجموع: {money(track.total_minor)}</p></>:<p>جارٍ التحقق من الحجز…</p>}
+    {track?.status==="confirmed"?<div style={{border:"1px solid #b9ddc7",background:"#f0f9f2",borderRadius:12,padding:14,display:"grid",gap:10}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+       <strong style={{color:"#176548"}}>فرصة موعد أبكر <span aria-hidden="true">🔔</span></strong>
+       <button type="button" disabled={ringEnabled} onClick={()=>void enableRing()} style={{border:"1px solid #c2dbc8",borderRadius:9,padding:10,background:"#fff",color:"#266746",fontWeight:800}}>{ringEnabled?"الرنّة مفعّلة":"تفعيل رنّة الهاتف"}</button>
+      </div>
+      {early?.status==="pending"&&early.expires_at&&new Date(early.expires_at).getTime()>clock?<>
+       <p style={{margin:0,fontSize:13}}>المعلم متاح قبل موعدك! فيك تجي الساعة <strong>{new Date(early.proposed_start??"").toLocaleTimeString("ar",{timeZone:"Europe/Istanbul",hour:"2-digit",minute:"2-digit"})}</strong> بدل وقتك الأصلي.</p>
+       <p style={{margin:0,fontSize:12,color:"#647967"}}>الوقت المتبقي للرد: <strong>{Math.max(0,Math.ceil((new Date(early.expires_at).getTime()-clock)/1000))} ثانية</strong>. بدون رد بيبقى موعدك القديم.</p>
+       <div style={{display:"flex",gap:9,flexWrap:"wrap"}}>
+        <button type="button" disabled={earlyBusy} onClick={()=>void answerEarly(true)} style={{flex:1,minWidth:120,border:0,borderRadius:10,padding:13,background:"#1b7550",color:"#fff",fontWeight:900}}>بوافق، بجي أبكر</button>
+        <button type="button" disabled={earlyBusy} onClick={()=>void answerEarly(false)} style={{flex:1,minWidth:120,border:"1px solid #d1dfd4",borderRadius:10,padding:13,background:"#fff",color:"#2c6248",fontWeight:850}}>لا، بخلي موعدي</button>
+       </div>
+      </>:early?.status==="declined"?<small>رفضت العرض، وموعدك الأصلي ثابت.</small>:
+       early?.status==="accepted"?<small>وافقت على الموعد الأبكر، وتم تحديث الحجز.</small>:
+       early?.status==="pending"?<small>انتهت مهلة العرض، وموعدك الأصلي ثابت.</small>:
+       <small>إذا صار المعلم متاح أبكر، بيظهر العرض هون وبيرن الجهاز بعد تفعيل الرنّة طالما الصفحة مفتوحة ونشطة.</small>}
+      {earlyNotice?<p role="status" style={{margin:0,fontSize:12,color:"#256c49"}}>{earlyNotice}</p>:null}
+      <small style={{color:"#708475"}}>الرنّة داخل صفحة مفتوحة فقط؛ لما الهاتف مقفل أو التطبيق بالخلفية ما في ضمان صوت. إشعارات Push وSMS تحتاج تفعيل مستقل.</small>
+     </div>:null}
     {arrivalMode&&track?.status==="confirmed"?<div style={{display:"grid",gap:8}}>
     <button type="button" disabled={arrivalBusy} onClick={()=>void requestArrival()} style={{border:0,borderRadius:10,padding:14,background:"#216b4f",color:"#fff",fontWeight:800}}>{arrivalBusy?"جارٍ إرسال طلب الوصول…":"أنا وصلت — اطلب تأكيد حضوري"}</button>
     <small>مسح QR لا يثبت وجودك وحده. المعلم يؤكد حضورك من حسابه بعد التحقق.</small>
