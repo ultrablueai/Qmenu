@@ -42,8 +42,8 @@ export default function SalonRoleDemo({role}:{role:Role}){
   setMessage(permission==="granted"?"تم تفعيل تنبيهات هذا المتصفح فقط":"استخدم خط سير الموعد داخل الصفحة لمتابعة التغييرات");
  }
  const basket=useMemo(()=>serviceBasket(selected),[selected]);
- const canUseTime=(candidate:string)=>slotFree(rows.map(b=>({
-  id:b.id,serviceIds:b.serviceIds,serviceId:b.serviceIds[0],barberId:b.barberId,
+ const canUseTime=(candidate:string)=>slotFree(rows.map((b,i)=>({
+  id:i+1,customer:b.name,walkin:false,paid:b.paid,serviceIds:b.serviceIds,serviceId:b.serviceIds[0],barberId:b.barberId,
   chairId:staff.find(s=>s.id===b.barberId)?.chair==="1"?"chair-1":staff.find(s=>s.id===b.barberId)?.chair==="2"?"chair-2":"chair-3",
   date:demoDate(),time:b.time,status:b.state==="cancelled"?"cancelled":b.state
  })),selected,barber,barber==="omer"?"chair-1":barber==="ahmet"?"chair-2":"chair-3",demoDate(),candidate,null,defaultSalonSchedule);
