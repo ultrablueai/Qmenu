@@ -105,5 +105,5 @@ reset role;
 select (select count(*) from public.salon_bookings b join g48_case c on c.business_id=b.business_id) as bookings_created,
  (select count(*) from public.salon_booking_services s join g48_case c on c.business_id=s.business_id) as service_lines,
  (select count(*) from public.salon_booking_events e join g48_case c on c.business_id=e.business_id and e.event_type='requested') as audit_events,
- (select count(*) from public.salon_bookings b join g48_case c on c.id=b.id where b.total_minor=55000) as multibasket_count;
+ (select count(*) from public.salon_bookings b join g48_case c on c.booking_id=b.id where b.total_minor=55000) as multibasket_count;
 rollback;
