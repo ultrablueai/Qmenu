@@ -22,3 +22,23 @@
 .bs-days input{accent-color:#257455}
 
 .bs-role-head{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;padding:20px 0}.bs-role-head h1{font-size:clamp(25px,4vw,34px);margin:7px 0}.bs-role-head p{font-size:13px;color:#60786a;max-width:570px;line-height:1.8}.bs-role-head a,.bs-checkin-link{font-size:13px;background:#e5f1e8;color:#246345;border:1px solid #c4deca;padding:10px 14px;border-radius:9px;text-decoration:none;font-weight:800;display:inline-flex;align-items:center;justify-content:center}.bs-role-nav{display:flex;gap:7px;flex-wrap:wrap;padding:7px;background:#e0eee5;border-radius:12px;margin:14px 0 22px}.bs-role-nav a{padding:11px 18px;font-size:13px;font-weight:850;border-radius:9px;color:#547363;text-decoration:none}.bs-role-nav a[aria-current=page]{background:#fff;color:#176447}.bs-role-timeline{display:grid;gap:11px;margin:18px 0;padding-inline-start:23px;color:#376b50;font-size:13px}.bs-role-timeline li small{display:block;font-size:11px;color:#819184}.bs-role-nav .bs-primary{background:#1f7657;color:#fff}.bs-checkin-link{margin:10px 0;cursor:pointer}.bs-checkin-link+.bs-primary{margin-inline-start:7px}
+
+/* G42 role-specific barber and owner overview */
+.bs-role-dashboard{display:grid;gap:18px}
+.bs-dashboard-title{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.bs-dashboard-title h2{font-size:clamp(23px,3vw,31px);margin:8px 0}
+.bs-dashboard-title .bs-fine{margin:0}
+.bs-analytics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.bs-analytic-card{border:1px solid #dce8df;border-radius:14px;background:#fff;min-height:104px;padding:17px;display:flex;flex-direction:column;justify-content:space-between;gap:12px}
+.bs-analytic-card span{font-size:12px;color:#607b6a;font-weight:650}
+.bs-analytic-card strong{font-size:clamp(19px,3vw,29px);color:#1d6649;font-weight:900;letter-spacing:-.03em}
+.bs-dashboard-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bs-service-mix{display:grid;gap:8px}
+.bs-service-mix>div{border:1px solid #e4eae4;background:#fafcf9;border-radius:10px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:#3c614e}
+.bs-service-mix>div strong,.bs-service-mix>div b{color:#216b4d}
+.bs-owner-filters{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:17px}
+.bs-owner-filters label{display:grid;gap:7px;min-width:min(100%,205px);font-size:12px;font-weight:750;color:#4b6b58}
+.bs-owner-filters input,.bs-owner-filters select{border:1px solid #d3e1d6;border-radius:9px;background:#fff;min-height:42px;padding:9px 11px;color:#264735}
+.bs-appointment-actions button.bs-approve{background:#1e7553;color:#fff;border-color:#1e7553}
+@media(max-width:700px){.bs-analytics{grid-template-columns:repeat(2,minmax(0,1fr))}.bs-dashboard-cols{grid-template-columns:1fr}}
+@media(max-width:380px){.bs-analytics{gap:8px}.bs-analytic-card{padding:12px;min-height:88px}.bs-analytic-card strong{font-size:20px}}
