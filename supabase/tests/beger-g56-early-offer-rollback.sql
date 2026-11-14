@@ -136,7 +136,7 @@ begin
  r:=public.beger_g56_respond_early_offer(c.token,offer,true);
  if r->>'status'<>'accepted' or r->>'customer_accepted'<>'true' then
   raise exception 'Acceptance failed: %',r;end if;
- if (select starts_at from public.salon_bookings where id=c.booking_id)
+ if (public.beger_g51_public_track(c.token)->>'starts_at')::timestamptz
    <>c.start_at-interval '30 minutes' then
   raise exception 'Booking time not shifted';end if;
  begin
