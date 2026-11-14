@@ -26,6 +26,7 @@ export default function SalonRoleDemo({role}:{role:Role}){
  const [search,setSearch]=useState("");
  useEffect(()=>{
   const first=read();previous.current=Object.fromEntries(first.map(b=>[b.id,b.state]));setRows(first);setMyId(sessionStorage.getItem("beger:salon:my-booking"));setHydrated(true);
+  if(role==="customer"){const requested=new URLSearchParams(window.location.search).get("barber");if(staff.some(s=>s.id===requested))setBarber(requested!);}
   setBrowserAlerts(typeof Notification!=="undefined"&&Notification.permission==="granted");
   const handler=()=>{
    const updated=read();const changed=updated.find(b=>previous.current[b.id]&&previous.current[b.id]!==b.state);
