@@ -3,6 +3,7 @@ import {useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {salonServices,serviceBasket,slotFree,defaultSalonSchedule} from "../../../lib/beger-salon-demo-model.mjs";
 import "./salon.css";
+import {SalonMetrics,SalonServiceMix} from "./salon-role-metrics";
 type Role="customer"|"barber"|"owner";
 type State="pending"|"confirmed"|"arrived"|"in_service"|"completed"|"cancelled";
 type Appt={id:string;token:string;name:string;serviceIds:string[];barberId:string;time:string;state:State;paid:boolean;events:{state:State;at:string}[]};
@@ -21,6 +22,8 @@ export default function SalonRoleDemo({role}:{role:Role}){
  const [message,setMessage]=useState(""),[myId,setMyId]=useState<string|null>(null);
  const previous=useRef<Record<string,State>>({});
  const [browserAlerts,setBrowserAlerts]=useState(false);
+ const [appointmentFilter,setAppointmentFilter]=useState<"all"|State>("all");
+ const [search,setSearch]=useState("");
  useEffect(()=>{
   const first=read();previous.current=Object.fromEntries(first.map(b=>[b.id,b.state]));setRows(first);setHydrated(true);
   setBrowserAlerts(typeof Notification!=="undefined"&&Notification.permission==="granted");
@@ -67,7 +70,15 @@ export default function SalonRoleDemo({role}:{role:Role}){
   if(b.state!=="confirmed")return setMessage("يجب تأكيد الحجز أولاً");
   advance(b,"arrived");
  }
- const title=role==="customer"?"صفحة الزبون":role==="barber"?"واجهة المعلم":"إدارة الصالون";
+ const ownerRows=rows.filter(b=>(appointmentFilter==="all"||b.state===appointmentFilter)&&(b.name.toLowerCase().includes(search.toLowerCase())||b.id.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>a.time.localeCompare(b.time));
+ const barberRows=rows.filter(b=>b.barberId===barber&&b.state!=="cancelled").sort((a,b)=>a.time.localeCompare(b.time));
+ function approveAssigned(b:Appt){
+  if(role!=="barber"||b.barberId!==barber||b.state!=="pending"){
+   setMessage("هذا الحجز ليس بانتظار موافقة المعلم المحدد");return;
+  }
+  advance(b,"confirmed");
+ }
+ const title=role==="customer"?"صفحة الزبون":role==="barber"?"لوحة المعلم":"لوحة صاحب الصالون";
  return <main className="bs-page" lang="ar" dir="rtl"><div className="bs-wrap">
  <header className="bs-role-head"><div><span className="bs-eyebrow">BEGER · SALON EXPERIENCE</span><h1>{title}</h1><p>نسخة تجربة محلية داخل المتصفح فقط، لا تدير مواعيد أو تنبيهات حقيقية بين أجهزة مختلفة.</p></div><Link href="/demo/salon">العودة لعرض الصالون</Link></header>
  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap",margin:"12px 0"}}><span className="bs-demo">الإشعارات هنا تجريبية ومحلية، وليست Push من الخادم</span><button type="button" className="bs-checkin-link" onClick={()=>void enableAlerts()}>{browserAlerts?"إشعارات هذا المتصفح مفعلة":"تفعيل إشعارات المتصفح"}</button></div>
@@ -84,8 +95,13 @@ export default function SalonRoleDemo({role}:{role:Role}){
  <p className="bs-fine">رابط الحضور خاص بحجز العرض، ولا يمنح صلاحية دخول إلى حساب الصالون.</p>
  {mine.state==="confirmed"?<><Link className="bs-checkin-link" href={"/demo/salon/checkin?token="+encodeURIComponent(mine.token)}>فتح رابط تسجيل الوصول</Link><button className="bs-primary" onClick={()=>checkIn(mine)}>تأكيد الوصول من نفس الجهاز</button></>:null}
  </>:<p>أرسل حجزاً لتظهر تفاصيل المتابعة.</p>}</aside></div>:null}
- {role==="owner"&&hydrated?<div className="bs-panel"><h2>الحجوزات والموظفون</h2><p className="bs-fine">في التطبيق الفعلي، هذه الواجهة تحتاج حساب مالك الصالون وصلاحيات الخادم. هنا العرض مفتوح للتجربة فقط.</p><div className="bs-rows">{rows.map(b=><article key={b.id} className="bs-appointment"><div className="bs-book-number">{b.id}</div><div className="bs-appointment-body"><strong>{b.name}</strong><p>{b.serviceIds.map(id=>salonServices.find(s=>s.id===id)?.ar).join(" + ")} · {b.time} · {staff.find(s=>s.id===b.barberId)?.name}</p><span className={"bs-status bs-"+b.state}>{statuses[b.state]}</span></div><div className="bs-appointment-actions">{b.state==="pending"?<button onClick={()=>advance(b,"confirmed")}>تأكيد الموعد</button>:null}{b.state==="confirmed"?<button onClick={()=>advance(b,"arrived")}>تأكيد الحضور يدوياً</button>:null}{["pending","confirmed","arrived"].includes(b.state)?<button className="bs-muted" onClick={()=>advance(b,"cancelled")}>إلغاء</button>:null}{b.state==="completed"?<button disabled={b.paid} onClick={()=>{commit(rows.map(x=>x.id===b.id?{...x,paid:true}:x));setMessage("تحصيل تجريبي فقط")}}>{b.paid?"محصّل":"تسجيل التحصيل"}</button>:null}</div></article>)}</div>{!rows.length?<p>لا توجد حجوزات في هذه الجلسة.</p>:null}</div>:null}
- {role==="barber"&&hydrated?<div className="bs-panel"><h2>لوحة المعلم</h2><label className="bs-field">المعلم<select value={barber} onChange={e=>setBarber(e.target.value)}>{staff.map(s=><option value={s.id} key={s.id}>{s.name}</option>)}</select></label><div className="bs-rows" style={{marginTop:16}}>{rows.filter(b=>b.barberId===barber&&b.state!=="cancelled").map(b=><article className="bs-appointment" key={b.id}><div className="bs-book-number">{b.time}</div><div className="bs-appointment-body"><strong>{b.name}</strong><p>{b.serviceIds.map(id=>salonServices.find(s=>s.id===id)?.ar).join(" + ")}</p><span className={"bs-status bs-"+b.state}>{statuses[b.state]}</span></div><div className="bs-appointment-actions">{b.state==="arrived"?<button onClick={()=>advance(b,"in_service")}>بدء الخدمة</button>:null}{b.state==="in_service"?<button onClick={()=>advance(b,"completed")}>إنهاء الخدمة</button>:null}</div></article>)}</div></div>:null}
+ {role==="owner"&&hydrated?<div className="bs-role-dashboard">
+ <header className="bs-dashboard-title"><div><span className="bs-eyebrow">SALON OVERVIEW</span><h2>لوحة تحكم الصالون</h2><p className="bs-fine">المواعيد، الحضور، التحصيل التجريبي ونشاط المعلمين من مكان واحد.</p></div><span className="bs-demo">عرض بيانات هذا المتصفح فقط</span></header>
+ <SalonMetrics bookings={rows}/>
+ <div className="bs-dashboard-cols"><div className="bs-panel"><h2>نشاط المعلمين</h2><div className="bs-service-mix">{staff.map(person=>{const theirs=rows.filter(b=>b.barberId===person.id);return <div key={person.id}><span><b>{person.name}</b> · كرسي {person.chair} · {theirs.length} حجز</span><strong>{theirs.filter(b=>b.state==="pending").length} جديد</strong></div>})}</div></div><SalonServiceMix bookings={rows}/></div>
+ <div className="bs-panel"><h2>الحجوزات والموظفون</h2>
+ <div className="bs-owner-filters"><label>بحث عن زبون أو رقم حجز<input aria-label="بحث عن زبون أو رقم حجز" value={search} onChange={e=>setSearch(e.target.value)} placeholder="اسم الزبون أو رقم الحجز"/></label><label>الحالة<select aria-label="تصفية الحجوزات" value={appointmentFilter} onChange={e=>setAppointmentFilter(e.target.value as "all"|State)}><option value="all">كل الحالات</option>{(Object.keys(statuses) as State[]).map(s=><option value={s} key={s}>{statuses[s]}</option>)}</select></label></div><p className="bs-fine">في التطبيق الفعلي، هذه الواجهة تحتاج حساب مالك الصالون وصلاحيات الخادم. هنا العرض مفتوح للتجربة فقط.</p><div className="bs-rows">{ownerRows.map(b=><article key={b.id} className="bs-appointment"><div className="bs-book-number">{b.id}</div><div className="bs-appointment-body"><strong>{b.name}</strong><p>{b.serviceIds.map(id=>salonServices.find(s=>s.id===id)?.ar).join(" + ")} · {b.time} · {staff.find(s=>s.id===b.barberId)?.name}</p><span className={"bs-status bs-"+b.state}>{statuses[b.state]}</span></div><div className="bs-appointment-actions">{b.state==="pending"?<button onClick={()=>advance(b,"confirmed")}>تأكيد الموعد</button>:null}{b.state==="confirmed"?<button onClick={()=>advance(b,"arrived")}>تأكيد الحضور يدوياً</button>:null}{["pending","confirmed","arrived"].includes(b.state)?<button className="bs-muted" onClick={()=>advance(b,"cancelled")}>إلغاء</button>:null}{b.state==="completed"?<button disabled={b.paid} onClick={()=>{commit(rows.map(x=>x.id===b.id?{...x,paid:true}:x));setMessage("تحصيل تجريبي فقط")}}>{b.paid?"محصّل":"تسجيل التحصيل"}</button>:null}</div></article>)}</div>{!ownerRows.length?<p>لا توجد حجوزات مطابقة للفلاتر.</p>:null}</div></div>:null}
+ {role==="barber"&&hydrated?<div className="bs-role-dashboard"><header className="bs-dashboard-title"><div><span className="bs-eyebrow">MY APPOINTMENTS</span><h2>مواعيدي اليوم</h2><p className="bs-fine">تأكيد الحجز الخاص بك، متابعة وصول الزبون، بدء الخدمة وإنهاؤها.</p></div><span className="bs-demo">تبديل المعلم لأغراض العرض فقط</span></header><label className="bs-field" style={{maxWidth:260,marginBottom:16}}>المعلم<select value={barber} onChange={e=>setBarber(e.target.value)}>{staff.map(s=><option value={s.id} key={s.id}>{s.name}</option>)}</select></label><SalonMetrics bookings={rows} barberId={barber}/><div className="bs-panel" style={{marginTop:16}}><h2>قائمة زبائني</h2><div className="bs-rows" style={{marginTop:16}}>{barberRows.map(b=><article className="bs-appointment" key={b.id}><div className="bs-book-number">{b.time}</div><div className="bs-appointment-body"><strong>{b.name}</strong><p>{b.serviceIds.map(id=>salonServices.find(s=>s.id===id)?.ar).join(" + ")}</p><span className={"bs-status bs-"+b.state}>{statuses[b.state]}</span></div><div className="bs-appointment-actions">{b.state==="pending"?<button className="bs-approve" type="button" onClick={()=>approveAssigned(b)}>تأكيد حجز زبوني</button>:null}{b.state==="arrived"?<button onClick={()=>advance(b,"in_service")}>بدء الخدمة</button>:null}{b.state==="in_service"?<button onClick={()=>advance(b,"completed")}>إنهاء الخدمة</button>:null}</div></article>)}</div></div></div>:null}
  <p className="bs-fine" style={{marginTop:22}}>الحجوزات المشتركة بهذه المعاينة تعمل فقط بين صفحات نفس المتصفح/الجهاز. رمز الوصول هنا للتجربة وليس إثبات هوية آمناً. الإشعارات الحقيقية تحتاج حسابات وصلاحيات وRealtime/Push من الخادم.</p>
  </div></main>;
 }
