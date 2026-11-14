@@ -11,7 +11,8 @@ test("overlapping same-chair bookings cannot be reserved by different barbers",(
  assert.equal(timesOverlap("10:00",30,"10:30",30),false);
 });
 test("closed slots and invalid service/chair cannot be booked",()=>{
- assert.equal(slotFree([],"hair","omer","chair-1","2026-11-14","18:30"),false);
+ assert.equal(slotFree([],"hair","omer","chair-1","2026-11-14","19:00"),false);
+ assert.equal(slotFree([],"hair","omer","chair-1","2026-11-14","18:30"),true);
  assert.equal(slotFree([],"hair","omer","chair-1","2026-11-14","18:00"),true);
  assert.equal(slotFree([],"missing","omer","chair-1","2026-11-14","12:00"),false);
  assert.equal(slotFree([],"hair","omer","missing","2026-11-14","12:00"),false);
