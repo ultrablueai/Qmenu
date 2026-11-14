@@ -5,7 +5,7 @@ create temp table g48_case(
  staff_1 uuid,staff_2 uuid,chair_1 uuid,chair_2 uuid,
  service_1 uuid,service_2 uuid,start_at timestamptz,booking_id uuid
 ) on commit drop;
-grant select on g48_case to authenticated;
+grant select,update on g48_case to authenticated;
 do $setup$
 declare b uuid;f uuid;br uuid;owner_user uuid;worker_user uuid;
  st1 uuid;st2 uuid;ch1 uuid;ch2 uuid;svc1 uuid;svc2 uuid;
