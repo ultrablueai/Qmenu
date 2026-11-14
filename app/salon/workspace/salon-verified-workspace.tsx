@@ -2,6 +2,7 @@
 import {useRouter} from "next/navigation";
 import {useCallback,useEffect,useRef,useState} from "react";
 import {browserSupabase} from "../../../lib/supabase/browser";
+import SalonEarlyOfferControls from "./salon-early-offer-controls";
 type SalonStaff={id:string;display_name:string;kind:string;branch_id:string;accepts_bookings:boolean;start_local:string|null;end_local:string|null};
 type SalonLine={service_id:string;staff_id:string;chair_id:string|null;line_number:number;duration_minutes:number;price_minor:number};
 type SalonBooking={id:string;branch_id:string;customer_name:string;status:string;starts_at:string;ends_at:string;total_minor:number|null;collected_minor:number|null;currency:string;service_lines:SalonLine[];source:string|null;arrival_requested_at:string|null};
@@ -152,6 +153,7 @@ export default function SalonVerifiedWorkspace({businessId,initial}:{businessId:
      {filtered.map(b=><article key={b.id} style={{border:"1px solid #e0e8e0",borderRadius:12,padding:14,display:"flex",justifyContent:"space-between",alignItems:"center",gap:13,flexWrap:"wrap"}}>
       <div style={{display:"grid",gap:5,minWidth:180,flex:1}}><strong>{b.customer_name}</strong><small style={{color:"#627a69"}}>{new Date(b.starts_at).toLocaleString("ar",{timeZone:"Europe/Istanbul",dateStyle:"medium",timeStyle:"short"})}</small><small>{b.service_lines.length} خدمات · {statusText[b.status]??b.status}</small>{b.status==="confirmed"&&b.arrival_requested_at?<small style={{fontWeight:900,color:"#176f4c"}}>الزبون أرسل طلب وصول — تحقق من حضوره ثم اضغط تأكيد الوصول</small>:null}{owner&&b.total_minor!==null?<small>إجمالي الفاتورة: {money(b.total_minor)}</small>:null}</div>
       <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+      {b.status==="confirmed"?<SalonEarlyOfferControls businessId={businessId} bookingId={b.id} startsAt={b.starts_at} onCreated={()=>void refresh()}/>:null}
       {b.status==="confirmed"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"arrived")} style={{border:0,borderRadius:9,padding:10,background:"#246f53",color:"#fff"}}>تأكيد وصول الزبون</button>:null}
       {b.status==="arrived"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"in_service")} style={{border:0,borderRadius:9,padding:10,background:"#246f53",color:"#fff"}}>بدء الخدمة</button>:null}
       {b.status==="in_service"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"completed")} style={{border:0,borderRadius:9,padding:10,background:"#246f53",color:"#fff"}}>إنهاء الخدمة</button>:null}
