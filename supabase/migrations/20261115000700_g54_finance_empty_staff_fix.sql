@@ -1,4 +1,5 @@
--- Prevent empty workers from appearing with unconfigured earnings.\ncreate or replace function public.beger_g54_staff_finance(p_business uuid)
+-- Prevent empty workers from appearing with unconfigured earnings.
+create or replace function public.beger_g54_staff_finance(p_business uuid)
 returns jsonb language plpgsql stable security definer set search_path=''
 as $$
 declare v_actor uuid:=(select auth.uid());v_role text;v_data jsonb;v_total bigint;
