@@ -23,7 +23,16 @@ export default function SalonEarlyOfferControls({businessId,bookingId,startsAt,o
     p_business:businessId,p_booking:bookingId,p_proposed_start:start.toISOString()
    });
    if(e||data?.status!=="pending"||data?.original_booking_unchanged!==true)throw Error("Rejected");
-   setInfo("انرسل العرض للزبون على صفحة متابعة موعده. عنده 5 دقائق ليختار. موعده الأصلي لم يتغيّر.");
+   let delivered=0;
+   try{
+    const response=await fetch("/api/salon/push",{method:"POST",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({business:businessId,offer:data.offer_id})});
+    if(response.ok){const push=await response.json();delivered=Number(push.delivered??0);}
+   }catch{/* Offer is still visible in the customer booking portal */}
+   setInfo(delivered>0?
+    "انرسل العرض على صفحة الزبون، وتم تسليم إشعار Push إلى خدمة إشعارات الهاتف. القبول خلال 5 دقائق اختياري.":
+    "انرسل العرض لصفحة متابعة الزبون، لكن ما تأكدنا من وصول تنبيه الخلفية. إذا الصفحة مفتوحة بتظهر الرنّة بعد تفعيلها.");
    onCreated();
   }catch{
    setError("ما قدرنا نرسل العرض. تأكد أن الموعد مؤكد، الوقت أبكر بـ10 إلى 180 دقيقة، وما في تضارب أو عرض معلق.");
