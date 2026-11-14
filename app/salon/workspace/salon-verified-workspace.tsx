@@ -1,7 +1,7 @@
 "use client";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
-import {browserSupabase} from "../../lib/supabase/browser";
+import {browserSupabase} from "../../../lib/supabase/browser";
 type SalonStaff={id:string;display_name:string;kind:string;branch_id:string;accepts_bookings:boolean;start_local:string|null;end_local:string|null};
 type SalonLine={service_id:string;staff_id:string;chair_id:string|null;line_number:number;duration_minutes:number;price_minor:number};
 type SalonBooking={id:string;branch_id:string;customer_name:string;status:string;starts_at:string;ends_at:string;total_minor:number|null;collected_minor:number|null;currency:string;service_lines:SalonLine[];source:string|null};
