@@ -101,6 +101,17 @@ export default function SalonRoleDemo({role}:{role:Role}){
   }
   advance(b,"confirmed");
  }
+ function loadShowcaseBookings(){
+  if(role!=="owner")return;
+  const now=new Date().toISOString();
+  const samples:Appt[]=[
+   {id:"DEMO-101",token:crypto.randomUUID(),name:"زبون جديد — سامر",serviceIds:["hair","beard"],barberId:"omer",time:"10:00",state:"pending",paid:false,events:[{state:"pending",at:now}]},
+   {id:"DEMO-102",token:crypto.randomUUID(),name:"زبون وصل — مراد",serviceIds:["combo"],barberId:"ahmet",time:"11:00",state:"arrived",paid:false,events:[{state:"pending",at:now},{state:"confirmed",at:now},{state:"arrived",at:now}]},
+   {id:"DEMO-103",token:crypto.randomUUID(),name:"زبون مكتمل — كريم",serviceIds:["hair","care"],barberId:"mert",time:"15:00",state:"completed",paid:true,events:[{state:"pending",at:now},{state:"confirmed",at:now},{state:"arrived",at:now},{state:"in_service",at:now},{state:"completed",at:now}]}
+  ];
+  commit([...rows.filter(b=>!b.id.startsWith("DEMO-")),...samples]);
+  setMessage("تم تجهيز 3 حجوزات تجريبية: جديد، وصل، ومكتمل ومحصّل. افتح لوحة المعلم لتجربة التأكيد.");
+ }
  const title=role==="customer"?"صفحة الزبون":role==="barber"?"لوحة المعلم":"لوحة صاحب الصالون";
  return <main className="bs-page" lang="ar" dir="rtl"><div className="bs-wrap">
  <header className="bs-role-head"><div><span className="bs-eyebrow">BEGER · SALON EXPERIENCE</span><h1>{title}</h1><p>نسخة تجربة محلية داخل المتصفح فقط، لا تدير مواعيد أو تنبيهات حقيقية بين أجهزة مختلفة.</p></div><Link href="/demo/salon">العودة لعرض الصالون</Link></header>
@@ -119,7 +130,7 @@ export default function SalonRoleDemo({role}:{role:Role}){
  {mine.state==="confirmed"?<><Link className="bs-checkin-link" href={"/demo/salon/checkin?token="+encodeURIComponent(mine.token)}>فتح رابط تسجيل الوصول</Link><button className="bs-primary" onClick={()=>checkIn(mine)}>تأكيد الوصول من نفس الجهاز</button></>:null}
  </>:<p>أرسل حجزاً لتظهر تفاصيل المتابعة.</p>}</aside></div>:null}
  {role==="owner"&&hydrated?<div className="bs-role-dashboard">
- <header className="bs-dashboard-title"><div><span className="bs-eyebrow">SALON OVERVIEW</span><h2>لوحة تحكم الصالون</h2><p className="bs-fine">المواعيد، الحضور، التحصيل التجريبي ونشاط المعلمين من مكان واحد.</p></div><span className="bs-demo">عرض بيانات هذا المتصفح فقط</span></header>
+ <header className="bs-dashboard-title"><div><span className="bs-eyebrow">SALON OVERVIEW</span><h2>لوحة تحكم الصالون</h2><p className="bs-fine">المواعيد، الحضور، التحصيل التجريبي ونشاط المعلمين من مكان واحد.</p></div><div className="bs-owner-demo-actions"><button type="button" onClick={loadShowcaseBookings}>تجهيز بيانات العرض بضغطة</button><span className="bs-demo">عرض بيانات هذا المتصفح فقط</span></div></header>
  <SalonMetrics bookings={rows}/>
  <div className="bs-role-switch"><button type="button" aria-pressed={managementTab==="appointments"} onClick={()=>setManagementTab("appointments")}>العمليات والحجوزات</button><button type="button" aria-pressed={managementTab==="staff"} onClick={()=>setManagementTab("staff")}>المعلمين والكراسي والمحاسبة</button></div>
  {managementTab==="staff"?<SalonStaffOperations role="owner" activeBarber={barber} profiles={profiles} bookings={rows} onProfile={changeProfile}/>:null}
