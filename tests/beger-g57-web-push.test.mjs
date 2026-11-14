@@ -6,6 +6,7 @@ import {encryptWebPushPayload,isTrustedPushEndpoint,vapidAuthorization} from "..
 const sql=readFileSync("supabase/migrations/20261115001100_g57_salon_optin_webpush.sql","utf8");
 const sw=readFileSync("public/salon-booking-sw.js","utf8");
 const route=readFileSync("app/api/salon/push/route.ts","utf8");
+const helper=readFileSync("lib/beger-web-push.mjs","utf8");
 const customer=readFileSync("app/salon/book/[slug]/public-salon-booking.tsx","utf8");
 const worker=readFileSync("app/salon/workspace/salon-early-offer-controls.tsx","utf8");
 test("G57 encrypted RFC8291 payload decrypts under customer receiver keys",()=>{
@@ -49,7 +50,7 @@ test("G57 URL allowlist blocks localhost, IP, redirects and arbitrary websites",
  assert.equal(isTrustedPushEndpoint("https://fcm.googleapis.com.evil.net/send"),false);
  assert.equal(isTrustedPushEndpoint("http://fcm.googleapis.com/"),false);
  assert.equal(isTrustedPushEndpoint("https://example.com/internal"),false);
- assert.equal(isTrustedPushEndpoint("https://fcm.googleapis.com:443/send"),false);
+ assert.equal(isTrustedPushEndpoint("https://fcm.googleapis.com:8443/send"),false);
 });
 test("G57 token-bound subscriptions RLS and staff dispatch, no public subscription read",()=>{
  assert.match(sql,/alter table public\.salon_push_subscriptions enable row level security/);
@@ -63,7 +64,7 @@ test("G57 token-bound subscriptions RLS and staff dispatch, no public subscripti
  assert.match(route,/headers\.get\("origin"\)/);
  assert.match(route,/beger_g57_claim_offer_push/);
  assert.match(route,/beger_g57_finish_offer_push/);
- assert.match(route,/redirect:"error"/);
+ assert.match(helper,/redirect:"error"/);
 });
 test("G57 customer opt-in and private generic SW notification, no claimed phone-call ringtone",()=>{
  assert.match(customer,/Notification\.requestPermission\(\)/);
