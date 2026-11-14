@@ -1,0 +1,51 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const sql=readFileSync("supabase/migrations/20261104194500_g9_kitchen_staff_workstation.sql","utf8");
+const kitchen=readFileSync("app/dashboard/merchant-kitchen.tsx","utf8");
+const route=readFileSync("app/staff/kitchen/page.tsx","utf8");
+const manage=readFileSync("app/dashboard/merchant-kitchen-access.tsx","utf8");
+const staff=readFileSync("app/dashboard/merchant-staff.tsx","utf8");
+test("kitchen access must have owner-assigned branch and active staff membership",()=>{
+ assert.match(sql,/alter table public.g9_kitchen_staff_branches enable row level security/);
+ assert.match(sql,/revoke all on public.g9_kitchen_staff_branches from public,anon,authenticated/);
+ assert.match(sql,/m.role='staff' and exists\(/);
+ assert.match(sql,/k.branch_id=b.id and k.business_id=b.business_id and k.user_id=auth.uid\(\)/);
+ assert.match(sql,/m.user_id=auth.uid\(\) and m.role='owner'/);
+ assert.match(sql,/v_role is not null and v_role<>'staff'/);
+ assert.match(sql,/grant execute on function public.g9_kitchen_assign\(uuid,text,boolean\) to authenticated/);
+});
+test("kitchen queue exposes only cooking information, never payment or guest tokens",()=>{
+ const start=sql.indexOf("create or replace function public.g9_kitchen_queue");
+ const end=sql.indexOf("-- Kitchen cannot accept",start);
+ const queue=sql.slice(start,end);
+ assert.match(queue,/public.g9_kitchen_allowed\(p_branch\)/);
+ assert.match(queue,/branch_id=p_branch and business_id=v_business/);
+ assert.match(queue,/status in \('accepted','preparing','ready'\)/);
+ assert.match(queue,/order by created_at limit 100/);
+ for(const privateField of ["payment_status","payment_method","total_minor","paid_at","public_token","auth.users"])assert.doesNotMatch(queue,new RegExp(privateField));
+ assert.match(sql,/grant execute on function public.g9_kitchen_queue\(uuid\) to authenticated/);
+});
+test("kitchen can only start preparation or mark ready with server-side row lock",()=>{
+ const action=sql.slice(sql.indexOf("create or replace function public.g9_kitchen_advance"));
+ assert.match(action,/for update/);
+ assert.match(action,/public.g9_kitchen_allowed\(v_order.branch_id\)/);
+ assert.match(action,/v_order.status='accepted' and p_next='preparing'/);
+ assert.match(action,/v_order.status='preparing' and p_next='ready'/);
+ assert.match(action,/Invalid kitchen transition/);
+ assert.match(action,/insert into public.g9_kitchen_events/);
+ assert.doesNotMatch(action,/payment_status|paid_at|payment_method|update public.memberships/);
+ assert.match(sql,/alter table public.g9_kitchen_events enable row level security/);
+});
+test("restricted kitchen station loads approved branches and no financial dashboards",()=>{
+ assert.match(route,/db.auth.getUser\(\)/);
+ assert.match(route,/g9_my_kitchen_branches/);
+ assert.match(route,/branches.find\(branch=>branch.id===params.branch\)\?\?branches\[0\]/);
+ assert.match(kitchen,/g9_kitchen_queue/);
+ assert.match(kitchen,/g9_kitchen_advance/);
+ assert.match(kitchen,/aria-label="محطة المطبخ"/);
+ assert.doesNotMatch(kitchen,/g3_record_external_payment|g8_collection_close|MerchantPrintSettings/);
+ assert.match(manage,/g9_kitchen_roster/);
+ assert.match(manage,/g9_kitchen_assign/);
+ assert.match(staff,/MerchantKitchenAccess key=/);
+});
