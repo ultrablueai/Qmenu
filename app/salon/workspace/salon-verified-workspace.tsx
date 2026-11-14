@@ -86,6 +86,21 @@ export default function SalonVerifiedWorkspace({businessId,initial}:{businessId:
    setError("تعذّر تأكيد الحجز. قد يكون تغيّر، أو أُسند لمعلم آخر، أو انتهت صلاحية الجلسة.");
   }finally{setBusy(null);}
  }
+ async function stage(id:string,next:"arrived"|"in_service"|"completed"|"cancelled"|"no_show"){
+  if(busy)return;
+  const names={arrived:"تأكيد وصول الزبون",in_service:"بدء الخدمة",completed:"إنهاء الخدمة",cancelled:"إلغاء الحجز",no_show:"تسجيل عدم الحضور"};
+  if(!window.confirm(names[next]+"؟ سيتم تسجيل هذا الإجراء باسم حسابك."))return;
+  setBusy(id);setError("");setNotice("");
+  try{
+   const {data,error:rpcError}=await browserSupabase().rpc("beger_g52_salon_booking_stage",
+    {p_business:businessId,p_booking:id,p_next:next});
+   if(rpcError||data?.status!==next||data?.event_recorded!==true)throw new Error("Invalid transition result");
+   setNotice("تم تحديث الموعد: "+names[next]);
+   await refresh();
+   router.refresh();
+  }catch{setError("تعذّر تحديث الحالة. تحقق من مرحلة الموعد وصلاحياتك وجلسة حسابك.");}
+  finally{setBusy(null)}
+ }
  const stats=[
   {label:owner?"الحجوزات المسجلة":"حجوزاتي المسندة",value:snapshot.summary.assigned_bookings},
   {label:"بانتظار التأكيد",value:snapshot.summary.pending_bookings},
@@ -122,6 +137,13 @@ export default function SalonVerifiedWorkspace({businessId,initial}:{businessId:
     <div style={{display:"grid",gap:9}}>
      {filtered.map(b=><article key={b.id} style={{border:"1px solid #e0e8e0",borderRadius:12,padding:14,display:"flex",justifyContent:"space-between",alignItems:"center",gap:13,flexWrap:"wrap"}}>
       <div style={{display:"grid",gap:5,minWidth:180,flex:1}}><strong>{b.customer_name}</strong><small style={{color:"#627a69"}}>{new Date(b.starts_at).toLocaleString("ar",{timeZone:"Europe/Istanbul",dateStyle:"medium",timeStyle:"short"})}</small><small>{b.service_lines.length} خدمات · {statusText[b.status]??b.status}</small>{owner&&b.total_minor!==null?<small>إجمالي الفاتورة: {money(b.total_minor)}</small>:null}</div>
+      <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+      {b.status==="confirmed"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"arrived")} style={{border:0,borderRadius:9,padding:10,background:"#246f53",color:"#fff"}}>تأكيد وصول الزبون</button>:null}
+      {b.status==="arrived"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"in_service")} style={{border:0,borderRadius:9,padding:10,background:"#246f53",color:"#fff"}}>بدء الخدمة</button>:null}
+      {b.status==="in_service"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"completed")} style={{border:0,borderRadius:9,padding:10,background:"#246f53",color:"#fff"}}>إنهاء الخدمة</button>:null}
+      {["pending","confirmed","arrived"].includes(b.status)?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"cancelled")} style={{border:"1px solid #edcdc7",borderRadius:9,padding:10,background:"#fff5f1",color:"#8d4840"}}>إلغاء</button>:null}
+      {b.status==="confirmed"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"no_show")} style={{border:"1px solid #e4d5bd",borderRadius:9,padding:10,background:"#fffaf1",color:"#8a6934"}}>لم يحضر</button>:null}
+      </div>
       {b.status==="pending"?<button type="button" disabled={Boolean(busy)} onClick={()=>void approve(b.id)} style={{border:0,borderRadius:10,padding:"11px 15px",background:"#1b7653",color:"#fff",fontWeight:800,cursor:"pointer"}}>{busy===b.id?"جارٍ التأكيد…":"تأكيد الحجز"}</button>:null}
      </article>)}
      {!filtered.length?<p style={{color:"#718274",fontSize:13}}>لا يوجد حجز مطابق. عند بدء استقبال الحجوزات الحقيقية ستظهر هنا بعد التحقق من الصلاحيات.</p>:null}
