@@ -48,7 +48,9 @@ begin
  if w->>'scope'<>'assigned_staff' or pg_catalog.jsonb_array_length(w->'staff')<>1
   or pg_catalog.jsonb_array_length(w->'bookings')<>2 then
   raise exception 'Staff workspace scope wrong: %',w;end if;
- if w::text like '%Other customer%' or w::text like '%35000%"total_minor"%' then
+ if w::text like '%Other customer%' or exists(
+  select 1 from pg_catalog.jsonb_array_elements(w->'bookings') as x
+  where x->>'total_minor' is not null or x->>'collected_minor' is not null) then
   raise exception 'Staff workspace leaked other customer or business totals';end if;
  begin
   perform public.beger_g47_salon_workspace((select foreign_business_id from g47_case));
