@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {salonServices,serviceBasket} from "../../../lib/beger-salon-demo-model.mjs";
 import "./salon.css";
@@ -19,8 +19,28 @@ export default function SalonRoleDemo({role}:{role:Role}){
  const [rows,setRows]=useState<Appt[]>([]),[hydrated,setHydrated]=useState(false);
  const [name,setName]=useState(""),[selected,setSelected]=useState(["hair"]),[barber,setBarber]=useState("omer"),[time,setTime]=useState("14:00");
  const [message,setMessage]=useState(""),[myId,setMyId]=useState<string|null>(null);
- const [origin,setOrigin]=useState("");
- useEffect(()=>{setOrigin(window.location.origin);setRows(read());setHydrated(true);const handler=()=>setRows(read());window.addEventListener("storage",handler);window.addEventListener("beger-salon-change",handler);return()=>{window.removeEventListener("storage",handler);window.removeEventListener("beger-salon-change",handler)}},[]);
+ const previous=useRef<Record<string,State>>({});
+ const [browserAlerts,setBrowserAlerts]=useState(false);
+ useEffect(()=>{
+  const first=read();previous.current=Object.fromEntries(first.map(b=>[b.id,b.state]));setRows(first);setHydrated(true);
+  setBrowserAlerts(typeof Notification!=="undefined"&&Notification.permission==="granted");
+  const handler=()=>{
+   const updated=read();const changed=updated.find(b=>previous.current[b.id]&&previous.current[b.id]!==b.state);
+   if(changed){
+    const alert="الموعد #"+changed.id+": "+statuses[changed.state];setMessage(alert);
+    if(typeof Notification!=="undefined"&&Notification.permission==="granted")new Notification("Beger Salon — تحديث الموعد",{body:alert});
+   }
+   previous.current=Object.fromEntries(updated.map(b=>[b.id,b.state]));setRows(updated);
+  };
+  window.addEventListener("storage",handler);window.addEventListener("beger-salon-change",handler);
+  return()=>{window.removeEventListener("storage",handler);window.removeEventListener("beger-salon-change",handler)};
+ },[]);
+ async function enableAlerts(){
+  if(typeof Notification==="undefined"){setMessage("المتصفح لا يدعم إشعارات الجهاز");return;}
+  const permission=await Notification.requestPermission();
+  setBrowserAlerts(permission==="granted");
+  setMessage(permission==="granted"?"تم تفعيل تنبيهات هذا المتصفح فقط":"استخدم خط سير الموعد داخل الصفحة لمتابعة التغييرات");
+ }
  const basket=useMemo(()=>serviceBasket(selected),[selected]);
  const mine=rows.find(x=>x.id===myId)||rows[rows.length-1];
  function commit(updated:Appt[]){write(updated);setRows(updated);}
@@ -43,6 +63,7 @@ export default function SalonRoleDemo({role}:{role:Role}){
  const title=role==="customer"?"صفحة الزبون":role==="barber"?"واجهة المعلم":"إدارة الصالون";
  return <main className="bs-page" lang="ar" dir="rtl"><div className="bs-wrap">
  <header className="bs-role-head"><div><span className="bs-eyebrow">BEGER · SALON EXPERIENCE</span><h1>{title}</h1><p>نسخة تجربة محلية داخل المتصفح فقط، لا تدير مواعيد أو تنبيهات حقيقية بين أجهزة مختلفة.</p></div><Link href="/demo/salon">العودة لعرض الصالون</Link></header>
+ <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap",margin:"12px 0"}}><span className="bs-demo">الإشعارات هنا تجريبية ومحلية، وليست Push من الخادم</span><button type="button" className="bs-checkin-link" onClick={()=>void enableAlerts()}>{browserAlerts?"إشعارات هذا المتصفح مفعلة":"تفعيل إشعارات المتصفح"}</button></div>
  <nav className="bs-role-nav" aria-label="تبديل صفحات المعاينة"><Link href="/demo/salon/customer" aria-current={role==="customer"?"page":undefined}>الزبون</Link><Link href="/demo/salon/barber" aria-current={role==="barber"?"page":undefined}>المعلم</Link><Link href="/demo/salon/owner" aria-current={role==="owner"?"page":undefined}>صاحب المحل</Link></nav>
  {message?<p role="status" className="bs-notice">{message}</p>:null}
  {!hydrated?<p>جارٍ تحميل بيانات العرض…</p>:null}
