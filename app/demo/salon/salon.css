@@ -42,3 +42,23 @@
 .bs-appointment-actions button.bs-approve{background:#1e7553;color:#fff;border-color:#1e7553}
 @media(max-width:700px){.bs-analytics{grid-template-columns:repeat(2,minmax(0,1fr))}.bs-dashboard-cols{grid-template-columns:1fr}}
 @media(max-width:380px){.bs-analytics{gap:8px}.bs-analytic-card{padding:12px;min-height:88px}.bs-analytic-card strong{font-size:20px}}
+
+/* G43 public booking QR poster */
+.bs-share-layout{display:grid;grid-template-columns:minmax(290px,420px) minmax(0,1fr);gap:20px;align-items:start;margin-top:22px}
+.bs-share-tools{display:grid;gap:18px;min-width:0}
+.bs-print-poster{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:34px 22px;box-shadow:0 12px 30px #2850390e}
+.bs-print-poster h2{font-size:clamp(21px,3vw,29px);line-height:1.4;text-align:center;margin:8px 0 0}
+.bs-print-poster p{font-size:13px;line-height:1.7;color:#607567;margin:0}
+.bs-print-poster strong{font-size:18px;color:#1b6b4e}
+.bs-poster-qr{display:block;width:min(100%,290px);height:auto;aspect-ratio:1;background:#fff;border:1px solid #ecf0eb;padding:6px;border-radius:12px}
+.bs-print-poster .bs-poster-link{overflow-wrap:anywhere;font-size:10px;color:#48715c}
+.bs-print-poster small{color:#738778}
+.bs-share-url{display:block;width:100%;min-height:47px;border:1px solid #d6e3d9;background:#f8faf8;border-radius:10px;padding:11px;color:#244f39;font-size:12px;direction:ltr;text-align:left}
+.bs-share-buttons{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0 2px}
+.bs-share-buttons button,.bs-share-buttons a,.bs-share-channel button,.bs-share-channel a{border:1px solid #c8dece;border-radius:9px;background:#f3faf5;color:#266348;text-decoration:none;cursor:pointer;padding:11px 13px;font-size:13px;font-weight:800}
+.bs-share-buttons .bs-primary{background:#1f7657;color:#fff;border-color:#1f7657}
+.bs-share-channel{padding:14px 0;border-top:1px solid #e2ebe5}
+.bs-share-channel strong{font-size:15px;color:#20553d}
+.bs-share-channel p{font-size:12px;line-height:1.8;color:#728476;margin:8px 0 12px}
+@media(max-width:780px){.bs-share-layout{grid-template-columns:1fr}.bs-print-poster{max-width:490px;margin:0 auto;width:100%}}
+@media print{@page{size:A4;margin:12mm}.bs-share-tools,.bs-role-head,.bs-demo,.bs-role-nav,.bs-notice{display:none!important}.bs-page{background:#fff}.bs-wrap{max-width:100%;padding:0}.bs-share-layout{display:block;margin:0}.bs-print-poster{border:3px solid #1c6549;box-shadow:none;border-radius:18px;min-height:265mm;justify-content:center;break-inside:avoid}.bs-poster-qr{width:100mm;max-width:100mm}.bs-print-poster h2{font-size:35pt}.bs-print-poster strong{font-size:23pt}}
