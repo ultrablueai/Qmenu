@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
-import {salonServices,serviceBasket} from "../../../lib/beger-salon-demo-model.mjs";
+import {salonServices,serviceBasket,slotFree,defaultSalonSchedule} from "../../../lib/beger-salon-demo-model.mjs";
 import "./salon.css";
 type Role="customer"|"barber"|"owner";
 type State="pending"|"confirmed"|"arrived"|"in_service"|"completed"|"cancelled";
@@ -42,10 +42,17 @@ export default function SalonRoleDemo({role}:{role:Role}){
   setMessage(permission==="granted"?"تم تفعيل تنبيهات هذا المتصفح فقط":"استخدم خط سير الموعد داخل الصفحة لمتابعة التغييرات");
  }
  const basket=useMemo(()=>serviceBasket(selected),[selected]);
+ const canUseTime=(candidate:string)=>slotFree(rows.map(b=>({
+  id:b.id,serviceIds:b.serviceIds,serviceId:b.serviceIds[0],barberId:b.barberId,
+  chairId:staff.find(s=>s.id===b.barberId)?.chair==="1"?"chair-1":staff.find(s=>s.id===b.barberId)?.chair==="2"?"chair-2":"chair-3",
+  date:demoDate(),time:b.time,status:b.state==="cancelled"?"cancelled":b.state
+ })),selected,barber,barber==="omer"?"chair-1":barber==="ahmet"?"chair-2":"chair-3",demoDate(),candidate,null,defaultSalonSchedule);
+
  const mine=rows.find(x=>x.id===myId)||rows[rows.length-1];
  function commit(updated:Appt[]){write(updated);setRows(updated);}
  function book(){
   if(!name.trim()||!selected.length)return setMessage("أدخل اسم الزبون واختر خدمة واحدة على الأقل");
+  if(!canUseTime(time))return setMessage("الموعد مشغول أو ضمن استراحة؛ اختَر وقتاً متاحاً");
   const id="B-"+Math.random().toString(36).slice(2,8).toUpperCase();
   const token=crypto.randomUUID();
   const b:Appt={id,token,name:name.trim().slice(0,70),barberId:barber,time,serviceIds:[...selected],state:"pending",paid:false,events:[{state:"pending",at:new Date().toISOString()}]};
@@ -70,8 +77,8 @@ export default function SalonRoleDemo({role}:{role:Role}){
  {role==="customer"&&hydrated?<div className="bs-layout"><section className="bs-panel">
  <h2>احجز موعداً</h2><p className="bs-fine">اختر خدمات متعددة. السعر والمدة الإجمالية تظهر قبل التأكيد.</p>
  <div className="bs-services">{salonServices.map(s=><button type="button" key={s.id} className={"bs-service "+(selected.includes(s.id)?"chosen":"")} aria-pressed={selected.includes(s.id)} onClick={()=>setSelected(prev=>prev.includes(s.id)?prev.length===1?prev:prev.filter(x=>x!==s.id):[...prev,s.id])}><strong>{s.ar}</strong><small>{s.duration} دقيقة</small><b>{money(s.price)}</b></button>)}</div>
- <div className="bs-schedule-fields" style={{marginTop:18}}><label>المعلم<select value={barber} onChange={e=>setBarber(e.target.value)}>{staff.map(b=><option key={b.id} value={b.id}>{b.name} · كرسي {b.chair}</option>)}</select></label><label>الوقت<select value={time} onChange={e=>setTime(e.target.value)}>{times.map(t=><option key={t}>{t}</option>)}</select></label><label>اسم الزبون<input maxLength={70} value={name} onChange={e=>setName(e.target.value)} placeholder="اسم للتجربة"/></label></div>
- <p><strong>{basket.duration} دقيقة · {money(basket.total)}</strong></p><button className="bs-primary" onClick={book}>إرسال طلب الحجز</button>
+ <div className="bs-schedule-fields" style={{marginTop:18}}><label>المعلم<select value={barber} onChange={e=>setBarber(e.target.value)}>{staff.map(b=><option key={b.id} value={b.id}>{b.name} · كرسي {b.chair}</option>)}</select></label><label>الوقت<select value={time} onChange={e=>setTime(e.target.value)}>{times.map(t=><option key={t} disabled={!canUseTime(t)}>{t}</option>)}</select></label><label>اسم الزبون<input maxLength={70} value={name} onChange={e=>setName(e.target.value)} placeholder="اسم للتجربة"/></label></div>
+ <p><strong>{basket.duration} دقيقة · {money(basket.total)}</strong></p><button className="bs-primary" disabled={!canUseTime(time)} onClick={book}>إرسال طلب الحجز</button>
  </section><aside className="bs-panel"><h2>متابعة موعدك</h2>{mine?<><strong>#{mine.id}</strong><p>{mine.name} · {mine.time}</p><span className={"bs-status bs-"+mine.state}>{statuses[mine.state]}</span>
  <ol className="bs-role-timeline">{mine.events.map((e,i)=><li key={i}>{statuses[e.state]} <small>{new Date(e.at).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</small></li>)}</ol>
  <p className="bs-fine">رابط الحضور خاص بحجز العرض، ولا يمنح صلاحية دخول إلى حساب الصالون.</p>
