@@ -6,6 +6,12 @@ type LinkData={slug:string;published:boolean;public_booking_enabled:boolean};
 export default function SalonPublicLinkSetup({businessId}:{businessId:string}){
  const [state,setState]=useState<LinkData|null>(null),[busy,setBusy]=useState(false),[notice,setNotice]=useState("");
  const [error,setError]=useState("");
+ useEffect(()=>{let mounted=true;
+  void browserSupabase().rpc("beger_g52_owner_link_status",{p_business:businessId}).then(({data,error:e})=>{
+   if(mounted&&!e&&data?.configured===true&&data.slug)setState(data as LinkData);
+  });
+  return()=>{mounted=false};
+ },[businessId]);
  async function setLink(publish:boolean,book:boolean){
   if(busy)return;
   if((publish||book)&&!window.confirm("تنبيه: سيصبح الرابط متاحاً لأي زائر من الإنترنت وقد تصل حجوزات فعلية إلى Staging. هل تريد المتابعة؟"))return;
