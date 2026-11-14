@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
-import {browserSupabase} from "../../../lib/supabase/browser";
+import {browserSupabase} from "../../../../lib/supabase/browser";
 type Catalog={salon_name:string;slug:string;public_booking_enabled:boolean;timezone:string;
  branches:{id:string;name:string}[];staff:{id:string;name:string;branch_id:string}[];
  chairs:{id:string;label:string;branch_id:string}[];services:{id:string;name:string;duration_minutes:number;price_minor:number;currency:string}[];
