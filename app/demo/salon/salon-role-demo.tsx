@@ -82,7 +82,7 @@ export default function SalonRoleDemo({role}:{role:Role}){
  return <main className="bs-page" lang="ar" dir="rtl"><div className="bs-wrap">
  <header className="bs-role-head"><div><span className="bs-eyebrow">BEGER · SALON EXPERIENCE</span><h1>{title}</h1><p>نسخة تجربة محلية داخل المتصفح فقط، لا تدير مواعيد أو تنبيهات حقيقية بين أجهزة مختلفة.</p></div><Link href="/demo/salon">العودة لعرض الصالون</Link></header>
  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap",margin:"12px 0"}}><span className="bs-demo">الإشعارات هنا تجريبية ومحلية، وليست Push من الخادم</span><button type="button" className="bs-checkin-link" onClick={()=>void enableAlerts()}>{browserAlerts?"إشعارات هذا المتصفح مفعلة":"تفعيل إشعارات المتصفح"}</button></div>
- <nav className="bs-role-nav" aria-label="تبديل صفحات المعاينة"><Link href="/demo/salon/customer" aria-current={role==="customer"?"page":undefined}>الزبون</Link><Link href="/demo/salon/barber" aria-current={role==="barber"?"page":undefined}>المعلم</Link><Link href="/demo/salon/owner" aria-current={role==="owner"?"page":undefined}>صاحب المحل</Link></nav>
+ <nav className="bs-role-nav" aria-label="تبديل صفحات المعاينة"><Link href="/demo/salon/share">QR ومشاركة الحجز</Link><Link href="/demo/salon/customer" aria-current={role==="customer"?"page":undefined}>الزبون</Link><Link href="/demo/salon/barber" aria-current={role==="barber"?"page":undefined}>المعلم</Link><Link href="/demo/salon/owner" aria-current={role==="owner"?"page":undefined}>صاحب المحل</Link></nav>
  {message?<p role="status" className="bs-notice">{message}</p>:null}
  {!hydrated?<p>جارٍ تحميل بيانات العرض…</p>:null}
  {role==="customer"&&hydrated?<div className="bs-layout"><section className="bs-panel">
