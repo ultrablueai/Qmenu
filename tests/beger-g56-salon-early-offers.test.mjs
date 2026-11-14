@@ -1,0 +1,65 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const sql=readFileSync("supabase/migrations/20261115000900_g56_salon_early_offers.sql","utf8");
+const fix=readFileSync("supabase/migrations/20261115001000_g56_uuid_aggregate_fix.sql","utf8");
+const smoke=readFileSync("supabase/tests/beger-g56-early-offer-rollback.sql","utf8");
+const staff=readFileSync("app/salon/workspace/salon-early-offer-controls.tsx","utf8");
+const dashboard=readFileSync("app/salon/workspace/salon-verified-workspace.tsx","utf8");
+const client=readFileSync("app/salon/book/[slug]/public-salon-booking.tsx","utf8");
+test("G56 early offer is a private, five-minute, voluntary proposal with original booking intact",()=>{
+ assert.match(sql,/create table if not exists public\.salon_early_offers/);
+ assert.match(sql,/status text not null default 'pending'/);
+ assert.match(sql,/now\(\)\+interval '5 minutes'/);
+ assert.match(sql,/v_booking\.status<>'confirmed'/);
+ assert.match(sql,/p_proposed_start<v_booking\.starts_at-interval '180 minutes'/);
+ assert.match(sql,/customer_must_accept',true/);
+ assert.match(sql,/original_booking_unchanged',true/);
+ assert.match(sql,/revoke all on public\.salon_early_offers from public,anon,authenticated/);
+ assert.match(sql,/alter table public\.salon_early_offers enable row level security/);
+});
+test("G56 authorizes worker/tenant and reserves soft offers without double allocation",()=>{
+ assert.match(sql,/v_role='staff' and not exists/);
+ assert.match(sql,/s\.user_id=v_actor and s\.active/);
+ assert.match(sql,/pg_advisory_xact_lock\(pg_catalog\.hashtextextended\(p_business::text,4818\)\)/);
+ assert.match(sql,/sl\.starts_at<v_new_end and sl\.ends_at>p_proposed_start/);
+ assert.match(sql,/e\.status='pending' and e\.expires_at>now\(\)/);
+ assert.match(sql,/salon_one_pending_offer_per_booking/);
+ assert.match(sql,/v_shift\.break_start is not null/);
+ assert.match(fix,/array_agg\(sl\.staff_id\)/);
+});
+test("G56 token-only customer can decline or accept a still-available offer once",()=>{
+ assert.match(sql,/access_hash=pg_catalog\.md5\(p_token\)/);
+ assert.match(sql,/if not p_accept then/);
+ assert.match(sql,/status='declined',decided_at=now\(\)/);
+ assert.match(sql,/if v_e\.expires_at<=now\(\) then/);
+ assert.match(sql,/status='expired',decided_at=now\(\)/);
+ assert.match(sql,/v_b\.status<>'confirmed'/);
+ assert.match(sql,/v_b\.starts_at<>v_e\.previous_start/);
+ assert.match(sql,/v_delta:=v_e\.proposed_start-v_b\.starts_at/);
+ assert.match(sql,/set starts_at=starts_at\+v_delta,ends_at=ends_at\+v_delta/);
+ assert.match(sql,/status='accepted',decided_at=now\(\)/);
+ assert.match(sql,/grant execute on function public\.beger_g56_respond_early_offer\(text,uuid,boolean\) to anon,authenticated/);
+});
+test("G56 real salon UI has worker invitation and customer opt-in phone sound",()=>{
+ assert.match(dashboard,/SalonEarlyOfferControls/);
+ assert.match(staff,/beger_g56_offer_early_slot/);
+ assert.match(staff,/5 دقائق/);
+ assert.match(client,/beger_g56_customer_early_offer/);
+ assert.match(client,/beger_g56_respond_early_offer/);
+ assert.match(client,/onClick=\{\(\)=>void answerEarly\(true\)\}/);
+ assert.match(client,/onClick=\{\(\)=>void answerEarly\(false\)\}/);
+ assert.match(client,/new AudioContext\(\)/);
+ assert.match(client,/if\(!ringEnabled/);
+ assert.match(client,/document\.visibilityState==="visible"/);
+ assert.match(client,/for\(let i=0;i<3;i\+\+\)/);
+ assert.match(client,/لما الهاتف مقفل أو التطبيق بالخلفية ما في ضمان صوت/);
+});
+test("G56 acceptance passed transactional rollback without persisting demo identities",()=>{
+ assert.match(smoke,/^begin;/m);
+ assert.match(smoke,/^rollback;/m);
+ assert.match(smoke,/SECURITY duplicate offer permitted/);
+ assert.match(smoke,/SECURITY stranger could accept offer/);
+ assert.match(smoke,/SECURITY duplicate acceptance/);
+ assert.match(smoke,/public\.beger_g51_public_track\(c\.token\)/);
+});
