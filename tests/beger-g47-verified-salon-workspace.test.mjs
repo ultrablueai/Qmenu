@@ -44,6 +44,6 @@ test("G47 real workspace requires authenticated user and server-confirmed member
  assert.match(middleware,/\/salon\/workspace\/:path\*/);
  assert.match(panel,/beger_g47_approve_salon_booking/);
  assert.match(panel,/data\?\.status!=="confirmed"/);
- assert.match(panel,/initial\.business_id===businessId/);
+ assert.match(panel,/initial\?\.business_id===businessId/);
  assert.match(panel,/initial\.scope==="whole_business"/);
 });
