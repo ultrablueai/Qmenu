@@ -15,10 +15,15 @@ export default function PublicSalonBooking({slug}:{slug:string}){
  const [branch,setBranch]=useState(""),[worker,setWorker]=useState(""),[chair,setChair]=useState("");
  const [services,setServices]=useState<string[]>([]),[name,setName]=useState(""),[when,setWhen]=useState("");
  const [busy,setBusy]=useState(false),[token,setToken]=useState(""),[track,setTrack]=useState<Track|null>(null);
+ const [arrivalMode,setArrivalMode]=useState(false),[arrivalBusy,setArrivalBusy]=useState(false),[arrivalNotice,setArrivalNotice]=useState("");
  useEffect(()=>{let alive=true;
   const raw=window.location.hash.slice(1);
   const t=new URLSearchParams(raw).get("t");
-  if(t&&/^[a-f0-9]{64}$/.test(t))setToken(t);
+  const isArrival=new URLSearchParams(window.location.search).get("arrive")==="1";
+  setArrivalMode(isArrival);
+  const stored=localStorage.getItem("beger-salon-booking:"+slug);
+  const found=t&&/^[a-f0-9]{64}$/.test(t)?t:stored&&/^[a-f0-9]{64}$/.test(stored)?stored:"";
+  if(found)setToken(found);
   void browserSupabase().rpc("beger_g51_public_salon_catalog",{p_slug:slug}).then(({data,error:e})=>{
    if(!alive)return;
    if(e||!data||!Array.isArray(data.services)||!Array.isArray(data.staff)){setError("رابط الصالون غير منشور أو غير متاح");}
@@ -58,10 +63,23 @@ export default function PublicSalonBooking({slug}:{slug:string}){
    if(e||!data?.access_token||data.status!=="pending")throw new Error("request rejected");
    const t=String(data.access_token);
    if(!/^[a-f0-9]{64}$/.test(t))throw new Error("token invalid");
-   setToken(t);window.location.hash="t="+t;
+   setToken(t);
+   localStorage.setItem("beger-salon-booking:"+slug,t);
+   window.location.hash="t="+t;
    setNotice("تم إنشاء الطلب! احتفظ برابط هذه الصفحة لتتابع تأكيد المعلم.");
   }catch{setError("تعذّر إرسال الحجز. ربما الوقت مشغول أو خارج الدوام، أو الخدمة لا يقدمها المعلم، أو بلغ الصالون حد الحجوزات التجريبية. جرّب وقتاً آخر.");}
   finally{setBusy(false)}
+ }
+ async function requestArrival(){
+  if(!token||arrivalBusy)return;
+  if(!window.confirm("إرسال إشعار وصولك؟ سيتحقق الموظف من وجودك داخل الصالون قبل تأكيد الحضور."))return;
+  setArrivalBusy(true);setArrivalNotice("");
+  try{
+   const {data,error:e}=await browserSupabase().rpc("beger_g53_request_arrival",{p_token:token});
+   if(e||data?.status!=="awaiting_staff_verification"||data?.physical_presence_verified!==false)throw new Error("Not eligible");
+   setArrivalNotice("تم إرسال طلب وصولك. المعلم أو الاستقبال يؤكد حضورك بعد التحقق منك داخل الصالون.");
+  }catch{setArrivalNotice("لم نتمكن من إرسال طلب الوصول. يلزم موعد مؤكد وقريب من وقت الحجز.");}
+  finally{setArrivalBusy(false);}
  }
  const valid=Boolean(catalog?.public_booking_enabled&&branch&&worker&&chair&&services.length&&services.length<=6&&name.trim().length>=2&&when&&!busy);
  return <main lang="ar" dir="rtl" style={{minHeight:"100vh",background:"#f6faf7",padding:"clamp(14px,4vw,30px)",fontFamily:"system-ui,Tahoma,sans-serif",color:"#204330"}}>
@@ -76,7 +94,13 @@ export default function PublicSalonBooking({slug}:{slug:string}){
    {token?<section style={{background:"#fff",border:"1px solid #dce9df",borderRadius:16,padding:22,display:"grid",gap:11}}>
     <h2 style={{fontSize:20,margin:0}}>متابعة حجزك</h2><p style={{fontSize:12,color:"#6e8073"}}>احتفظ بالرابط الحالي. رمز المتابعة خاص بك ولا تشاركه علناً.</p>
     {track?<><strong style={{color:"#22724e",fontSize:19}}>{statuses[track.status]??track.status}</strong><p style={{margin:0}}>وقت الموعد: {new Date(track.starts_at).toLocaleString("ar",{timeZone:"Europe/Istanbul",dateStyle:"full",timeStyle:"short"})}</p><p style={{margin:0}}>المجموع: {money(track.total_minor)}</p></>:<p>جارٍ التحقق من الحجز…</p>}
-    <small>تتحدّث الحالة كل 15 ثانية أثناء فتح الصفحة. تأكيد الوصول والتنبيهات بالخلفية غير مفعّلين بعد.</small>
+    {arrivalMode&&track?.status==="confirmed"?<div style={{display:"grid",gap:8}}>
+    <button type="button" disabled={arrivalBusy} onClick={()=>void requestArrival()} style={{border:0,borderRadius:10,padding:14,background:"#216b4f",color:"#fff",fontWeight:800}}>{arrivalBusy?"جارٍ إرسال طلب الوصول…":"أنا وصلت — اطلب تأكيد حضوري"}</button>
+    <small>مسح QR لا يثبت وجودك وحده. المعلم يؤكد حضورك من حسابه بعد التحقق.</small>
+    {arrivalNotice?<p role="status" style={{color:"#246d4d",fontSize:13}}>{arrivalNotice}</p>:null}
+   </div>:null}
+    {arrivalMode&&!track?<small>افتح رابط حجزك على نفس الهاتف أولاً، أو أدخل من الرابط الخاص بموعدك.</small>:null}
+    <small>تتحدّث حالة الموعد كل 15 ثانية أثناء فتح الصفحة. إشعارات الخلفية غير مفعّلة بعد.</small>
    </section>:null}
    {catalog&&!token?<section style={{background:"#fff",border:"1px solid #dce9df",borderRadius:16,padding:22,display:"grid",gap:17}}>
     <h2 style={{fontSize:21,margin:0}}>احجز موعدك</h2>
