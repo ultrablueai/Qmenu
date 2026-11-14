@@ -34,7 +34,7 @@ test("G49 staging rollback verifies denial and the G48 catalog can view the new 
  assert.match(smoke,/shift_count/);
 });
 test("G49 visible only to actual owner and integrated into protected workspace",()=>{
- assert.match(page,/data\.role==="owner"\?<SalonPilotSetup/);
+ assert.match(page,/data\.role==="owner"\?<>?<SalonPilotSetup/);
  assert.match(page,/currentUserId=\{user\.id\}/);
  assert.match(page,/supabase\.auth\.getUser\(\)/);
  assert.match(ui,/beger_g49_setup_salon_pilot/);
