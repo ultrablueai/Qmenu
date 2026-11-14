@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {redirect} from "next/navigation";
-import {serverSupabase} from "../../lib/supabase/server";
+import {serverSupabase} from "../../../lib/supabase/server";
 import SalonVerifiedWorkspace,{type SalonWorkspaceData} from "./salon-verified-workspace";
 export const dynamic="force-dynamic";
 export const metadata={title:"Beger | لوحة الصالون المحمية",robots:{index:false,follow:false}};
