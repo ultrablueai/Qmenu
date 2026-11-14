@@ -165,7 +165,7 @@ begin
   perform public.beger_g52_salon_booking_stage(c.business_id,c.booking_id,'completed');
   raise exception 'SECURITY duplicate completion';
  exception when sqlstate '22023' then null;end;
-end $stage$;
+end $complete$;
 reset role;
 set local role anon;
 do $track$
