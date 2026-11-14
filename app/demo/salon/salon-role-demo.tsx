@@ -25,7 +25,7 @@ export default function SalonRoleDemo({role}:{role:Role}){
  const [appointmentFilter,setAppointmentFilter]=useState<"all"|State>("all");
  const [search,setSearch]=useState("");
  useEffect(()=>{
-  const first=read();previous.current=Object.fromEntries(first.map(b=>[b.id,b.state]));setRows(first);setHydrated(true);
+  const first=read();previous.current=Object.fromEntries(first.map(b=>[b.id,b.state]));setRows(first);setMyId(sessionStorage.getItem("beger:salon:my-booking"));setHydrated(true);
   setBrowserAlerts(typeof Notification!=="undefined"&&Notification.permission==="granted");
   const handler=()=>{
    const updated=read();const changed=updated.find(b=>previous.current[b.id]&&previous.current[b.id]!==b.state);
@@ -51,7 +51,7 @@ export default function SalonRoleDemo({role}:{role:Role}){
   date:demoDate(),time:b.time,status:b.state==="cancelled"?"cancelled":b.state
  })),selected,barber,barber==="omer"?"chair-1":barber==="ahmet"?"chair-2":"chair-3",demoDate(),candidate,null,defaultSalonSchedule);
 
- const mine=rows.find(x=>x.id===myId)||rows[rows.length-1];
+ const mine=rows.find(x=>x.id===myId);
  function commit(updated:Appt[]){write(updated);setRows(updated);}
  function book(){
   if(!name.trim()||!selected.length)return setMessage("أدخل اسم الزبون واختر خدمة واحدة على الأقل");
@@ -59,7 +59,7 @@ export default function SalonRoleDemo({role}:{role:Role}){
   const id="B-"+Math.random().toString(36).slice(2,8).toUpperCase();
   const token=crypto.randomUUID();
   const b:Appt={id,token,name:name.trim().slice(0,70),barberId:barber,time,serviceIds:[...selected],state:"pending",paid:false,events:[{state:"pending",at:new Date().toISOString()}]};
-  commit([...rows,b]);setMyId(id);setMessage("تم إنشاء الحجز التجريبي، بانتظار تأكيد الصالون");
+  commit([...rows,b]);setMyId(id);sessionStorage.setItem("beger:salon:my-booking",id);setMessage("تم إنشاء الحجز التجريبي، بانتظار تأكيد المعلم");
  }
  function advance(b:Appt,to:State){
   if(!permitted[b.state].includes(to))return;
