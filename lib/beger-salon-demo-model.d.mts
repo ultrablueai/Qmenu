@@ -1,12 +1,14 @@
 export type SalonService={id:string;ar:string;tr:string;en:string;duration:number;price:number;icon:string};
 export type SalonBarber={id:string;ar:string;tr:string;en:string;initial:string};
-export type SalonBooking={id:number;customer:string;serviceId:string;barberId:string;chairId:string;date:string;time:string;status:string;walkin:boolean;paid:boolean};
+export type SalonBooking={id:number;customer:string;serviceId:string;serviceIds?:string[];barberId:string;chairId:string;date:string;time:string;status:string;walkin:boolean;paid:boolean};
 export type SalonPolicy={model:"commission"|"chair_rent"|"salary_plus_commission"|"owner";percent:number;rent:number;rentPeriod:"day"|"week"|"month"};
 export const salonServices:SalonService[];
 export const salonBarbers:SalonBarber[];
 export const salonChairs:string[];
 export function mins(value:string):number;
 export function timesOverlap(aStart:string,aDuration:number,bStart:string,bDuration:number):boolean;
-export function slotFree(bookings:SalonBooking[],serviceId:string,barberId:string,chairId:string,date:string,time:string,excludeId?:number|null):boolean;
+export function serviceBasket(serviceIds:string[]):{items:SalonService[];total:number;duration:number};
+export function bookingServiceIds(booking:SalonBooking):string[];
+export function slotFree(bookings:SalonBooking[],serviceIds:string|string[],barberId:string,chairId:string,date:string,time:string,excludeId?:number|null):boolean;
 export function calculateSplit(price:number,model:SalonPolicy["model"],percentage:number):{barber:number;shop:number};
 export function calculateLedger(bookings:SalonBooking[],policies:Record<string,SalonPolicy>):Record<string,{sales:number;barber:number;shop:number;services:number}>;
