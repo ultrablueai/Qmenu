@@ -53,7 +53,7 @@ test("G56 real salon UI has worker invitation and customer opt-in phone sound",(
  assert.match(client,/if\(!ringEnabled/);
  assert.match(client,/document\.visibilityState==="visible"/);
  assert.match(client,/for\(let i=0;i<3;i\+\+\)/);
- assert.match(client,/لما الهاتف مقفل أو التطبيق بالخلفية ما في ضمان صوت/);
+ assert.match(client,/صوت شاشة القفل ومدته يحددهما النظام/);
 });
 test("G56 acceptance passed transactional rollback without persisting demo identities",()=>{
  assert.match(smoke,/^begin;/m);
