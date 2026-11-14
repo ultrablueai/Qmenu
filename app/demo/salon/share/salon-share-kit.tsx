@@ -43,6 +43,9 @@ export default function SalonShareKit(){
      </div>
      {notice?<p role="status" className="bs-notice">{notice}</p>:null}
     </section>
+    <section className="bs-panel"><h2>رابط خاص بكل معلم</h2><p className="bs-fine">المعلم يقدر يحط الرابط في حسابه؛ الزبون يفتح الحجز والمعلم محدد مسبقاً، ويظل قادراً على تغيير اختياره. هذه نسخة عرض عامة وليست هوية موظف مصادقاً عليها.</p>
+      <div className="bs-service-mix">{[{id:"omer",name:"Ömer",chair:1},{id:"ahmet",name:"Ahmet",chair:2},{id:"mert",name:"Mert",chair:3}].map(person=><div key={person.id}><span><strong>{person.name}</strong> · كرسي {person.chair}</span><button type="button" onClick={()=>void copy(base+"?barber="+encodeURIComponent(person.id)+"&source=staff")}>نسخ رابط المعلم</button></div>)}</div>
+    </section>
     <section className="bs-panel"><h2>وين مننشر الرابط؟</h2>
      <div className="bs-share-channel"><strong>WhatsApp</strong><p>أرسل رابطاً مع نص حجز جاهز لزبائن الصالون.</p><a href={"https://wa.me/?text="+encodeURIComponent(message)} target="_blank" rel="noopener noreferrer">مشاركة على WhatsApp</a></div>
      <div className="bs-share-channel"><strong>Instagram / TikTok</strong><p>انسخ رابط السوشيال وضعه في البايو أو صفحة الروابط. تفعيل زر «احجز الآن» الرسمي يتبع أهلية حساب المنصة وتكامل الشريك.</p><button type="button" onClick={()=>void copy(sourceLink("instagram"))}>نسخ رابط Instagram</button></div>
