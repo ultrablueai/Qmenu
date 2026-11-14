@@ -66,7 +66,7 @@ begin
  v_local_start := p_starts_at at time zone 'Europe/Istanbul';
  select * into v_schedule from public.salon_staff_schedules s where
   s.business_id=p_business and s.staff_id=p_staff
-  and s.weekday=pg_catalog.extract(dow from v_local_start);
+  and s.weekday=extract(dow from v_local_start);
  if not found then
   raise exception 'No scheduled working shift for this weekday' using errcode='22023';
  end if;
@@ -104,7 +104,7 @@ begin
   v_local_finish:=v_finish at time zone 'Europe/Istanbul';
   if v_local_finish::date<>v_local_start::date or v_local_finish::time>v_close
     or (v_break_start is not null and
-      v_cursor at time zone 'Europe/Istanbul'<v_local_start::date+v_break_end
+      (v_cursor at time zone 'Europe/Istanbul')<v_local_start::date+v_break_end
       and v_local_finish>v_local_start::date+v_break_start) then
    raise exception 'Selected services overlap break or closing time' using errcode='22023';
   end if;
