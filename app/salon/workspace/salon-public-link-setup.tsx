@@ -40,7 +40,18 @@ export default function SalonPublicLinkSetup({businessId}:{businessId:string}){
  <label style={{fontSize:12,fontWeight:800}}>رابط الحجز الخاص بهذا الصالون<input readOnly value={url} onFocus={e=>e.currentTarget.select()} style={{width:"100%",padding:12,borderRadius:9,border:"1px solid #cdded1",marginTop:6,direction:"ltr",textAlign:"left"}}/></label>
  <span style={{fontSize:12,color:state.public_booking_enabled?"#1b7452":"#8d6b3e"}}>{state.public_booking_enabled?"الحجز العام مفعّل على Staging":state.published?"صفحة العرض منشورة، الحجز معطّل":"الرابط الخاص غير منشور"}</span>
  <div style={{display:"flex",gap:9,flexWrap:"wrap"}}><button onClick={()=>void copy()} style={{padding:10,borderRadius:9,border:"1px solid #bddcc7",background:"#eaf5ed"}}>نسخ الرابط</button>{state.published?<a href={url} rel="noopener noreferrer" target="_blank" style={{padding:10,color:"#205a41"}}>فتح صفحة الزبون</a>:null}</div>
- {state.published?<img src={"https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="+encodeURIComponent(url)} alt="QR حجز صالون Staging" width={180} height={180}/>:null}
+ {state.published?<div style={{display:"flex",flexWrap:"wrap",gap:24,alignItems:"start"}}>
+   <figure style={{margin:0,textAlign:"center",display:"grid",gap:9}}>
+    <strong>QR الحجز من باب الصالون أو السوشيال ميديا</strong>
+    <img src={"https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="+encodeURIComponent(url)} alt="رمز QR يفتح حجز الصالون العام" width={180} height={180}/>
+    <small>لإرسال طلب الحجز فقط</small>
+   </figure>
+   <figure style={{margin:0,textAlign:"center",display:"grid",gap:9}}>
+    <strong>QR تسجيل الوصول داخل الصالون</strong>
+    <img src={"https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="+encodeURIComponent(url+"?arrive=1")} alt="رمز QR لطلب تأكيد الحضور داخل الصالون" width={180} height={180}/>
+    <small>الزبون يطلب الوصول، والمعلم يؤكده بعد التحقق من حضوره</small>
+   </figure>
+   </div>:null}
  </div>:null}
  {notice?<p role="status" style={{color:"#226d4e",fontSize:12}}>{notice}</p>:null}{error?<p role="alert" style={{color:"#a34a40",fontSize:12}}>{error}</p>:null}
  <small style={{color:"#778579"}}>تنبيه: أداة QR الخارجية ترسل رابط الصالون العام إلى مزود خدمة توليد الرمز. لا تتضمن بيانات الحجز الخاصة.</small>
