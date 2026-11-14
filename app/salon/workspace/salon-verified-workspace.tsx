@@ -4,7 +4,7 @@ import {useCallback,useEffect,useRef,useState} from "react";
 import {browserSupabase} from "../../../lib/supabase/browser";
 type SalonStaff={id:string;display_name:string;kind:string;branch_id:string;accepts_bookings:boolean;start_local:string|null;end_local:string|null};
 type SalonLine={service_id:string;staff_id:string;chair_id:string|null;line_number:number;duration_minutes:number;price_minor:number};
-type SalonBooking={id:string;branch_id:string;customer_name:string;status:string;starts_at:string;ends_at:string;total_minor:number|null;collected_minor:number|null;currency:string;service_lines:SalonLine[];source:string|null};
+type SalonBooking={id:string;branch_id:string;customer_name:string;status:string;starts_at:string;ends_at:string;total_minor:number|null;collected_minor:number|null;currency:string;service_lines:SalonLine[];source:string|null;arrival_requested_at:string|null};
 export type SalonWorkspaceData={business_id:string;scope:"whole_business"|"assigned_staff";role:"owner"|"manager"|"staff";staff:SalonStaff[];bookings:SalonBooking[];summary:{assigned_bookings:number;pending_bookings:number;completed_bookings:number;settled_service_minor:number};billing_enabled:false;demo_api:true;limited_results:number};
 const statusText:Record<string,string>={pending:"بانتظار موافقة المعلم",confirmed:"مؤكد",arrived:"وصل الزبون",in_service:"قيد الخدمة",completed:"مكتمل",cancelled:"ملغى",no_show:"لم يحضر"};
 const money=(minor:number)=>new Intl.NumberFormat("tr-TR",{style:"currency",currency:"TRY",maximumFractionDigits:0}).format(minor/100);
@@ -136,7 +136,7 @@ export default function SalonVerifiedWorkspace({businessId,initial}:{businessId:
     {notice?<p role="status" style={{color:"#216b49"}}>{notice}</p>:null}
     <div style={{display:"grid",gap:9}}>
      {filtered.map(b=><article key={b.id} style={{border:"1px solid #e0e8e0",borderRadius:12,padding:14,display:"flex",justifyContent:"space-between",alignItems:"center",gap:13,flexWrap:"wrap"}}>
-      <div style={{display:"grid",gap:5,minWidth:180,flex:1}}><strong>{b.customer_name}</strong><small style={{color:"#627a69"}}>{new Date(b.starts_at).toLocaleString("ar",{timeZone:"Europe/Istanbul",dateStyle:"medium",timeStyle:"short"})}</small><small>{b.service_lines.length} خدمات · {statusText[b.status]??b.status}</small>{owner&&b.total_minor!==null?<small>إجمالي الفاتورة: {money(b.total_minor)}</small>:null}</div>
+      <div style={{display:"grid",gap:5,minWidth:180,flex:1}}><strong>{b.customer_name}</strong><small style={{color:"#627a69"}}>{new Date(b.starts_at).toLocaleString("ar",{timeZone:"Europe/Istanbul",dateStyle:"medium",timeStyle:"short"})}</small><small>{b.service_lines.length} خدمات · {statusText[b.status]??b.status}</small>{b.status==="confirmed"&&b.arrival_requested_at?<small style={{fontWeight:900,color:"#176f4c"}}>الزبون أرسل طلب وصول — تحقق من حضوره ثم اضغط تأكيد الوصول</small>:null}{owner&&b.total_minor!==null?<small>إجمالي الفاتورة: {money(b.total_minor)}</small>:null}</div>
       <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
       {b.status==="confirmed"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"arrived")} style={{border:0,borderRadius:9,padding:10,background:"#246f53",color:"#fff"}}>تأكيد وصول الزبون</button>:null}
       {b.status==="arrived"?<button type="button" disabled={Boolean(busy)} onClick={()=>void stage(b.id,"in_service")} style={{border:0,borderRadius:9,padding:10,background:"#246f53",color:"#fff"}}>بدء الخدمة</button>:null}
