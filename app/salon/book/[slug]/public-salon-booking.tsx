@@ -37,6 +37,8 @@ export default function PublicSalonBooking({slug}:{slug:string}){
  const [early,setEarly]=useState<EarlyOffer|null>(null);
  const [earlyBusy,setEarlyBusy]=useState(false),[earlyNotice,setEarlyNotice]=useState("");
  const [ringEnabled,setRingEnabled]=useState(false);
+ const [pushEnabled,setPushEnabled]=useState(false),[pushBusy,setPushBusy]=useState(false);
+ const [pushMessage,setPushMessage]=useState("");
  const ringContext=useRef<AudioContext|null>(null),lastRang=useRef("");
  const [clock,setClock]=useState(Date.now());
  useEffect(()=>{let alive=true;
@@ -96,6 +98,62 @@ export default function PublicSalonBooking({slug}:{slug:string}){
   }catch{setError("تعذّر إرسال الحجز. ربما الوقت مشغول أو خارج الدوام، أو الخدمة لا يقدمها المعلم، أو بلغ الصالون حد الحجوزات التجريبية. جرّب وقتاً آخر.");}
   finally{setBusy(false)}
  }
+ async function enablePush(){
+  if(!token||pushBusy)return;
+  setPushBusy(true);setPushMessage("");
+  try{
+   if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window))
+    throw Error("unsupported");
+   const standalone=window.matchMedia("(display-mode: standalone)").matches||
+    (navigator as Navigator&{standalone?:boolean}).standalone===true;
+   if(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!standalone)
+    throw Error("ios_install_first");
+   const permission=await Notification.requestPermission();
+   if(permission!=="granted")throw Error("permission");
+   const config=await fetch("/api/salon/push",{cache:"no-store"}).then(r=>r.json());
+   if(!config.enabled||typeof config.publicKey!=="string")throw Error("server_unavailable");
+   const raw=atob(config.publicKey.replace(/-/g,"+").replace(/_/g,"/"));
+   const key=Uint8Array.from(raw,c=>c.charCodeAt(0));
+   const worker=await navigator.serviceWorker.register("/salon-booking-sw.js",{scope:"/salon/book/"});
+   const subscription=await worker.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
+   const json=subscription.toJSON(),keys=json.keys;
+   if(!json.endpoint||!keys?.p256dh||!keys?.auth)throw Error("subscription_missing");
+   const {data,error:e}=await browserSupabase().rpc("beger_g57_register_push",{
+    p_token:token,p_endpoint:json.endpoint,p_p256dh:keys.p256dh,p_auth:keys.auth
+   });
+   if(e||data?.subscribed!==true)throw Error("registration_refused");
+   setPushEnabled(true);
+   setPushMessage("تم تفعيل إشعارات الهاتف لهذا الحجز. بتقدر تلغيها بأي وقت. صوت الإشعار يحدده جهازك.");
+  }catch(e){
+   const code=e instanceof Error?e.message:"";
+   setPushMessage(code==="ios_install_first"?"على iPhone: من Safari اضغط مشاركة ← إضافة إلى الشاشة الرئيسية، وبعد فتح التطبيق من أيقونته اضغط تفعيل إشعارات الهاتف.":
+    code==="permission"?"ما تم السماح بالإشعارات من إعدادات المتصفح.":"ما اكتمل اشتراك Push على هذا الجهاز. استخدم الرنّة داخل الصفحة أو جرّب من متصفح يدعم الإشعارات.");
+  }finally{setPushBusy(false)}
+ }
+ async function disablePush(){
+  if(!token||pushBusy||!("serviceWorker" in navigator))return;
+  setPushBusy(true);setPushMessage("");
+  try{
+   const worker=await navigator.serviceWorker.ready;
+   const sub=await worker.pushManager.getSubscription();
+   if(sub){
+    const {error:e}=await browserSupabase().rpc("beger_g57_unregister_push",{
+     p_token:token,p_endpoint:sub.endpoint
+    });
+    if(e)throw new Error("unsubscribe_denied");
+    await sub.unsubscribe();
+   }
+   setPushEnabled(false);setPushMessage("تم إيقاف الإشعارات لهذا الهاتف.");
+  }catch{setPushMessage("ما قدرنا نوقف الاشتراك من الخادم. جرّب مرة ثانية أو أوقف إذن الإشعارات من إعدادات الجهاز.");}
+  finally{setPushBusy(false)}
+ }
+ useEffect(()=>{
+  if(!token||!("serviceWorker" in navigator))return;
+  let alive=true;
+  void navigator.serviceWorker.getRegistration("/salon/book/").then(reg=>reg?.pushManager.getSubscription())
+   .then(sub=>{if(alive)setPushEnabled(Boolean(sub))}).catch(()=>{});
+  return()=>{alive=false};
+ },[token]);
  async function enableRing(){
   try{
    const ctx=ringContext.current??new AudioContext();
@@ -156,6 +214,10 @@ export default function PublicSalonBooking({slug}:{slug:string}){
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,flexWrap:"wrap"}}>
        <strong style={{color:"#176548"}}>فرصة موعد أبكر <span aria-hidden="true">🔔</span></strong>
        <button type="button" disabled={ringEnabled} onClick={()=>void enableRing()} style={{border:"1px solid #c2dbc8",borderRadius:9,padding:10,background:"#fff",color:"#266746",fontWeight:800}}>{ringEnabled?"الرنّة مفعّلة":"تفعيل رنّة الهاتف"}</button>
+       <button type="button" disabled={pushBusy} onClick={()=>void (pushEnabled?disablePush():enablePush())}
+        style={{border:"1px solid #c2dbc8",borderRadius:9,padding:10,background:"#fff",color:"#266746",fontWeight:800}}>
+        {pushBusy?"جارٍ الإعداد…":pushEnabled?"إيقاف إشعارات الهاتف":"تفعيل إشعارات الهاتف بالخلفية"}
+       </button>
       </div>
       {early?.status==="pending"&&early.expires_at&&new Date(early.expires_at).getTime()>clock?<>
        <p style={{margin:0,fontSize:13}}>المعلم متاح قبل موعدك! فيك تجي الساعة <strong>{new Date(early.proposed_start??"").toLocaleTimeString("ar",{timeZone:"Europe/Istanbul",hour:"2-digit",minute:"2-digit"})}</strong> بدل وقتك الأصلي.</p>
@@ -169,7 +231,8 @@ export default function PublicSalonBooking({slug}:{slug:string}){
        early?.status==="pending"?<small>انتهت مهلة العرض، وموعدك الأصلي ثابت.</small>:
        <small>إذا صار المعلم متاح أبكر، بيظهر العرض هون وبيرن الجهاز بعد تفعيل الرنّة طالما الصفحة مفتوحة ونشطة.</small>}
       {earlyNotice?<p role="status" style={{margin:0,fontSize:12,color:"#256c49"}}>{earlyNotice}</p>:null}
-      <small style={{color:"#708475"}}>الرنّة داخل صفحة مفتوحة فقط؛ لما الهاتف مقفل أو التطبيق بالخلفية ما في ضمان صوت. إشعارات Push وSMS تحتاج تفعيل مستقل.</small>
+      {pushMessage?<p role="status" style={{margin:0,fontSize:12,color:"#256c49"}}>{pushMessage}</p>:null}
+      <small style={{color:"#708475"}}>الرنّة داخل الصفحة المفتوحة فقط؛ يمكن تفعيل Web Push للهاتف المتوافق بعد الموافقة، لكن صوت شاشة القفل ومدته يحددهما النظام. لا تُرسل SMS.</small>
      </div>:null}
     {arrivalMode&&track?.status==="confirmed"?<div style={{display:"grid",gap:8}}>
     <button type="button" disabled={arrivalBusy} onClick={()=>void requestArrival()} style={{border:0,borderRadius:10,padding:14,background:"#216b4f",color:"#fff",fontWeight:800}}>{arrivalBusy?"جارٍ إرسال طلب الوصول…":"أنا وصلت — اطلب تأكيد حضوري"}</button>
