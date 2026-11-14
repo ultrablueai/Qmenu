@@ -62,3 +62,27 @@
 .bs-share-channel p{font-size:12px;line-height:1.8;color:#728476;margin:8px 0 12px}
 @media(max-width:780px){.bs-share-layout{grid-template-columns:1fr}.bs-print-poster{max-width:490px;margin:0 auto;width:100%}}
 @media print{@page{size:A4;margin:12mm}.bs-share-tools,.bs-role-head,.bs-demo,.bs-role-nav,.bs-notice{display:none!important}.bs-page{background:#fff}.bs-wrap{max-width:100%;padding:0}.bs-share-layout{display:block;margin:0}.bs-print-poster{border:3px solid #1c6549;box-shadow:none;border-radius:18px;min-height:265mm;justify-content:center;break-inside:avoid}.bs-poster-qr{width:100mm;max-width:100mm}.bs-print-poster h2{font-size:35pt}.bs-print-poster strong{font-size:23pt}}
+
+/* G45: operational workspaces, owner and staff have different control scopes */
+.bs-role-switch{display:flex;gap:6px;flex-wrap:wrap;background:#e5eee7;padding:5px;border-radius:12px;margin:16px 0}
+.bs-role-switch button{padding:11px 15px;border:0;background:transparent;color:#52715e;font-weight:800;font-size:13px;border-radius:9px}
+.bs-role-switch button[aria-pressed=true]{background:#fff;color:#176548;box-shadow:0 2px 8px #23503312}
+.bs-staff-ops{display:grid;gap:14px;min-width:0}
+.bs-staff-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.bs-staff-card{padding:17px;background:#fbfdfa;border:1px solid #dce9dd;border-radius:14px;min-width:0}
+.bs-staff-card>header{display:flex;align-items:start;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.bs-staff-card>header>div{display:grid;gap:6px}
+.bs-staff-card>header strong{color:#184e39;font-size:18px}
+.bs-staff-card>header small{font-size:12px;color:#6e8674}
+.bs-staff-available,.bs-staff-paused{font-weight:850;font-size:11px;border-radius:30px;padding:7px 9px;background:#e0f4e6;color:#247249}
+.bs-staff-paused{background:#fbebdd;color:#a25e30}
+.bs-staff-numbers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:11px 0 16px}
+.bs-staff-numbers>div{background:#fff;border:1px solid #e6ede6;border-radius:10px;padding:10px;display:grid;gap:7px}
+.bs-staff-numbers span{font-size:11px;color:#698075}.bs-staff-numbers b{font-size:16px;color:#255d44}
+.bs-staff-toggle{display:flex;align-items:center;gap:10px;font-size:13px;color:#285c44;font-weight:800;background:#e9f4ed;border-radius:10px;padding:12px;margin:14px 0}
+.bs-staff-toggle input,.bs-staff-services input{width:17px;height:17px;accent-color:#247351}
+.bs-staff-services{padding:12px;border-radius:10px;border:1px solid #e1e9df;margin-bottom:14px}
+.bs-staff-services summary{font-weight:800;color:#305d46;cursor:pointer}
+.bs-staff-services>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px}
+.bs-staff-services label{display:flex;gap:8px;align-items:center;font-size:12px;color:#60796a}
+@media(max-width:490px){.bs-staff-grid{grid-template-columns:1fr}.bs-staff-services>div{grid-template-columns:1fr}.bs-role-switch button{flex:1;min-width:125px}}
