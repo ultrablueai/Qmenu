@@ -14,5 +14,5 @@ test("G44 owner can share personal staff booking links separately from public QR
  assert.match(share,/base\+"\?barber="\+encodeURIComponent\(person\.id\)/);
  assert.match(share,/source=staff/);
  assert.match(share,/كرسي \{person\.chair\}/);
- assert.match(share,/public/);
+ assert.match(share,/\/demo\/beger-salon-customer-qr\.svg/);
 });
