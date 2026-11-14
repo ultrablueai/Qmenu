@@ -37,7 +37,7 @@ test("salon interface uses a multi-select basket for appointments and walk-ins",
  assert.match(ui,/setSelectedServices/);
  assert.match(ui,/aria-pressed=\{selectedServices\.includes\(s\.id\)\}/);
  assert.match(ui,/serviceBasket\(selectedServices\)/);
- assert.match(ui,/slotFree\(bookings,selectedServices/);
+ assert.match(ui,/slotFree\(visibleBookings,selectedServices/);
  assert.match(ui,/serviceIds:\[\.\.\.selectedServices\]/);
  assert.match(ui,/services\.items\.map/);
  assert.match(ui,/money\(basket\.total\)/);
