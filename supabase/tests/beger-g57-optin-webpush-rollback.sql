@@ -1,0 +1,233 @@
+-- G51 staging rollback smoke for genuinely anonymous bookings. No durable customer records.
+begin;
+create temp table g51_case(business_id uuid,owner_id uuid,worker_id uuid,branch_id uuid,
+ staff_id uuid,chair_id uuid,service_id uuid,slug text,start_at timestamptz,booking_id uuid,token text) on commit drop;
+grant select,update on g51_case to authenticated,anon;
+do $setup$
+declare b uuid;ow uuid;wk uuid;br uuid;st uuid;ch uuid;sv uuid;dt date;
+begin
+ select user_id into ow from public.memberships where role='owner' order by created_at limit 1;
+ select user_id into wk from public.memberships where role='staff' and user_id<>ow order by created_at limit 1;
+ if ow is null or wk is null then raise exception 'Missing staging test actors';end if;
+ insert into public.businesses(name,country_code) values('G51 rollback public booking','TR') returning id into b;
+ insert into public.memberships(business_id,user_id,role) values(b,ow,'owner'),(b,wk,'staff');
+ insert into public.branches(business_id,name) values(b,'Salon pilot branch') returning id into br;
+ insert into public.salon_staff(business_id,branch_id,user_id,display_name)
+ values(b,br,wk,'Qualified worker') returning id into st;
+ insert into public.salon_chairs(business_id,branch_id,label) values(b,br,'Chair 1') returning id into ch;
+ insert into public.salon_services(business_id,name,duration_minutes,price_minor)
+ values(b,'Basic haircut',30,35000) returning id into sv;
+ insert into public.salon_staff_services(business_id,staff_id,service_id)
+ values(b,st,sv);
+ dt:=(now() at time zone 'Europe/Istanbul')::date+7;
+ for i in 0..6 loop
+  insert into public.salon_staff_schedules(business_id,staff_id,weekday,opens_at,closes_at,
+   break_start,break_end,gap_minutes)
+  values(b,st,i,'09:00','19:00','13:00','14:00',10);
+ end loop;
+ insert into g51_case values(b,ow,wk,br,st,ch,sv,null,
+  (dt+time '10:00') at time zone 'Europe/Istanbul',null,null);
+end $setup$;
+select set_config('request.jwt.claim.sub',(select owner_id::text from g51_case),true);
+set local role authenticated;
+do $owner$
+declare r jsonb;
+begin
+ r:=public.beger_g51_owner_salon_link((select business_id from g51_case),false,false);
+ if r->>'published'<>'false' then raise exception 'Unpublished default failed';end if;
+ update g51_case set slug=r->>'slug';
+end $owner$;
+reset role;
+set local role anon;
+do $anon_denied$
+begin
+ begin
+  perform public.beger_g51_public_salon_catalog((select slug from g51_case));
+  raise exception 'SECURITY: unpublished catalog accessible';
+ exception when sqlstate '22023' then null;end;
+ begin
+  perform public.beger_g51_public_book((select slug from g51_case),'Pilot customer',
+   (select branch_id from g51_case),(select staff_id from g51_case),
+   (select chair_id from g51_case),array[(select service_id from g51_case)],
+   (select start_at from g51_case));
+  raise exception 'SECURITY: unpublished public booking accessible';
+ exception when sqlstate '42501' then null;end;
+end $anon_denied$;
+reset role;
+select set_config('request.jwt.claim.sub',(select worker_id::text from g51_case),true);
+set local role authenticated;
+do $worker$
+begin
+ begin
+  perform public.beger_g51_owner_salon_link((select business_id from g51_case),true,true);
+  raise exception 'SECURITY: worker changed public booking status';
+ exception when sqlstate '42501' then null;end;
+end $worker$;
+reset role;
+select set_config('request.jwt.claim.sub',(select owner_id::text from g51_case),true);
+set local role authenticated;
+select public.beger_g51_owner_salon_link((select business_id from g51_case),true,true);
+reset role;
+set local role anon;
+do $anon$
+declare c g51_case%rowtype;r jsonb;catalog jsonb;tracked jsonb;
+begin
+ select * into c from g51_case;
+ catalog:=public.beger_g51_public_salon_catalog(c.slug);
+ if catalog->>'public_booking_enabled'<>'true'
+    or pg_catalog.jsonb_array_length(catalog->'services')<>1
+    or pg_catalog.jsonb_array_length(catalog->'staff')<>1
+    or catalog::text like '%Pilot customer%' then
+  raise exception 'Bad public catalog: %',catalog;end if;
+ r:=public.beger_g51_public_book(c.slug,'Pilot customer',c.branch_id,c.staff_id,
+  c.chair_id,array[c.service_id],c.start_at);
+ if r->>'status'<>'pending' or length(r->>'access_token')<>64
+    or (r->>'total_minor')::bigint<>35000 then
+  raise exception 'Public booking response incorrect: %',r;end if;
+ update g51_case set booking_id=(r->>'booking_id')::uuid,token=r->>'access_token';
+ tracked:=public.beger_g51_public_track(r->>'access_token');
+ if tracked->>'status'<>'pending' or tracked->>'total_minor'<>'35000'
+    or tracked ? 'customer_name' then raise exception 'Private tracking leaked or failed';end if;
+ begin
+  perform public.beger_g51_public_track(repeat('a',64));
+  raise exception 'SECURITY invalid tracking bearer accepted';
+ exception when sqlstate '42501' then null;end;
+ begin
+  perform public.beger_g51_public_book(c.slug,'Other customer',c.branch_id,c.staff_id,
+   c.chair_id,array[c.service_id],c.start_at+interval '10 minutes');
+  raise exception 'SECURITY overlapping public appointment';
+ exception when sqlstate '23P01' then null;end;
+end $anon$;
+reset role;
+select set_config('request.jwt.claim.sub',(select worker_id::text from g51_case),true);
+set local role authenticated;
+do $stage$
+declare c g51_case%rowtype;r jsonb;
+begin
+ select * into c from g51_case;
+ begin
+  perform public.beger_g52_owner_link_status(c.business_id);
+  raise exception 'SECURITY worker read private owner URL configuration';
+ exception when sqlstate '42501' then null;end;
+ r:=public.beger_g47_approve_salon_booking(c.business_id,c.booking_id);
+ if r->>'status'<>'confirmed' then raise exception 'Worker approval failed';end if;
+ r:=public.beger_g56_offer_early_slot(c.business_id,c.booking_id,c.start_at-interval '30 minutes');
+ if r->>'status'<>'pending' or r->>'customer_must_accept'<>'true' or
+  r->>'original_booking_unchanged'<>'true' then raise exception 'Early invitation not issued';end if;
+ begin
+  perform public.beger_g56_offer_early_slot(c.business_id,c.booking_id,c.start_at-interval '45 minutes');
+  raise exception 'SECURITY duplicate offer permitted';
+ exception when sqlstate '22023' then null;end;
+end $stage$;
+reset role;
+set local role anon;
+do $subscriber$
+declare c g51_case%rowtype;r jsonb;
+begin
+ select * into c from g51_case;
+ r:=public.beger_g57_register_push(c.token,
+  'https://fcm.googleapis.com/fcm/send/g57test',
+  repeat('A',87),repeat('B',22));
+ if r->>'subscribed'<>'true' then raise exception 'Customer push opt-in failed';end if;
+ begin
+  perform public.beger_g57_register_push(repeat('f',64),
+   'https://fcm.googleapis.com/fcm/send/other',repeat('A',87),repeat('B',22));
+  raise exception 'SECURITY stranger registered push';
+ exception when sqlstate '42501' then null;end;
+ begin
+  perform public.beger_g57_claim_offer_push(c.business_id,gen_random_uuid());
+  raise exception 'SECURITY anonymous dispatch claim';
+ exception when sqlstate '42501' then null;end;
+end $subscriber$;
+reset role;
+select set_config('request.jwt.claim.sub',(select worker_id::text from g51_case),true);
+set local role authenticated;
+do $dispatch$
+declare c g51_case%rowtype;o jsonb;r jsonb;offer uuid;
+begin
+ select * into c from g51_case;
+ o:=public.beger_g56_customer_early_offer(c.token);
+ offer:=(o->>'offer_id')::uuid;
+ r:=public.beger_g57_claim_offer_push(c.business_id,offer);
+ if pg_catalog.jsonb_array_length(r->'devices')<>1 or
+  r->'devices'->0->>'endpoint'<>'https://fcm.googleapis.com/fcm/send/g57test' then
+  raise exception 'Assigned worker push dispatch not scoped: %',r;end if;
+ r:=public.beger_g57_claim_offer_push(c.business_id,offer);
+ if r->>'claim_in_progress'<>'true' then raise exception 'Duplicate push claim was not throttled';end if;
+ r:=public.beger_g57_finish_offer_push(c.business_id,offer,true);
+ if r->>'acknowledged'<>'true' then raise exception 'Push delivery receipt failed';end if;
+ r:=public.beger_g57_claim_offer_push(c.business_id,offer);
+ if r->>'already_sent'<>'true' then raise exception 'Duplicate push delivery permitted';end if;
+end $dispatch$;
+reset role;
+set local role anon;
+do $customer_accept$
+declare c g51_case%rowtype;o jsonb;r jsonb;offer uuid;
+begin
+ select * into c from g51_case;
+ o:=public.beger_g56_customer_early_offer(c.token);
+ if o->>'status'<>'pending' or o->>'requires_response'<>'true' then
+  raise exception 'Customer offer not visible: %',o;end if;
+ offer:=(o->>'offer_id')::uuid;
+ begin
+  perform public.beger_g56_respond_early_offer(repeat('a',64),offer,true);
+  raise exception 'SECURITY stranger could accept offer';
+ exception when sqlstate '42501' then null;end;
+ r:=public.beger_g56_respond_early_offer(c.token,offer,true);
+ if r->>'status'<>'accepted' or r->>'customer_accepted'<>'true' then
+  raise exception 'Acceptance failed: %',r;end if;
+ if (public.beger_g51_public_track(c.token)->>'starts_at')::timestamptz
+   <>c.start_at-interval '30 minutes' then
+  raise exception 'Booking time not shifted';end if;
+ begin
+  perform public.beger_g56_respond_early_offer(c.token,offer,true);
+  raise exception 'SECURITY duplicate acceptance';
+ exception when sqlstate '22023' then null;end;
+end $customer_accept$;
+reset role;
+select set_config('request.jwt.claim.sub',(select worker_id::text from g51_case),true);
+set local role authenticated;
+do $complete$
+declare c g51_case%rowtype;r jsonb;
+begin
+ select * into c from g51_case;
+ r:=public.beger_g52_salon_booking_stage(c.business_id,c.booking_id,'arrived');
+ if r->>'status'<>'arrived' then raise exception 'Arrival confirmation failed';end if;
+ begin
+  perform public.beger_g52_salon_booking_stage(c.business_id,c.booking_id,'completed');
+  raise exception 'SECURITY skipped service stage';
+ exception when sqlstate '22023' then null;end;
+ r:=public.beger_g52_salon_booking_stage(c.business_id,c.booking_id,'in_service');
+ if r->>'status'<>'in_service' then raise exception 'Start failed';end if;
+ r:=public.beger_g52_salon_booking_stage(c.business_id,c.booking_id,'completed');
+ if r->>'status'<>'completed' then raise exception 'Finish failed';end if;
+ begin
+  perform public.beger_g52_salon_booking_stage(c.business_id,c.booking_id,'completed');
+  raise exception 'SECURITY duplicate completion';
+ exception when sqlstate '22023' then null;end;
+end $complete$;
+reset role;
+set local role anon;
+do $track$
+declare r jsonb;
+begin
+ r:=public.beger_g51_public_track((select token from g51_case));
+ if r->>'status'<>'completed' then raise exception 'Customer did not observe completion';end if;
+ begin
+  perform public.beger_g52_salon_booking_stage((select business_id from g51_case),
+   (select booking_id from g51_case),'arrived');
+  raise exception 'SECURITY anonymous attendance approval';
+ exception when sqlstate '42501' then null;end;
+end $track$;
+reset role;
+do $assert$
+declare c g51_case%rowtype;
+begin
+ select * into c from g51_case;
+ if (select count(*) from public.salon_booking_services where business_id=c.business_id)<>1
+ or (select count(*) from public.salon_booking_events where business_id=c.business_id and event_type='requested')<>1
+ or (select count(*) from public.salon_customer_access where booking_id=c.booking_id)<>1 then
+ raise exception 'Public booking audit/token missing';end if;
+end $assert$;
+select 'G57 token-bound opt-in, staff dispatch and voluntary acceptance passed (ROLLBACK)' as outcome;
+rollback;
