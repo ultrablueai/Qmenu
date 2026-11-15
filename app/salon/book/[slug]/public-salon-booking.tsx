@@ -5,6 +5,7 @@ type Catalog={salon_name:string;slug:string;public_booking_enabled:boolean;timez
  branches:{id:string;name:string}[];staff:{id:string;name:string;branch_id:string}[];
  chairs:{id:string;label:string;branch_id:string}[];services:{id:string;name:string;duration_minutes:number;price_minor:number|null;currency:string;price_mode:"exact_price"|"starting_at"|"quote_required";price_is_final:boolean}[];
  offers:{staff_id:string;service_id:string}[]};
+type PublicPromotions={plans:{id:string;name:string;description:string;price_minor:number;currency:string;cycle_months:number;included_visits:number}[];banners:{id:string;title:string;description:string}[];membership_checkout_enabled:false;marketing_push_enabled:false};
 type Track={id:string;status:string;starts_at:string;ends_at:string;total_minor:number;currency:string;last_update:string};
 type EarlyOffer={offer_id?:string;status:string;proposed_start?:string;original_start?:string;expires_at?:string;requires_response?:boolean};
 function ringPhone(ctx:AudioContext){
@@ -29,6 +30,7 @@ const cStyle={minHeight:44,border:"1px solid #dae7db",background:"#fff",borderRa
 const money=(n:number)=>new Intl.NumberFormat("tr-TR",{style:"currency",currency:"TRY",maximumFractionDigits:0}).format(n/100);
 export default function PublicSalonBooking({slug}:{slug:string}){
  const [catalog,setCatalog]=useState<Catalog|null>(null);
+ const [promotions,setPromotions]=useState<PublicPromotions|null>(null);
  const [loading,setLoading]=useState(true),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const [branch,setBranch]=useState(""),[worker,setWorker]=useState(""),[chair,setChair]=useState("");
  const [services,setServices]=useState<string[]>([]),[name,setName]=useState(""),[when,setWhen]=useState("");
@@ -49,6 +51,9 @@ export default function PublicSalonBooking({slug}:{slug:string}){
   const stored=localStorage.getItem("beger-salon-booking:"+slug);
   const found=t&&/^[a-f0-9]{64}$/.test(t)?t:stored&&/^[a-f0-9]{64}$/.test(stored)?stored:"";
   if(found)setToken(found);
+  void browserSupabase().rpc("beger_g59_g60_public_promotions",{p_slug:slug}).then(({data,error:e})=>{
+   if(alive&&!e&&data&&Array.isArray(data.plans)&&Array.isArray(data.banners))setPromotions(data as PublicPromotions);
+  });
   void browserSupabase().rpc("beger_g51_public_salon_catalog",{p_slug:slug}).then(({data,error:e})=>{
    if(!alive)return;
    if(e||!data||!Array.isArray(data.services)||!Array.isArray(data.staff)){setError("رابط الصالون غير منشور أو غير متاح");}
@@ -206,6 +211,20 @@ export default function PublicSalonBooking({slug}:{slug:string}){
     <h1 style={{fontSize:"clamp(25px,5vw,38px)",margin:"12px 0 8px"}}>{catalog?.salon_name??"حجز صالون Beger"}</h1>
     <p style={{fontSize:13,opacity:.86,margin:0}}>اختَر خدماتك، معلم الحلاقة، والموعد المناسب — بدون تنزيل تطبيق</p>
    </header>
+   {promotions&&promotions.banners.length>0?<section aria-label="عروض الصالون" style={{display:"grid",gap:9}}>
+    {promotions.banners.map(b=><div key={b.id} style={{background:"#eaf5eb",padding:15,borderRadius:14,border:"1px solid #cae0ce"}}>
+     <strong style={{color:"#165e42"}}>✨ {b.title}</strong><p style={{margin:"6px 0 0",fontSize:13,color:"#38664d"}}>{b.description}</p>
+    </div>)}
+   </section>:null}
+   {promotions&&promotions.plans.length>0?<section style={{background:"#fff",borderRadius:14,padding:17,display:"grid",gap:11,border:"1px solid #e0eae1"}}>
+    <h2 style={{fontSize:18,margin:0}}>باقات وعضويات الصالون</h2>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,210px),1fr))",gap:10}}>
+    {promotions.plans.map(p=><div key={p.id} style={{border:"1px solid #d8e6db",borderRadius:11,padding:13,display:"grid",gap:6}}>
+     <b>{p.name}</b><strong style={{color:"#196e4e"}}>{money(p.price_minor)}</strong>
+     <small>{p.included_visits} خدمات خلال {p.cycle_months} شهر</small><small>{p.description}</small>
+    </div>)}</div>
+    <small style={{color:"#796744"}}>هذه الباقات متاحة للاستعلام من الصالون. شراء العضوية والتجديد الإلكتروني غير مفعّلين بعد.</small>
+   </section>:null}
    {loading?<p>جارٍ تحميل خدمات الصالون…</p>:null}
    {error?<p role="alert" style={{background:"#fff2ee",padding:15,borderRadius:10,color:"#a14a41"}}>{error}</p>:null}
    {token?<section style={{background:"#fff",border:"1px solid #dce9df",borderRadius:16,padding:22,display:"grid",gap:11}}>
