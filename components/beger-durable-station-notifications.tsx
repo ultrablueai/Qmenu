@@ -1,5 +1,5 @@
 "use client";
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import {browserSupabase} from "../lib/supabase/browser";
 import type {Station} from "../lib/beger-station-alerts";
 
@@ -15,31 +15,42 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
  const [events,setEvents]=useState<ServerEvent[]>([]);
  const [loading,setLoading]=useState(true),[error,setError]=useState("");
  const [busy,setBusy]=useState(""),[open,setOpen]=useState(false);
+ // Invalidate in-flight requests on scope changes, refreshes and unmount.
+ const requestSequence=useRef(0);
+ const scopeEpoch=useRef(0);
+ const activeScope=useRef(branchId+":"+station);
+ activeScope.current=branchId+":"+station;
  const refresh=useCallback(async()=>{
+  if(activeScope.current!==(branchId+":"+station))return;
+  const requestId=++requestSequence.current;
   const {data,error:rpcError}=await browserSupabase().rpc("g23_branch_notifications",{
    p_branch:branchId,p_station:station
   });
+  if(requestId!==requestSequence.current||activeScope.current!==(branchId+":"+station))return;
   if(rpcError||!Array.isArray(data))throw Error("Notifications unavailable");
   setEvents(data as ServerEvent[]);setError("");setLoading(false);
  },[branchId,station]);
  useEffect(()=>{
-  let active=true;setLoading(true);setError("");setEvents([]);setOpen(false);
+  let active=true;setLoading(true);setError("");setBusy("");setEvents([]);setOpen(false);
   const update=()=>{void refresh().catch(()=>{if(active){setError("تعذّر تحميل سجل تنبيهات الفرع.");setLoading(false)}})};
   update();
   const timer=window.setInterval(update,15000);
   const onVisible=()=>{if(document.visibilityState==="visible")update()};
   document.addEventListener("visibilitychange",onVisible);
-  return()=>{active=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)};
+  return()=>{active=false;scopeEpoch.current++;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)};
  },[refresh]);
  async function markRead(item:ServerEvent){
-  if(busy||item.read)return;
+  const actionScope=branchId+":"+station;
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy||item.read)return;
   setBusy(item.id);setError("");
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("g23_mark_notification_read",{p_notification:item.id});
+   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
    if(rpcError||data!==true)throw Error("Ack failed");
    setEvents(old=>old.map(e=>e.id===item.id?{...e,read:true}:e));
-  }catch{setError("تعذّر تسجيل قراءة التنبيه. أعد المحاولة.")}
-  finally{setBusy("")}
+  }catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("تعذّر تسجيل قراءة التنبيه. أعد المحاولة.")}
+  finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy("")}
  }
  const unread=events.filter(e=>!e.read).length;
  return <section dir="rtl" aria-label="سجل تنبيهات الطلبات الدائم" style={{background:"#fff",border:"1px solid #dfe5dc",borderRadius:12,padding:"12px 14px",margin:"10px 0"}}>
