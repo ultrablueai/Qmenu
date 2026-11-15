@@ -31,6 +31,8 @@ const money=(n:number)=>new Intl.NumberFormat("tr-TR",{style:"currency",currency
 export default function PublicSalonBooking({slug}:{slug:string}){
  const [catalog,setCatalog]=useState<Catalog|null>(null);
  const [promotions,setPromotions]=useState<PublicPromotions|null>(null);
+ const [marketingAllowed,setMarketingAllowed]=useState(false);
+ const [marketingSaving,setMarketingSaving]=useState(false),[marketingNote,setMarketingNote]=useState("");
  const [loading,setLoading]=useState(true),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const [branch,setBranch]=useState(""),[worker,setWorker]=useState(""),[chair,setChair]=useState("");
  const [services,setServices]=useState<string[]>([]),[name,setName]=useState(""),[when,setWhen]=useState("");
@@ -71,6 +73,25 @@ export default function PublicSalonBooking({slug}:{slug:string}){
  const requiresQuote=basket.some(s=>s.price_mode!=="exact_price");
  useEffect(()=>{setWorker(workers[0]?.id??"");setChair(chairs[0]?.id??"");setServices([]);},[branch,catalog]); 
  useEffect(()=>{setServices([])},[worker]);
+ useEffect(()=>{if(!token)return;let live=true;
+  void browserSupabase().rpc("beger_g61_marketing_status",{p_token:token}).then(({data:r,error:e})=>{
+   if(live&&!e&&typeof r?.granted==="boolean")setMarketingAllowed(r.granted);
+  });
+  return()=>{live=false};
+ },[token]);
+ async function toggleMarketing(granted:boolean){
+  if(!token||marketingSaving)return;
+  setMarketingSaving(true);setMarketingNote("");
+  try{
+   const {data:r,error:e}=await browserSupabase().rpc("beger_g61_marketing_consent",{p_token:token,p_granted:granted});
+   if(e||r?.recorded!==true||r?.granted!==granted||r?.marketing_push_currently_enabled!==false)
+    throw Error("rejected");
+   setMarketingAllowed(granted);
+   setMarketingNote(granted?"تم حفظ موافقتك على استقبال العروض مستقبلاً، لكن إرسال الإعلانات غير مفعّل حالياً.":
+    "تم تسجيل إلغاء موافقتك على العروض. تنبيهات حجزك تبقى مستقلة.");
+  }catch{setMarketingNote("تعذّر تحديث الموافقة. جرّب مرة ثانية.");}
+  finally{setMarketingSaving(false)}
+ }
  useEffect(()=>{
   if(!token)return;
   let alive=true;
@@ -228,7 +249,16 @@ export default function PublicSalonBooking({slug}:{slug:string}){
    {loading?<p>جارٍ تحميل خدمات الصالون…</p>:null}
    {error?<p role="alert" style={{background:"#fff2ee",padding:15,borderRadius:10,color:"#a14a41"}}>{error}</p>:null}
    {token?<section style={{background:"#fff",border:"1px solid #dce9df",borderRadius:16,padding:22,display:"grid",gap:11}}>
-    <h2 style={{fontSize:20,margin:0}}>متابعة حجزك</h2><p style={{fontSize:12,color:"#6e8073"}}>احتفظ بالرابط الحالي. رمز المتابعة خاص بك ولا تشاركه علناً.</p>
+    <h2 style={{fontSize:20,margin:0}}>متابعة حجزك</h2>
+    <div style={{padding:13,border:"1px solid #dfeadf",borderRadius:10,display:"grid",gap:8,background:"#f8fbf8"}}>
+     <label style={{display:"flex",alignItems:"center",gap:9,fontSize:13}}>
+      <input type="checkbox" checked={marketingAllowed} disabled={marketingSaving}
+       onChange={e=>void toggleMarketing(e.target.checked)}/>
+      أوافق على استقبال عروض الصالون عبر Push عند تفعيل خدمة الإعلانات
+     </label>
+     <small style={{color:"#6e8473"}}>اختياري وغير محدد مسبقاً. يمكنك سحب الموافقة هنا. إشعارات مواعيدك وتغييرها لا تعتمد على موافقة التسويق.</small>
+     {marketingNote?<small role="status" style={{color:"#267351"}}>{marketingNote}</small>:null}
+    </div><p style={{fontSize:12,color:"#6e8073"}}>احتفظ بالرابط الحالي. رمز المتابعة خاص بك ولا تشاركه علناً.</p>
     {track?<><strong style={{color:"#22724e",fontSize:19}}>{statuses[track.status]??track.status}</strong><p style={{margin:0}}>وقت الموعد: {new Date(track.starts_at).toLocaleString("ar",{timeZone:"Europe/Istanbul",dateStyle:"full",timeStyle:"short"})}</p><p style={{margin:0}}>المجموع: {money(track.total_minor)}</p></>:<p>جارٍ التحقق من الحجز…</p>}
     {track?.status==="confirmed"?<div style={{border:"1px solid #b9ddc7",background:"#f0f9f2",borderRadius:12,padding:14,display:"grid",gap:10}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,flexWrap:"wrap"}}>
