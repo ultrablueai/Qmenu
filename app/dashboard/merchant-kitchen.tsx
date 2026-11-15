@@ -20,8 +20,8 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
  const [filter,setFilter]=useState<"live"|"ready">("live");
  const refresh=useCallback(async()=>{
-  const requestId=++requestSequence.current;
   if(activeScope.current!==(branchId))return;
+  const requestId=++requestSequence.current;
   const {data,error}=await browserSupabase().rpc("g9_kitchen_queue",{p_branch:branchId});
   if(requestId!==requestSequence.current||activeScope.current!==(branchId))return;
   if(error||!Array.isArray(data))throw Error("Unauthorized kitchen query");
