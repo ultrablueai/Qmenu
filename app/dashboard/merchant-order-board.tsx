@@ -86,20 +86,23 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
   setActiveView("live");setHistoryOpen(false);setStatusFilter("all");
  }
  async function toggle(){
-  if(busy||!confirm(enabled?"إيقاف استقبال طلبات QR الجديدة لهذا الفرع؟ الطلبات السابقة ستبقى محفوظة.":"تفعيل استقبال طلبات الطاولات على نسخة Staging؟ هذا يعني إمكانية إرسال طلبات اختبار حقيقية إلى هذه اللوحة."))return;
+  const actionScope=businessId+":"+branchId;
+  if(activeScope.current!==actionScope||busy||!confirm(enabled?"إيقاف استقبال طلبات QR الجديدة لهذا الفرع؟ الطلبات السابقة ستبقى محفوظة.":"تفعيل استقبال طلبات الطاولات على نسخة Staging؟ هذا يعني إمكانية إرسال طلبات اختبار حقيقية إلى هذه اللوحة."))return;
   setBusy(true);setError("");setNotice("");
-  try{const {data,error}=await browserSupabase().from("g3_branch_order_settings").upsert({branch_id:branchId,business_id:businessId,enabled:!enabled,updated_at:new Date().toISOString()},{onConflict:"branch_id"}).select("enabled").single();if(error||!data)throw error??Error("No updated record");setEnabled(data.enabled);setNotice(data.enabled?"استقبال الطلبات التجريبية مفعّل لهذا الفرع.":"تم إيقاف استقبال الطلبات الجديدة.")}catch{setError("لم يتغير إعداد استقبال الطلبات. تحقق من صلاحياتك.")}finally{setBusy(false)}
+  try{const {data,error}=await browserSupabase().from("g3_branch_order_settings").upsert({branch_id:branchId,business_id:businessId,enabled:!enabled,updated_at:new Date().toISOString()},{onConflict:"branch_id"}).select("enabled").single();if(activeScope.current!==actionScope)return;if(error||!data)throw error??Error("No updated record");setEnabled(data.enabled);setNotice(data.enabled?"استقبال الطلبات التجريبية مفعّل لهذا الفرع.":"تم إيقاف استقبال الطلبات الجديدة.")}catch{if(activeScope.current===actionScope)setError("لم يتغير إعداد استقبال الطلبات. تحقق من صلاحياتك.")}finally{if(activeScope.current===actionScope)setBusy(false)}
  }
  async function togglePickup(){
-  if(busy||!confirm(pickupEnabled?"إيقاف استقبال طلبات السفري لهذا الفرع؟ ستبقى الطلبات السابقة محفوظة.":"تفعيل طلبات السفري التجريبية لهذا الفرع؟ ستظهر الطلبات في لوحة المطبخ وتتطلب موافقتك."))return;
+  const actionScope=businessId+":"+branchId;
+  if(activeScope.current!==actionScope||busy||!confirm(pickupEnabled?"إيقاف استقبال طلبات السفري لهذا الفرع؟ ستبقى الطلبات السابقة محفوظة.":"تفعيل طلبات السفري التجريبية لهذا الفرع؟ ستظهر الطلبات في لوحة المطبخ وتتطلب موافقتك."))return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().from("g3_branch_order_settings").upsert({branch_id:branchId,business_id:businessId,pickup_enabled:!pickupEnabled,updated_at:new Date().toISOString()},{onConflict:"branch_id"}).select("pickup_enabled").single();
+   if(activeScope.current!==actionScope)return;
    if(error||!data)throw error??Error("No updated setting");
    setPickupEnabled(data.pickup_enabled===true);
    setNotice(data.pickup_enabled?"تم تفعيل استقبال طلبات السفري التجريبية.":"تم إيقاف طلبات السفري الجديدة.");
-  }catch{setError("لم يتغير إعداد طلبات السفري. تأكد من صلاحيات الإدارة.")}
-  finally{setBusy(false)}
+  }catch{if(activeScope.current===actionScope)setError("لم يتغير إعداد طلبات السفري. تأكد من صلاحيات الإدارة.")}
+  finally{if(activeScope.current===actionScope)setBusy(false)}
  }
  async function recordPayment(order:Order){
   const actionScope=businessId+":"+branchId;
