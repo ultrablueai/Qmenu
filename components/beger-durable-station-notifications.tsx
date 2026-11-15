@@ -1,5 +1,5 @@
 "use client";
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import {browserSupabase} from "../lib/supabase/browser";
 import type {Station} from "../lib/beger-station-alerts";
 
@@ -15,10 +15,14 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
  const [events,setEvents]=useState<ServerEvent[]>([]);
  const [loading,setLoading]=useState(true),[error,setError]=useState("");
  const [busy,setBusy]=useState(""),[open,setOpen]=useState(false);
+ // Invalidate in-flight requests on scope changes, refreshes and unmount.
+ const requestSequence=useRef(0);
  const refresh=useCallback(async()=>{
+  const requestId=++requestSequence.current;
   const {data,error:rpcError}=await browserSupabase().rpc("g23_branch_notifications",{
    p_branch:branchId,p_station:station
   });
+  if(requestId!==requestSequence.current)return;
   if(rpcError||!Array.isArray(data))throw Error("Notifications unavailable");
   setEvents(data as ServerEvent[]);setError("");setLoading(false);
  },[branchId,station]);
@@ -29,7 +33,7 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
   const timer=window.setInterval(update,15000);
   const onVisible=()=>{if(document.visibilityState==="visible")update()};
   document.addEventListener("visibilitychange",onVisible);
-  return()=>{active=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)};
+  return()=>{active=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)};
  },[refresh]);
  async function markRead(item:ServerEvent){
   if(busy||item.read)return;
