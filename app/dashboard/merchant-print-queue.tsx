@@ -17,6 +17,7 @@ const states:Record<State,string>={queued:"بانتظار فتح الطباعة"
 export default function MerchantPrintQueue({branchId,branchName,settings}:{branchId:string;branchName:string;settings:BranchPrintSettings}){
  const [jobs,setJobs]=useState<PrintJob[]>([]),[events,setEvents]=useState<PrintEvent[]>([]),[loaded,setLoaded]=useState(false);
  const requestSequence=useRef(0);
+ const scopeEpoch=useRef(0);
  const activeScope=useRef(branchId);
  activeScope.current=branchId;
  const [filter,setFilter]=useState<"pending"|"all">("pending");
@@ -38,11 +39,12 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
   let live=true;setLoaded(false);setJobs([]);setEvents([]);setBusy("");setFilter("pending");setError("");
   const update=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل سجل الطباعة؛ تأكد من صلاحيات مالك/مدير الفرع.")})};
   update();const timer=window.setInterval(update,8000);
-  return()=>{live=false;requestSequence.current++;window.clearInterval(timer)};
+  return()=>{live=false;scopeEpoch.current++;requestSequence.current++;window.clearInterval(timer)};
  },[refresh]);
  async function action(job:PrintJob,next:"preview"|"confirm"|"retry"|"fail"){
   const actionScope=branchId;
-  if(activeScope.current!==actionScope||busy)return;
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy)return;
   if(next==="preview"){
    const opened=printOrderTicket(job.order,branchName,job.kind,settings);
    if(!opened){setError("المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.");return}
@@ -66,12 +68,12 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
   setBusy(job.id);setError("");setNotice("");
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("g18_print_job_action",{p_job:job.id,p_action:next,p_note:note});
-   if(activeScope.current!==actionScope)return;
+   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
    if(rpcError||data?.id!==job.id)throw Error("Print status update failed");
    setNotice(next==="preview"?"فُتحت المعاينة. اطبع المستند ثم أكد خروج الورقة.":next==="confirm"?"تم تسجيل تأكيد الموظف بخروج الورقة.":next==="fail"?"تم توثيق فشل الطباعة وسببه؛ يمكن إعادة المحاولة بعد حل المشكلة.":"أُعيدت المهمة إلى قائمة الانتظار مع تسجيل العملية.");
    await refresh();
-  }catch{if(activeScope.current===actionScope)setError("تعذّر تسجيل حالة مهمة الطباعة. حدّث القائمة وتحقق قبل تكرار الطباعة.")}
-  finally{if(activeScope.current===actionScope)setBusy("")}
+  }catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("تعذّر تسجيل حالة مهمة الطباعة. حدّث القائمة وتحقق قبل تكرار الطباعة.")}
+  finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy("")}
  }
  const queued=jobs.filter(j=>j.state!=="confirmed");
  const failed=jobs.filter(j=>j.state==="failed");
