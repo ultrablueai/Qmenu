@@ -39,14 +39,16 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
   return()=>{active=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)};
  },[refresh]);
  async function markRead(item:ServerEvent){
-  if(busy||item.read)return;
+  const actionScope=branchId+":"+station;
+  if(activeScope.current!==actionScope||busy||item.read)return;
   setBusy(item.id);setError("");
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("g23_mark_notification_read",{p_notification:item.id});
+   if(activeScope.current!==actionScope)return;
    if(rpcError||data!==true)throw Error("Ack failed");
    setEvents(old=>old.map(e=>e.id===item.id?{...e,read:true}:e));
-  }catch{setError("تعذّر تسجيل قراءة التنبيه. أعد المحاولة.")}
-  finally{setBusy("")}
+  }catch{if(activeScope.current===actionScope)setError("تعذّر تسجيل قراءة التنبيه. أعد المحاولة.")}
+  finally{if(activeScope.current===actionScope)setBusy("")}
  }
  const unread=events.filter(e=>!e.read).length;
  return <section dir="rtl" aria-label="سجل تنبيهات الطلبات الدائم" style={{background:"#fff",border:"1px solid #dfe5dc",borderRadius:12,padding:"12px 14px",margin:"10px 0"}}>
