@@ -59,3 +59,19 @@ test("branch change releases busy state for every order station and print inbox"
  const inbox=readFileSync("components/beger-durable-station-notifications.tsx","utf8");
  assert.match(inbox,/setLoading\(true\);setError\(""\);setBusy\(""\)/);
 });
+
+test("print health and printer lease lab isolate branch-scoped refresh results",()=>{
+ for(const file of ["app/dashboard/merchant-print-health.tsx","app/dashboard/merchant-printer-lease-lab.tsx"]){
+  const src=readFileSync(file,"utf8");
+  assert.match(src,/const activeScope=useRef\(branchId\)/,file);
+  assert.match(src,/const requestId=\+\+requestSequence\.current/,file);
+  assert.match(src,/requestId!==requestSequence\.current\|\|activeScope\.current!==branchId/,file);
+  assert.match(src,/requestSequence\.current\+\+/,file);
+ }
+ const lab=readFileSync("app/dashboard/merchant-printer-lease-lab.tsx","utf8");
+ for(const rpc of ["g20_register_test_printer","g20_claim_test_print","g20_release_test_print"]){
+  assert.ok(lab.includes('rpc("'+rpc+'"'),rpc);
+ }
+ assert.match(lab,/if\(activeScope\.current!==actionScope\)return;/);
+ assert.match(lab,/setLease\(null\);setBusy\(false\);/);
+});
