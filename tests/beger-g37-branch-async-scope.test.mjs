@@ -19,3 +19,9 @@ for (const [name, file, endpoint] of sources) {
   assert.ok(src.includes('rpc("'+endpoint+'"'));
  });
 }
+
+test("merchant order board clears previous branch tickets and history before refetch", () => {
+ const src=readFileSync("app/dashboard/merchant-order-board.tsx","utf8");
+ assert.match(src,/useEffect\(\(\)=>\{let live=true;setLoaded\(false\);setOrders\(\[\]\);setClosedOrders\(\[\]\);/);
+ assert.match(src,/setEnabled\(false\);setPickupEnabled\(false\);/);
+});
