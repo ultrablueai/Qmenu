@@ -38,16 +38,18 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
   return()=>{active=false;requestSequence.current++;window.clearInterval(id);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
  },[refresh]);
  async function advance(order:Order,next:"preparing"|"ready"){
-  if(busy)return;
+  const actionScope=branchId;
+  if(activeScope.current!==actionScope||busy)return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().rpc("g9_kitchen_advance",{p_order:order.id,p_next:next});
+   if(activeScope.current!==actionScope)return;
    if(error||data?.status!==next)throw Error("Transition not confirmed");
    setOrders(old=>old.map(o=>o.id===order.id?{...o,status:next}:o));
    setNotice("تم تحديث طلب "+order.reference+" إلى "+labels[next]);
    try{await refresh()}catch{/* retain server-confirmed state */}
-  }catch{setError("لم يتم تحديث الطلب. قد يكون موظف آخر غيّر حالته؛ حدّث القائمة قبل المحاولة.");}
-  finally{setBusy(false)}
+  }catch{if(activeScope.current===actionScope)setError("لم يتم تحديث الطلب. قد يكون موظف آخر غيّر حالته؛ حدّث القائمة قبل المحاولة.");}
+  finally{if(activeScope.current===actionScope)setBusy(false)}
  }
  const shown=orders.filter(o=>filter==="ready"?o.status==="ready":o.status!=="ready");
  return <section className="beger-kitchen" dir="rtl" aria-label="محطة المطبخ">
