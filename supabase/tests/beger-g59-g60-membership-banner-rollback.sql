@@ -28,6 +28,11 @@ begin
  insert into g51_case values(b,ow,wk,br,st,ch,sv,null,
   (dt+time '10:00') at time zone 'Europe/Istanbul',null,null);
 end $setup$;
+create temp table g60_other(business_id uuid) on commit drop;
+grant select on g60_other to authenticated;
+with fresh as (insert into public.businesses(name,country_code)
+values('G60 foreign rollback salon','TR') returning id)
+insert into g60_other select id from fresh;
 select set_config('request.jwt.claim.sub',(select owner_id::text from g51_case),true);
 set local role authenticated;
 do $owner$
@@ -132,7 +137,7 @@ begin
   raise exception 'Marketing banner unexpectedly sent notifications';end if;
  r:=public.beger_g60_upsert_banner(c.business_id,null,'Expired old offer',
   'Do not display',now()-interval '3 days',now()-interval '1 day',true);
- other:=(select id from public.businesses where id<>c.business_id limit 1);
+ other:=(select business_id from g60_other);
  begin
   perform public.beger_g59_upsert_membership_plan(other,null,'Foreign plan','Test',10000,1,1,true);
   raise exception 'SECURITY cross tenant plan inserted';
