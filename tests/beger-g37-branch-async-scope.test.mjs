@@ -16,7 +16,7 @@ for (const [name, file, endpoint] of sources) {
   assert.match(src,/requestId=\+\+requestSequence\.current/);
   assert.match(src,/if\(requestId!==requestSequence\.current\|\|activeScope\.current!==/);
   assert.match(src,/if\(activeScope\.current!==/);
-  assert.match(src,/return\(\)=>\{(?:live|active)=false;requestSequence\.current\+\+;/);
+  assert.match(src,/return\(\)=>\{(?:live|active)=false;scopeEpoch\.current\+\+;requestSequence\.current\+\+;/);
   assert.ok(src.includes('rpc("'+endpoint+'"'));
  });
 }
@@ -85,6 +85,6 @@ test("print health and printer lease lab isolate branch-scoped refresh results",
  for(const rpc of ["g20_register_test_printer","g20_claim_test_print","g20_release_test_print"]){
   assert.ok(lab.includes('rpc("'+rpc+'"'),rpc);
  }
- assert.match(lab,/if\(activeScope\.current!==actionScope\)return;/);
+ assert.match(lab,/if\(activeScope\.current!==actionScope\|\|scopeEpoch\.current!==actionEpoch\)return;/);
  assert.match(lab,/setLease\(null\);setBusy\(false\);/);
 });
