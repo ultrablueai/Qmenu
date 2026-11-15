@@ -56,3 +56,10 @@ Gate 02 independent JWT tenant/branch/RPC negative checks; Gate 03 full customer
 - Updated both regression source tests to assert active scope guards.
 - Independent remote-source consistency check returned **27/27 source pattern assertions** across all five components and two test files. This is not a full `npm test`, a TypeScript build, a browser functional test, or an adversarial security test.
 - PR #6 remains draft; Vercel ignored builds are expected for nonapproved branches; GitHub Actions jobs remain failing with missing job-step/log details at inspection. Commercial GO remains blocked.
+
+## 2026-11-15 follow-up — stale callback epoch bug
+- Found a narrower race: an old-branch callback could increment the global request epoch BEFORE checking its branch identity, unintentionally invalidating the current branch's valid fetch.
+- Fixed in all five components by moving the `activeScope` check BEFORE `++requestSequence.current`.
+- Extended `tests/beger-g37-branch-async-scope.test.mjs` with a check for guard-before-increment; remote GitHub source inspection confirmed this order in five of five modules.
+- CI did not yet report any pull-request workflow run for latest commit `96b1877560c4d18ecadfcd37c1f78ad49a96f322` at inspection; earlier runs on this PR failed without accessible step logs. Neither source inspection nor GitHub's Vercel status can certify compile success.
+- Staging `feat/g1-foundation` remains exactly `621936af3d9a9f3318fa043bee8a3b5c054a67f2`. Draft PR #6 remains unmerged.
