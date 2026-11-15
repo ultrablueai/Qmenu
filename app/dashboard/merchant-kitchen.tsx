@@ -14,6 +14,7 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
  const stationAlerts=useStationAlerts("kitchen",branchId,feedback.signal);
  const [orders,setOrders]=useState<Order[]>([]);
  const requestSequence=useRef(0);
+ const scopeEpoch=useRef(0);
  const activeScope=useRef(branchId);
  activeScope.current=branchId;
  const [loaded,setLoaded]=useState(false),[busy,setBusy]=useState(false);
@@ -35,21 +36,22 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
   const id=window.setInterval(update,7000);
   const onVisible=()=>{if(document.visibilityState==="visible")update()};
   const onFocus=()=>update();document.addEventListener("visibilitychange",onVisible);window.addEventListener("focus",onFocus);
-  return()=>{active=false;requestSequence.current++;window.clearInterval(id);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
+  return()=>{active=false;scopeEpoch.current++;requestSequence.current++;window.clearInterval(id);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
  },[refresh]);
  async function advance(order:Order,next:"preparing"|"ready"){
   const actionScope=branchId;
-  if(activeScope.current!==actionScope||busy)return;
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy)return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().rpc("g9_kitchen_advance",{p_order:order.id,p_next:next});
-   if(activeScope.current!==actionScope)return;
+   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
    if(error||data?.status!==next)throw Error("Transition not confirmed");
    setOrders(old=>old.map(o=>o.id===order.id?{...o,status:next}:o));
    setNotice("تم تحديث طلب "+order.reference+" إلى "+labels[next]);
    try{await refresh()}catch{/* retain server-confirmed state */}
-  }catch{if(activeScope.current===actionScope)setError("لم يتم تحديث الطلب. قد يكون موظف آخر غيّر حالته؛ حدّث القائمة قبل المحاولة.");}
-  finally{if(activeScope.current===actionScope)setBusy(false)}
+  }catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("لم يتم تحديث الطلب. قد يكون موظف آخر غيّر حالته؛ حدّث القائمة قبل المحاولة.");}
+  finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy(false)}
  }
  const shown=orders.filter(o=>filter==="ready"?o.status==="ready":o.status!=="ready");
  return <section className="beger-kitchen" dir="rtl" aria-label="محطة المطبخ">
