@@ -1,5 +1,5 @@
 "use client";
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {StationAlertBell,useStationAlerts} from "../../components/beger-station-alerts";
 import {DurableStationNotifications} from "../../components/beger-durable-station-notifications";
@@ -13,11 +13,14 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
  const feedback=useBegerFeedback();
  const stationAlerts=useStationAlerts("kitchen",branchId,feedback.signal);
  const [orders,setOrders]=useState<Order[]>([]);
+ const requestSequence=useRef(0);
  const [loaded,setLoaded]=useState(false),[busy,setBusy]=useState(false);
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
  const [filter,setFilter]=useState<"live"|"ready">("live");
  const refresh=useCallback(async()=>{
+  const requestId=++requestSequence.current;
   const {data,error}=await browserSupabase().rpc("g9_kitchen_queue",{p_branch:branchId});
+  if(requestId!==requestSequence.current)return;
   if(error||!Array.isArray(data))throw Error("Unauthorized kitchen query");
   stationAlerts.observe(data as Order[]);
   setOrders(data as Order[]);setLoaded(true);setError("");
@@ -29,7 +32,7 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
   const id=window.setInterval(update,7000);
   const onVisible=()=>{if(document.visibilityState==="visible")update()};
   const onFocus=()=>update();document.addEventListener("visibilitychange",onVisible);window.addEventListener("focus",onFocus);
-  return()=>{active=false;window.clearInterval(id);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
+  return()=>{active=false;requestSequence.current++;window.clearInterval(id);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
  },[refresh]);
  async function advance(order:Order,next:"preparing"|"ready"){
   if(busy)return;
