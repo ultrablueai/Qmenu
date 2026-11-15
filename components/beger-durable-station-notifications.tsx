@@ -17,6 +17,7 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
  const [busy,setBusy]=useState(""),[open,setOpen]=useState(false);
  // Invalidate in-flight requests on scope changes, refreshes and unmount.
  const requestSequence=useRef(0);
+ const scopeEpoch=useRef(0);
  const activeScope=useRef(branchId+":"+station);
  activeScope.current=branchId+":"+station;
  const refresh=useCallback(async()=>{
@@ -36,18 +37,19 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
   const timer=window.setInterval(update,15000);
   const onVisible=()=>{if(document.visibilityState==="visible")update()};
   document.addEventListener("visibilitychange",onVisible);
-  return()=>{active=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)};
+  return()=>{active=false;scopeEpoch.current++;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)};
  },[refresh]);
  async function markRead(item:ServerEvent){
   const actionScope=branchId+":"+station;
-  if(activeScope.current!==actionScope||busy||item.read)return;
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy||item.read)return;
   setBusy(item.id);setError("");
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("g23_mark_notification_read",{p_notification:item.id});
-   if(activeScope.current!==actionScope)return;
+   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
    if(rpcError||data!==true)throw Error("Ack failed");
    setEvents(old=>old.map(e=>e.id===item.id?{...e,read:true}:e));
-  }catch{if(activeScope.current===actionScope)setError("تعذّر تسجيل قراءة التنبيه. أعد المحاولة.")}
+  }catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("تعذّر تسجيل قراءة التنبيه. أعد المحاولة.")}
   finally{if(activeScope.current===actionScope)setBusy("")}
  }
  const unread=events.filter(e=>!e.read).length;
