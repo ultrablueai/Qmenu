@@ -15,6 +15,7 @@ export default function MerchantPrinterLeaseLab({branchId}:{branchId:string}){
  const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
  const requestSequence=useRef(0);
+ const scopeEpoch=useRef(0);
  const activeScope=useRef(branchId);
  activeScope.current=branchId;
  const refresh=useCallback(async()=>{
@@ -28,51 +29,52 @@ export default function MerchantPrinterLeaseLab({branchId}:{branchId:string}){
  useEffect(()=>{
   let active=true;setDevices([]);setLease(null);setBusy(false);setError("");setNotice("");setLoading(true);
   void refresh().catch(()=>{if(active)setError("تعذّر تحميل المحطات التجريبية أو التحقق من صلاحية الفرع.")}).finally(()=>{if(active)setLoading(false)});
-  return()=>{active=false;requestSequence.current++};
+  return()=>{active=false;scopeEpoch.current++;requestSequence.current++};
  },[refresh]);
  async function register(){
   const actionScope=branchId;
-  if(activeScope.current!==actionScope)return;
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
   if(busy||!label.trim()||label.trim().length>80||/[\r\n]/.test(label)){setError("اختر اسماً واضحاً للمحطة (حتى 80 حرفاً).");return}
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("g20_register_test_printer",{p_branch:branchId,p_kind:kind,p_label:label.trim()});
-   if(activeScope.current!==actionScope)return;
+   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
    if(rpcError||data?.simulation_only!==true)throw Error("Registration failed");
-   await refresh();if(activeScope.current!==actionScope)return;setNotice("سُجلت محطة محاكاة فقط. لم يتم الاتصال بطابعة.");
-  }catch{if(activeScope.current===actionScope)setError("تعذّر إنشاء محطة المحاكاة. تحقق من صلاحية مالك/مدير الفرع.")}
-  finally{if(activeScope.current===actionScope)setBusy(false)}
+   await refresh();if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;setNotice("سُجلت محطة محاكاة فقط. لم يتم الاتصال بطابعة.");
+  }catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("تعذّر إنشاء محطة المحاكاة. تحقق من صلاحية مالك/مدير الفرع.")}
+  finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy(false)}
  }
  async function claim(device:TestDevice){
   const actionScope=branchId;
-  if(activeScope.current!==actionScope||busy||lease)return;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy||lease)return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("g20_claim_test_print",{p_device:device.id});
-   if(activeScope.current!==actionScope)return;
+   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
    if(rpcError||data?.simulation_only!==true)throw Error("Claim failed");
    if(data.claimed!==true){setNotice("لا توجد مهمة طباعة جديدة متاحة لهذه المحطة، أو أنها محجوزة بالفعل.");return}
    if(typeof data.jobId!=="string"||typeof data.leaseToken!=="string")throw Error("Incomplete lease");
    setLease({...data,deviceId:device.id} as Lease&{deviceId:string});
    setNotice("تم حجز مهمة للاختبار لمدة 90 ثانية فقط. لم تُرسل بيانات إلى طابعة.");
    await refresh();
-  }catch{if(activeScope.current===actionScope)setError("تعذّر حجز المهمة. قد يكون جهاز آخر حجزها أو أن صلاحيات الفرع لا تسمح.")}
-  finally{if(activeScope.current===actionScope)setBusy(false)}
+  }catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("تعذّر حجز المهمة. قد يكون جهاز آخر حجزها أو أن صلاحيات الفرع لا تسمح.")}
+  finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy(false)}
  }
  async function release(){
   const actionScope=branchId;
-  if(activeScope.current!==actionScope||busy||!lease?.jobId||!lease.leaseToken)return;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy||!lease?.jobId||!lease.leaseToken)return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("g20_release_test_print",{
     p_device:lease.deviceId,p_job:lease.jobId,p_token:lease.leaseToken
    });
-   if(activeScope.current!==actionScope)return;
+   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
    if(rpcError||data!==true)throw Error("Release failed");
-   setLease(null);await refresh();if(activeScope.current!==actionScope)return;setNotice("حُرر الحجز. مهمة الطباعة بقيت في حالتها الأصلية.");
+   setLease(null);await refresh();if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;setNotice("حُرر الحجز. مهمة الطباعة بقيت في حالتها الأصلية.");
   }catch{
-   if(activeScope.current===actionScope){setLease(null);setError("تعذّر تحرير الحجز. سينتهي تلقائياً بعد 90 ثانية من إنشائه. حدّث القائمة.");}
-  }finally{if(activeScope.current===actionScope)setBusy(false)}
+   if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch){setLease(null);setError("تعذّر تحرير الحجز. سينتهي تلقائياً بعد 90 ثانية من إنشائه. حدّث القائمة.");}
+  }finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy(false)}
  }
  return <details style={{margin:"14px 0",border:"1px solid #d9e5de",background:"#f5faf7",borderRadius:13,padding:"13px 16px"}}>
   <summary style={{cursor:"pointer",fontWeight:800}}>مختبر حجز الطباعة — بدون طابعة فعلية</summary>
