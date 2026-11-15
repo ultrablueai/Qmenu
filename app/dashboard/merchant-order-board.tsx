@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useEffect,useRef,useState} from "react";
 import {StationAlertBell,useStationAlerts} from "../../components/beger-station-alerts";
 import {DurableStationNotifications} from "../../components/beger-durable-station-notifications";
 import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
@@ -20,6 +20,7 @@ function orderReference(id:string){return id.replace(/-/g,"").slice(0,10).toUppe
 export default function MerchantOrderBoard({businessId,branchId,branchName,onOpenStation}:{businessId:string;branchId:string;branchName:string;onOpenStation?:(station:"kitchen"|"cashier")=>void}){
  const feedback=useBegerFeedback();
  const stationAlerts=useStationAlerts("merchant",branchId,feedback.signal);
+ const requestSequence=useRef(0);
  const [historyOpen,setHistoryOpen]=useState(false),[historyBusy,setHistoryBusy]=useState(false),[closedOrders,setClosedOrders]=useState<Order[]>([]),[historyLoaded,setHistoryLoaded]=useState(false);
  const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  const [collectionMethods,setCollectionMethods]=useState<Record<string,string>>({});
@@ -43,11 +44,13 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
  const filteredLive=orders.filter(filterOrder);
  const filteredHistory=closedOrders.filter(filterOrder).sort((a,b)=>archiveSort==="newest"?Date.parse(b.createdAt)-Date.parse(a.createdAt):Date.parse(a.createdAt)-Date.parse(b.createdAt));
  async function refresh(){
+  const requestId=++requestSequence.current;
   const db=browserSupabase();
   const [cap,list]=await Promise.all([
    db.from("g3_branch_order_settings").select("enabled,pickup_enabled").eq("branch_id",branchId).eq("business_id",businessId).maybeSingle(),
    db.rpc("g3_branch_orders",{p_branch:branchId})
   ]);
+  if(requestId!==requestSequence.current)return;
   if(cap.error)throw cap.error;
   if(list.error)throw list.error;
   setEnabled(cap.data?.enabled===true);setPickupEnabled(cap.data?.pickup_enabled===true);
@@ -57,7 +60,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
   setError("");
   setLoaded(true);
  }
- useEffect(()=>{let live=true;setLoaded(false);const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
+ useEffect(()=>{let live=true;setLoaded(false);const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
  async function loadHistory(){
   setHistoryBusy(true);
   try{
