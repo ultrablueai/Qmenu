@@ -1,5 +1,5 @@
 "use client";
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
 
 type Health={
@@ -18,8 +18,14 @@ const statusLabel={
 export default function MerchantPrintHealth({branchId}:{branchId:string}){
  const [data,setData]=useState<Health|null>(null);
  const [loaded,setLoaded]=useState(false),[error,setError]=useState("");
+ const requestSequence=useRef(0);
+ const activeScope=useRef(branchId);
+ activeScope.current=branchId;
  const refresh=useCallback(async()=>{
+  if(activeScope.current!==branchId)return;
+  const requestId=++requestSequence.current;
   const {data:result,error:rpcError}=await browserSupabase().rpc("g21_branch_print_health",{p_branch:branchId});
+  if(requestId!==requestSequence.current||activeScope.current!==branchId)return;
   if(rpcError||!result||typeof result!=="object"||!["normal","delayed","needs_attention","no_jobs"].includes(result.status))
    throw Error("Unavailable");
   setData(result as Health);setLoaded(true);setError("");
@@ -29,7 +35,7 @@ export default function MerchantPrintHealth({branchId}:{branchId:string}){
   const update=()=>void refresh().catch(()=>{if(active)setError("فشل تحميل مراقبة الطباعة؛ تحقق من صلاحية إدارة الفرع.")});
   update();
   const timer=window.setInterval(update,15000);
-  return()=>{active=false;window.clearInterval(timer)};
+  return()=>{active=false;requestSequence.current++;window.clearInterval(timer)};
  },[refresh]);
  const alert=data?.status==="needs_attention"||data?.status==="delayed";
  return <section dir="rtl" aria-label="مراقبة تشغيل الطباعة" style={{background:"#fff",border:"1px solid #dae6d8",borderRadius:15,padding:"16px 18px",margin:"14px 0"}}>
