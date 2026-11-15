@@ -21,6 +21,8 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
  const feedback=useBegerFeedback();
  const stationAlerts=useStationAlerts("merchant",branchId,feedback.signal);
  const requestSequence=useRef(0);
+ const historySequence=useRef(0);
+ const scopeEpoch=useRef(0);
  const activeScope=useRef(businessId+":"+branchId);
  activeScope.current=businessId+":"+branchId;
  const [historyOpen,setHistoryOpen]=useState(false),[historyBusy,setHistoryBusy]=useState(false),[closedOrders,setClosedOrders]=useState<Order[]>([]),[historyLoaded,setHistoryLoaded]=useState(false);
@@ -63,19 +65,21 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
   setError("");
   setLoaded(true);
  }
- useEffect(()=>{let live=true;setLoaded(false);setOrders([]);setClosedOrders([]);setHistoryLoaded(false);setHistoryBusy(false);setBusy(false);setHistoryOpen(false);setActiveView("live");setEnabled(false);setPickupEnabled(false);setError("");setNotice("");const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
+ useEffect(()=>{let live=true;setLoaded(false);setOrders([]);setClosedOrders([]);setHistoryLoaded(false);setHistoryBusy(false);setBusy(false);setHistoryOpen(false);setActiveView("live");setEnabled(false);setPickupEnabled(false);setError("");setNotice("");const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;scopeEpoch.current++;historySequence.current++;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
  async function loadHistory(){
   const historyScope=businessId+":"+branchId;
   if(activeScope.current!==historyScope)return;
+  const historyEpoch=scopeEpoch.current;
+  const historyRequest=++historySequence.current;
   setHistoryBusy(true);
   try{
    const {data,error}=await browserSupabase().rpc("g4_recent_closed_orders",{p_branch:branchId});
-   if(activeScope.current!==historyScope)return;
+   if(activeScope.current!==historyScope||scopeEpoch.current!==historyEpoch||historyRequest!==historySequence.current)return;
    if(error)throw error;
    setClosedOrders(Array.isArray(data)?data as Order[]:[]);
    setHistoryLoaded(true);
-  }catch{if(activeScope.current===historyScope)setError("تعذّر تحميل سجل الطلبات السابقة. تحقق من الاتصال والصلاحيات.")}
-  finally{if(activeScope.current===historyScope)setHistoryBusy(false)}
+  }catch{if(activeScope.current===historyScope&&scopeEpoch.current===historyEpoch&&historyRequest===historySequence.current)setError("تعذّر تحميل سجل الطلبات السابقة. تحقق من الاتصال والصلاحيات.")}
+  finally{if(activeScope.current===historyScope&&scopeEpoch.current===historyEpoch&&historyRequest===historySequence.current)setHistoryBusy(false)}
  }
  async function toggleHistory(){
   if(historyOpen){setHistoryOpen(false);setActiveView("live");return;}
@@ -87,13 +91,15 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
  }
  async function toggle(){
   const actionScope=businessId+":"+branchId;
-  if(activeScope.current!==actionScope||busy||!confirm(enabled?"إيقاف استقبال طلبات QR الجديدة لهذا الفرع؟ الطلبات السابقة ستبقى محفوظة.":"تفعيل استقبال طلبات الطاولات على نسخة Staging؟ هذا يعني إمكانية إرسال طلبات اختبار حقيقية إلى هذه اللوحة."))return;
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy||!confirm(enabled?"إيقاف استقبال طلبات QR الجديدة لهذا الفرع؟ الطلبات السابقة ستبقى محفوظة.":"تفعيل استقبال طلبات الطاولات على نسخة Staging؟ هذا يعني إمكانية إرسال طلبات اختبار حقيقية إلى هذه اللوحة."))return;
   setBusy(true);setError("");setNotice("");
-  try{const {data,error}=await browserSupabase().from("g3_branch_order_settings").upsert({branch_id:branchId,business_id:businessId,enabled:!enabled,updated_at:new Date().toISOString()},{onConflict:"branch_id"}).select("enabled").single();if(activeScope.current!==actionScope)return;if(error||!data)throw error??Error("No updated record");setEnabled(data.enabled);setNotice(data.enabled?"استقبال الطلبات التجريبية مفعّل لهذا الفرع.":"تم إيقاف استقبال الطلبات الجديدة.")}catch{if(activeScope.current===actionScope)setError("لم يتغير إعداد استقبال الطلبات. تحقق من صلاحياتك.")}finally{if(activeScope.current===actionScope)setBusy(false)}
+  try{const {data,error}=await browserSupabase().from("g3_branch_order_settings").upsert({branch_id:branchId,business_id:businessId,enabled:!enabled,updated_at:new Date().toISOString()},{onConflict:"branch_id"}).select("enabled").single();if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;if(error||!data)throw error??Error("No updated record");setEnabled(data.enabled);setNotice(data.enabled?"استقبال الطلبات التجريبية مفعّل لهذا الفرع.":"تم إيقاف استقبال الطلبات الجديدة.")}catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("لم يتغير إعداد استقبال الطلبات. تحقق من صلاحياتك.")}finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy(false)}
  }
  async function togglePickup(){
   const actionScope=businessId+":"+branchId;
-  if(activeScope.current!==actionScope||busy||!confirm(pickupEnabled?"إيقاف استقبال طلبات السفري لهذا الفرع؟ ستبقى الطلبات السابقة محفوظة.":"تفعيل طلبات السفري التجريبية لهذا الفرع؟ ستظهر الطلبات في لوحة المطبخ وتتطلب موافقتك."))return;
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy||!confirm(pickupEnabled?"إيقاف استقبال طلبات السفري لهذا الفرع؟ ستبقى الطلبات السابقة محفوظة.":"تفعيل طلبات السفري التجريبية لهذا الفرع؟ ستظهر الطلبات في لوحة المطبخ وتتطلب موافقتك."))return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().from("g3_branch_order_settings").upsert({branch_id:branchId,business_id:businessId,pickup_enabled:!pickupEnabled,updated_at:new Date().toISOString()},{onConflict:"branch_id"}).select("pickup_enabled").single();
@@ -106,7 +112,8 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
  }
  async function recordPayment(order:Order){
   const actionScope=businessId+":"+branchId;
-  if(activeScope.current!==actionScope||busy||order.paymentStatus==="paid")return;
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy||order.paymentStatus==="paid")return;
   const method=collectionMethods[order.id]??"cash";
   const methodLabel=method==="cash"?"نقداً":method==="external_card"?"بطاقة على جهاز التاجر":"تحويل خارجي";
   if(!confirm("تأكيد استلام كامل المبلغ "+formatOrderTotal(order.totalMinor,order.currency)+" عبر "+methodLabel+"؟ هذا لا يجري أي خصم إلكتروني."))return;
@@ -118,13 +125,14 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
    setOrders(current=>current.map(item=>item.id===order.id?{...item,paymentStatus:"paid",paymentMethod:method}:item));
    setClosedOrders(current=>current.map(item=>item.id===order.id?{...item,paymentStatus:"paid",paymentMethod:method}:item));
    setNotice("تم تسجيل تحصيل الطلب #"+orderReference(order.id)+" لدى التاجر. العملية ليست دفعاً إلكترونياً عبر Beger.");
-   try{await refresh();if(historyOpen)await loadHistory()}catch{setError("تم تسجيل التحصيل لكن فشل تحديث القائمة. حدّث الطلبات للتحقق.");}
+   try{await refresh();if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch&&historyOpen)await loadHistory()}catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("تم تسجيل التحصيل لكن فشل تحديث القائمة. حدّث الطلبات للتحقق.");}
   }catch{if(activeScope.current===actionScope)setError("تعذّر تأكيد تسجيل التحصيل. حدّث الطلبات أولاً قبل إعادة المحاولة.")}
   finally{if(activeScope.current===actionScope)setBusy(false)}
  }
  async function transition(order:Order,status:Status){
   const actionScope=businessId+":"+branchId;
-  if(activeScope.current!==actionScope||busy)return;
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy)return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().rpc("g3_transition_order",{p_order:order.id,p_next:status});
