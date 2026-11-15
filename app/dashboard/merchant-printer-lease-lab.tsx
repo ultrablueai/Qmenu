@@ -47,6 +47,7 @@ export default function MerchantPrinterLeaseLab({branchId}:{branchId:string}){
  }
  async function claim(device:TestDevice){
   const actionScope=branchId;
+  const actionEpoch=scopeEpoch.current;
   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy||lease)return;
   setBusy(true);setError("");setNotice("");
   try{
