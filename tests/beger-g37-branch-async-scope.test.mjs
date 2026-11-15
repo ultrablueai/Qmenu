@@ -26,3 +26,14 @@ test("merchant order board clears previous branch tickets and history before ref
  assert.match(src,/useEffect\(\(\)=>\{let live=true;setLoaded\(false\);setOrders\(\[\]\);setClosedOrders\(\[\]\);/);
  assert.match(src,/setEnabled\(false\);setPickupEnabled\(false\);/);
 });
+
+// A callback retained from the previous branch must never invalidate a current-branch request.
+test("all station refreshes reject retired scope before advancing the request epoch", () => {
+ const files=[...sources.map(([,file])=>file),"components/beger-durable-station-notifications.tsx"];
+ for(const file of files){
+  const src=readFileSync(file,"utf8");
+  const guard=src.indexOf("if(activeScope.current!==");
+  const increment=src.indexOf("const requestId=++requestSequence.current;");
+  assert.ok(guard>=0 && increment>guard,file+" must guard stale scope before epoch increment");
+ }
+});
