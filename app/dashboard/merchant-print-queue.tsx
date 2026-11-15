@@ -41,7 +41,8 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
   return()=>{live=false;requestSequence.current++;window.clearInterval(timer)};
  },[refresh]);
  async function action(job:PrintJob,next:"preview"|"confirm"|"retry"|"fail"){
-  if(busy)return;
+  const actionScope=branchId;
+  if(activeScope.current!==actionScope||busy)return;
   if(next==="preview"){
    const opened=printOrderTicket(job.order,branchName,job.kind,settings);
    if(!opened){setError("المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.");return}
@@ -65,11 +66,12 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
   setBusy(job.id);setError("");setNotice("");
   try{
    const {data,error:rpcError}=await browserSupabase().rpc("g18_print_job_action",{p_job:job.id,p_action:next,p_note:note});
+   if(activeScope.current!==actionScope)return;
    if(rpcError||data?.id!==job.id)throw Error("Print status update failed");
    setNotice(next==="preview"?"فُتحت المعاينة. اطبع المستند ثم أكد خروج الورقة.":next==="confirm"?"تم تسجيل تأكيد الموظف بخروج الورقة.":next==="fail"?"تم توثيق فشل الطباعة وسببه؛ يمكن إعادة المحاولة بعد حل المشكلة.":"أُعيدت المهمة إلى قائمة الانتظار مع تسجيل العملية.");
    await refresh();
-  }catch{setError("تعذّر تسجيل حالة مهمة الطباعة. حدّث القائمة وتحقق قبل تكرار الطباعة.")}
-  finally{setBusy("")}
+  }catch{if(activeScope.current===actionScope)setError("تعذّر تسجيل حالة مهمة الطباعة. حدّث القائمة وتحقق قبل تكرار الطباعة.")}
+  finally{if(activeScope.current===actionScope)setBusy("")}
  }
  const queued=jobs.filter(j=>j.state!=="confirmed");
  const failed=jobs.filter(j=>j.state==="failed");
