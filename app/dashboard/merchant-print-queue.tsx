@@ -23,8 +23,8 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
  const [routes,setRoutes]=useState<PrintDestinations>({kitchen:"مطبخ الفرع",pickup:"بطاقات الاستلام",summary:"كاشير الفرع"});
  const [error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState("");
  const refresh=useCallback(async()=>{
-  const requestId=++requestSequence.current;
   if(activeScope.current!==(branchId))return;
+  const requestId=++requestSequence.current;
   const db=browserSupabase();
   const [queue,history]=await Promise.all([
    db.rpc("g17_branch_print_jobs",{p_branch:branchId}),
