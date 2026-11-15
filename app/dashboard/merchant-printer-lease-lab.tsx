@@ -39,7 +39,7 @@ export default function MerchantPrinterLeaseLab({branchId}:{branchId:string}){
    const {data,error:rpcError}=await browserSupabase().rpc("g20_register_test_printer",{p_branch:branchId,p_kind:kind,p_label:label.trim()});
    if(activeScope.current!==actionScope)return;
    if(rpcError||data?.simulation_only!==true)throw Error("Registration failed");
-   await refresh();setNotice("سُجلت محطة محاكاة فقط. لم يتم الاتصال بطابعة.");
+   await refresh();if(activeScope.current!==actionScope)return;setNotice("سُجلت محطة محاكاة فقط. لم يتم الاتصال بطابعة.");
   }catch{if(activeScope.current===actionScope)setError("تعذّر إنشاء محطة المحاكاة. تحقق من صلاحية مالك/مدير الفرع.")}
   finally{if(activeScope.current===actionScope)setBusy(false)}
  }
@@ -69,7 +69,7 @@ export default function MerchantPrinterLeaseLab({branchId}:{branchId:string}){
    });
    if(activeScope.current!==actionScope)return;
    if(rpcError||data!==true)throw Error("Release failed");
-   setLease(null);await refresh();setNotice("حُرر الحجز. مهمة الطباعة بقيت في حالتها الأصلية.");
+   setLease(null);await refresh();if(activeScope.current!==actionScope)return;setNotice("حُرر الحجز. مهمة الطباعة بقيت في حالتها الأصلية.");
   }catch{
    if(activeScope.current===actionScope){setLease(null);setError("تعذّر تحرير الحجز. سينتهي تلقائياً بعد 90 ثانية من إنشائه. حدّث القائمة.");}
   }finally{if(activeScope.current===actionScope)setBusy(false)}
