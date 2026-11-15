@@ -1,0 +1,42 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const landing=readFileSync("app/page.tsx","utf8");
+const login=readFileSync("app/login/page.tsx","utf8");
+const signup=readFileSync("app/signup/page.tsx","utf8");
+const css=readFileSync("app/beger-marketing.css","utf8");
+const auth=readFileSync("components/beger-auth-layout.tsx","utf8");
+const brand=readFileSync("components/beger-brand.tsx","utf8");
+test("premium Beger landing links customer demo, merchant sign in and signup",()=>{
+ assert.match(landing,/BegerBrand/);
+ assert.match(landing,/beger-marketing-hero/);
+ assert.match(landing,/beger-hero-art/);
+ assert.match(landing,/beger-feature-grid/);
+ assert.match(landing,/href="\/login"/);
+ assert.match(landing,/href="\/signup"/);
+ assert.match(landing,/const demo="\/b\//);
+ assert.match(css,/\.beger-marketing-hero\{display:grid/);
+ assert.match(css,/@media\(max-width:550px\)/);
+ assert.match(brand,/beger-brand-qmenu/);
+});
+test("merchant auth pages share a visual system while preserving Supabase sign-in/sign-up",()=>{
+ assert.match(login,/BegerAuthLayout/);
+ assert.match(signup,/BegerAuthLayout/);
+ assert.match(auth,/beger-auth-visual/);
+ assert.match(auth,/beger-auth-side/);
+ assert.match(css,/\.beger-auth-shell\{min-height:100dvh;display:grid/);
+ assert.match(login,/signInWithPassword\(\{email: email\.trim\(\), password\}\)/);
+ assert.match(login,/target === "\/admin" \? "\/admin" : "\/dashboard"/);
+ assert.match(login,/autoComplete="current-password"/);
+ assert.match(login,/role="alert"/);
+ assert.match(signup,/auth\.signUp\(/);
+ assert.match(signup,/emailRedirectTo:callback\.toString\(\)/);
+ assert.match(signup,/minLength=\{12\}/);
+ assert.match(signup,/autoComplete="new-password"/);
+});
+test("landing and auth contain no simulated real orders or impersonated HQ data",()=>{
+ assert.doesNotMatch(landing+auth+login+signup,/2,856|425,300|1,264 Reviews|fakeOrder/);
+ assert.match(landing,/يمكنك تجربة إرسال الطلبات وتشغيل الكاشير والمطبخ والبيجر/);
+ assert.match(landing,/لا يوجد دفع إلكتروني أو اشتراك تجاري مدفوع/);
+ assert.match(landing,/مركز اختبار المتجر للمالك/);
+});

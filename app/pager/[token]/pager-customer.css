@@ -1,0 +1,20 @@
+.beger-pager-customer{min-height:100dvh;background:radial-gradient(circle at 10% 5%,#eaf0da,transparent 45%),#f9f5ed;color:#3c3329;padding:24px 15px;display:flex;flex-direction:column;align-items:center;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
+.beger-pager-customer>header{text-align:center;padding:20px 0 28px}
+.beger-pager-customer>header strong{font-family:Georgia,serif;font-size:31px}
+.beger-pager-customer>header strong span{color:#708c50}
+.beger-pager-customer>header p{font-size:12px;color:#867b6d}
+.beger-pager-customer-card{width:min(100%,410px);background:#fff;border:1px solid #e4ddcf;border-radius:24px;padding:26px 22px;text-align:center;box-shadow:0 14px 35px #44331d18;display:flex;flex-direction:column;gap:14px;align-items:center}
+.beger-pager-customer-card>p:first-child{font-size:14px;font-weight:800;margin:0}
+.beger-pager-customer-card>small{font-size:12px;color:#8b8071}
+.beger-pager-customer-number{font-variant-numeric:tabular-nums;display:grid;place-items:center;background:#eef3e6;border:5px solid #80995b;border-radius:50%;height:190px;width:190px;font-size:80px;line-height:1;color:#4e6938}
+.beger-pager-customer-card.is-ready .beger-pager-customer-number{background:#e6f0d8;border-color:#587f35}
+.beger-pager-customer-card h1{font-size:clamp(20px,5vw,25px);margin:8px 0;color:#40362b}
+.beger-pager-customer-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;margin:8px 0}
+.beger-pager-customer-steps span{padding:10px 5px;border-radius:9px;background:#f0eee9;color:#8c857b;font-size:11px;font-weight:800}
+.beger-pager-customer-steps span.is-current{background:#e8f0de;color:#537037}
+.beger-pager-alert-toggle{min-height:48px;border:1px solid #bfcea9;color:#516d3a;background:#f6faf0;padding:9px 16px;border-radius:11px;font-size:13px;font-weight:800;cursor:pointer}
+.beger-pager-customer-card>p[role=status]{font-size:12px;color:#58753f;margin:0}
+.beger-pager-customer-hint{font-size:11px;color:#8a7c69;line-height:1.8;margin:0}
+.beger-pager-customer-error{color:#973e2f;background:#ffece5;border-radius:12px;padding:13px}
+.beger-pager-alert-toggle:focus-visible{outline:3px solid #93ac73;outline-offset:3px}
+@media(max-width:420px){.beger-pager-customer-card{padding:21px 14px}.beger-pager-customer-number{width:170px;height:170px;font-size:70px}}

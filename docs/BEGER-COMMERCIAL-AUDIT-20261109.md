@@ -1,0 +1,110 @@
+# BEGER — Commercial closure audit, 2026-11-09
+
+**Branch:** `feat/g1-foundation` (not `main`). **Environment:** Supabase `qandxrcuetwzenlqspez` (Staging), Vercel `qmenu-staging`. **Production:** no changes.
+
+## Confirmed operational acceptance
+
+The owner reports independently testing all core guest-order journeys and the real hardware (kitchen, cashier, printer and Pager) successfully. Treat this as owner-reported operational acceptance and do not needlessly re-open previously fixed journey issues. It is not a substitute for a recorded release SHA, restore drill, commercial billing tests or penetration/security review.
+
+## Live, read-only Staging evidence
+
+An aggregate SQL query was executed through the connected Staging database on 2026-11-09. It returned:
+
+| Signal | Value |
+| --- | ---: |
+| Businesses | 3 |
+| Branches | 3 |
+| Existing orders | 15 |
+| Plans / active plans | 0 / 0 |
+| Subscriptions | 0 |
+| Public tables without RLS | 0 |
+| SECURITY DEFINER executable by anon | 16 |
+| SECURITY DEFINER executable by authenticated | 83 |
+
+The checked-in `scripts/commercial-readiness-audit.sql` reproduces these aggregate checks without exposing customer PII or writing to the database.
+
+Supabase Security Advisor (2026-11-09) also returned:
+- 30 **INFO** `rls_enabled_no_policy` notices: this is not an automatic exposure; inspect intent and direct grants.
+- 16 **WARN** anonymous executable security-definer functions: inspect intent, guest QR semantics, input limits and privilege checks before changing grants.
+- 83 **WARN** authenticated executable security-definer functions: systematically review role/tenant checks; count alone does not imply exploitable vulnerability.
+- 1 **WARN** leaked-password-protection not enabled. Check Auth configuration and enable in the appropriate environment after reviewing behavior; no settings were changed here.
+
+References:
+- https://supabase.com/docs/guides/deployment/going-into-prod
+- https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
+- https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+## Latest independently examined preview evidence
+
+Vercel `qmenu-staging` deployment `dpl_FCprekXoYutZ9UUFpJtmAkT6WHw3` reported `READY` for SHA `973300d406dcad5b6c95aa95101f331fd089753e` on 2026-11-08. This is **not the same SHA** as the documentation and audit-script commits on 2026-11-09. Those audit commits are not claimed to have been deployed or tested in Vercel.
+
+## Closure gates — decision register
+
+| Area | State (evidence as of 2026-11-09) | Next permitted action |
+| --- | --- | --- |
+| Customer and device functionality | Owner-reported PASS | Only regress on proven defects or consequential new changes |
+| Tenant and public function security | OPEN | Review function grants and authenticated negative cross-tenant tests; no blanket revoke |
+| Password breach protection | OPEN | Investigate applicable Auth setting and enable after validation |
+| Paid subscriptions and invoices | BLOCKED — 0 plans, 0 subscriptions | Approve regional tariffs, currency, tax, billing periods, trial, grace/cancel/refund policies before implementing activation or invoicing |
+| Merchant ↔ customer payments | Out of scope | Beger does not custody food-order funds or settle to merchants |
+| Recovery and monitoring | OPEN | Perform isolated restore drill with a documented recovery result; confirm alerts and incident handling |
+| Production rollout | NO-GO | Verified build, tested release SHA, security and recovery evidence, qualified legal/tax review, explicit owner approval |
+
+## Commercial policy to approve before billing
+
+Draft only, no prices or legal claims:
+1. **Merchant subscription:** Beger bills each subscribing business for platform access; separate fees for any optional devices/services must be transparent.
+2. **Customer transactions:** merchant retains their own payment provider and receives their customers' money directly; manual/cash records are merchant accounting events, not platform settlements.
+3. **Plans:** define feature entitlements, branch/staff caps and trial behavior; publish actual amounts only after the owner approves currency, tax-inclusive/exclusive presentation and invoicing jurisdiction.
+4. **Lifecycle:** explicitly define start, expiry, grace period, suspended/read-only rules, renewal, cancellation, refund/credit and audit trails; enforce entitlements server-side rather than by UI label.
+5. **Pilot first:** no live checkout, real invoice issuance, subscription activation, `main` merge or Production migration without documented approval.
+
+## Next engineering slice
+
+Perform a per-function threat classification and test verified guest/customer/merchant/staff boundaries, then implement the smallest justified security fix on Staging. In parallel, prepare a restore rehearsal and a proposed billing state machine for sign-off. Re-run exact-head tests/build after any code changes. Document each verification, deployment SHA, remaining blocker and GO/NO-GO.
+
+**This document is an execution record, not a claim that the commercial launch is completed.**
+
+## 2026-11-09 — Follow-up security verification
+
+- Added and **executed** read-only `scripts/security-public-functions-audit.sql` against the live isolated Staging database. Result: `anonymous_definer_count=16`, `unexpected_exposures=0`, `missing_expected_public_functions=0`, `unlocked_search_paths=0`, `public_function_baseline_pass=true`. This is **exposure drift verification**, not a complete vulnerability review. The allowlist reflects currently observed intended public endpoints and must be reviewed for semantic correctness.
+- Added `supabase/tests/beger-public-invalid-token-smoke.sql`. An equivalent `BEGIN READ ONLY; SET LOCAL ROLE anon; ... ROLLBACK;` query executed successfully against Staging: four booleans `order_token_denied`, `pager_token_denied`, `display_token_denied`, `rating_token_denied` were all `true` for the reserved all-zero UUID.
+- No keys, personal order data, private tokens or user-created test records were read into a report. No grants revoked, migrations applied or production data changed.
+- **Open:** valid-token least-data/authorization checks, signed-in JWT cross-tenant negative cases, meaningful abuse/load testing of public mutation endpoints, reviews of the 83 authenticated-executable definer functions, actual encrypted restore on isolated disposable target, approved billing rules and legal/regulatory sign-off.
+- Security Advisor references: [anonymous definer lint](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), [authenticated definer lint](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable). The current baseline pass does **not** resolve those warning categories by itself.
+
+## 2026-11-09 G26 — Authenticated elevated function baseline
+
+Live Staging security classification at 14:13 UTC:
+- 83 `SECURITY DEFINER` functions executable by the `authenticated` role.
+- 16 also available to `anon`, whose intended guest token/menu/order behavior is a separate review stream.
+- 58 include a literal `auth.uid()` reference; 8 appear to delegate authorization to another helper; 1 `g17_print_job_action` delegates to `g18_print_job_action`.
+- 0 unclassified by this rule-based audit; 0 missing explicit locked empty search path.
+- `scripts/security-authenticated-functions-audit.sql` executed on live Staging and returned `baseline_pass=true`. A textual classification **does not prove** role/tenant checks are correct.
+- Inspected `g18_print_job_action` SQL: requires a signed-in identity plus membership `owner/manager` in the print job business before mutating. An actual read-only transaction with role `authenticated` but no `auth.uid()` confirmed `g17_print_job_action` raises SQLSTATE `42501` as expected. Saved executable test at `supabase/tests/beger-g26-print-auth-negative.sql`.
+- **Still open**: exact-token real user session tests, adversarial same-role cross-business calls for all privileged mutations, function return-field disclosure checks, actual restore, plan pricing/tax/invoicing, and independent release certification.
+- Vercel check on 2026-11-09: newest observed Staging deployment remains `dpl_FCprekXoYutZ9UUFpJtmAkT6WHw3` (`READY`, SHA `973300d...`, 2026-11-08); subsequent documentation and SQL audit commits were **not deployed** and do not require deploying app code just to record findings.
+- No DDL, data deletion, payment activation, production changes or `main` branch modifications were made.
+
+## 2026-11-09 — Phased commercial closure execution (evening)
+
+### Phase 1 — Tenant and station permissions
+Executed the existing `supabase/tests/beger-g15-tenant-role-smoke.sql` in three separately recorded transactions on isolated Staging, with all writes rolled back. Observed:
+- merchant owner: **5/5 PASS** (own access, foreign tenant denied, platform preflight denied)
+- cashier worker: **4/4 PASS** (own station positive, foreign/kitchen negatives)
+- pager worker: **4/4 PASS** (own station positive, foreign/cashier/kitchen negatives)
+- **13/13 DB role-simulation checks PASS**; not live authenticated JWT E2E. Do not mark security phase production-certified without real distinct authenticated-user tests, sensitive RPC negative paths and abuse controls.
+
+### Phase 2 — Recovery integrity preparation
+- Added `scripts/verify-backup-manifest.mjs`: offline verifier for staging-only `roles.sql`, `schema.sql` and `data.sql`; checks project ref, documented export status, Git SHA/timestamp, exact filenames, nonzero sizes, regular-file type, and SHA256 integrity. Returns `restoreVerified:false` explicitly. No SQL data is sent to GitHub.
+- Added `tests/beger-backup-manifest-integrity.test.mjs` with valid synthetic export, tampered data, and wrong-project regression scenarios. Local Node 22 tests **3/3 pass** on synthetically generated files; remote exact-head CI/build not yet observed.
+- A real encrypted export, isolated restore rehearsal, database/RLS verification, RPO/RTO measurement and operator sign-off remain **OPEN**. Do not treat checksum-only tests as backup/recovery completion.
+
+### Remaining sequence and stop conditions
+- **Phase 1 OPEN** until authentic browser/JWT tests across separate merchants and station roles, external endpoint rate/abuse review and authorization audit results are recorded.
+- **Phase 2 OPEN** until owner-approved disposable restore target and encrypted dump undergo genuine import + post-restore checks. Existing Staging and Production are NOT restore targets.
+- **Phase 3 NOT ACTIVATED**: pricing and jurisdiction-specific tax/invoicing policy approval required; no plan, paid subscription, invoice or live payment mutation permitted by this audit.
+- **Phase 4 OPEN**: legal privacy, terms, monitoring, support operations, data retention and billing notices need release evidence.
+- **Phase 5 NO-GO**: same-SHA CI/build/staging, rollback evidence and explicit owner release sign-off required.
+
+The repository contains test and audit additions only. No Production changes, no `main` merge, no merchant data edits, no payment activations, and no change to the validated device workflows.

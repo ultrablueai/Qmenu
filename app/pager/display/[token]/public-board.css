@@ -1,0 +1,23 @@
+.beger-public-board{box-sizing:border-box;background:#101e18;color:#f7f6ee;min-height:100dvh;padding:clamp(20px,3vw,46px);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;display:flex;flex-direction:column;gap:clamp(20px,3vw,35px)}
+.beger-public-board *{box-sizing:border-box}
+.beger-public-board-header{display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #41604b;padding-bottom:18px;flex-wrap:wrap}
+.beger-public-board-header small{color:#c2d4bd;font-size:12px;letter-spacing:.12em}
+.beger-public-board-header h1{font-size:clamp(24px,3vw,48px);line-height:1.3;margin:5px 0}
+.beger-public-board-brand{font-family:Georgia,serif;font-size:clamp(23px,3vw,45px);font-weight:900;white-space:nowrap}
+.beger-public-board-brand span{color:#baca8b}
+.beger-public-board-content{display:grid;grid-template-columns:minmax(0,3fr) minmax(190px,1fr);gap:clamp(16px,2vw,30px);flex:1;align-items:stretch;min-height:300px}
+.beger-public-board-ready{border-radius:25px;background:#1d3629;border:1px solid #476a4a;padding:clamp(16px,2.5vw,35px)}
+.beger-public-board-ready h2{font-size:clamp(22px,3vw,42px);margin:0 0 20px}
+.beger-public-board-ready h2 span{color:#b9d58c;font-size:.8em;margin-inline-end:10px}
+.beger-public-board-numbers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(9px,1.4vw,18px)}
+.beger-public-board-number{min-width:0;background:#eef5df;color:#1e462d;border-radius:20px;min-height:clamp(93px,12vw,170px);display:grid;place-items:center;font-size:clamp(42px,7vw,94px);font-weight:950;font-variant-numeric:tabular-nums;box-shadow:inset 0 -5px 0 #a6ba8f}
+.beger-public-board-empty{font-size:clamp(18px,2.2vw,28px);color:#b7c9b5;padding:45px 15px;text-align:center}
+.beger-public-board-side{display:grid;align-content:start;gap:17px}
+.beger-public-board-side>div{border-radius:20px;padding:23px;background:#f9f7ef;color:#354b32;display:grid;gap:13px}
+.beger-public-board-side span{font-size:clamp(14px,1.4vw,22px);font-weight:750}
+.beger-public-board-side strong{font-size:clamp(44px,5vw,83px);line-height:1;font-variant-numeric:tabular-nums}
+.beger-public-board-side p{color:#c7d7c3;font-size:clamp(12px,1.5vw,20px);line-height:1.7;padding:0 8px}
+.beger-public-board-error{color:#ffddd2;border:1px solid #9f6355;border-radius:11px;padding:10px}
+.beger-public-board footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #41604b;padding-top:14px;color:#aec3ab;font-size:13px}
+@media(max-width:900px){.beger-public-board-content{grid-template-columns:1fr}.beger-public-board-numbers{grid-template-columns:repeat(3,minmax(0,1fr))}.beger-public-board-side{grid-template-columns:repeat(2,minmax(0,1fr))}.beger-public-board-side p{grid-column:1/-1}}
+@media(max-width:440px){.beger-public-board{padding:12px}.beger-public-board-numbers{grid-template-columns:repeat(2,minmax(0,1fr))}.beger-public-board-number{min-height:95px}.beger-public-board-ready{padding:14px}}

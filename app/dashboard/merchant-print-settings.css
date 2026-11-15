@@ -1,0 +1,19 @@
+.beger-print-settings{border:1px solid #e1ddcf;border-radius:14px;background:#fffdf9;padding:13px 15px;min-width:0;color:#4a4034}
+.beger-print-settings>summary{cursor:pointer;display:flex;justify-content:space-between;gap:12px;align-items:center;list-style:none;min-height:34px}
+.beger-print-settings>summary::-webkit-details-marker{display:none}
+.beger-print-settings>summary span{font-size:14px;font-weight:850;color:#536b3e}
+.beger-print-settings>summary small{font-size:11px;color:#877b6d}
+.beger-print-settings-body{display:grid;gap:12px;padding-top:13px}
+.beger-print-settings-body>p{font-size:12px;line-height:1.7;margin:0;color:#7e7364}
+.beger-print-setting-field{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:12px;border:1px solid #ebe3d7;border-radius:11px;background:#fbfaf6}
+.beger-print-setting-field>span{display:grid;gap:5px}
+.beger-print-setting-field strong{font-size:13px}
+.beger-print-setting-field small{color:#82786c;font-size:11px}
+.beger-print-setting-field select{border:1px solid #d9d4c5;border-radius:9px;background:white;padding:9px;min-height:43px;min-width:140px;color:#40392f;font-size:12px}
+.beger-print-settings-body>button{min-height:45px;background:#667d4b;color:white;border:0;border-radius:11px;font-size:13px;font-weight:850;cursor:pointer}
+.beger-print-settings-body>button:disabled{opacity:.6;cursor:not-allowed}
+.beger-print-settings-body .beger-print-settings-success{color:#4b7136;background:#edf4e8;padding:10px;border-radius:9px}
+.beger-print-settings-body .beger-print-settings-error{color:#923e2f;background:#fff0e8;padding:10px;border-radius:9px}
+.beger-print-settings-body .beger-print-settings-caveat{font-size:11px}
+.beger-print-settings button:focus-visible,.beger-print-settings select:focus-visible,.beger-print-settings summary:focus-visible{outline:3px solid #99b47c;outline-offset:2px}
+@media(max-width:510px){.beger-print-setting-field{align-items:stretch;flex-direction:column}.beger-print-setting-field select{width:100%}.beger-print-settings>summary{align-items:start;flex-direction:column}}

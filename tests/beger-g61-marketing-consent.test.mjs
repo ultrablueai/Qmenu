@@ -1,0 +1,30 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const sql=readFileSync("supabase/migrations/20261115001400_g61_marketing_consent_event_ledger.sql","utf8");
+const smoke=readFileSync("supabase/tests/beger-g61-marketing-consent-rollback.sql","utf8");
+const publicUI=readFileSync("app/salon/book/[slug]/public-salon-booking.tsx","utf8");
+test("G61 marketing consent is private, token-scoped and opt-in false by default",()=>{
+ assert.match(sql,/salon_marketing_consent_events enable row level security/);
+ assert.match(sql,/revoke all on public\.salon_marketing_consent_events from public,anon,authenticated/);
+ assert.match(sql,/access_hash=pg_catalog\.md5\(p_token\)/);
+ assert.match(sql,/coalesce\(v_record.granted,false\)/);
+ assert.match(sql,/p_granted is null/);
+ assert.match(sql,/salon-marketing-v1/);
+ assert.match(sql,/source text not null default 'customer_booking_page'/);
+ assert.match(sql,/'active_marketing_delivery',false/);
+ assert.match(sql,/'transactional_booking_notifications_independent',true/);
+});
+test("G61 customer can consent and revoke without enabling promotional sends",()=>{
+ assert.match(sql,/insert into public\.salon_marketing_consent_events/);
+ assert.match(sql,/grant execute on function public\.beger_g61_marketing_consent\(text,boolean\) to anon,authenticated/);
+ assert.match(publicUI,/beger_g61_marketing_status/);
+ assert.match(publicUI,/beger_g61_marketing_consent/);
+ assert.match(publicUI,/checked=\{marketingAllowed\}/);
+ assert.match(publicUI,/أوافق على استقبال عروض الصالون/);
+ assert.match(publicUI,/إشعارات مواعيدك وتغييرها لا تعتمد على موافقة التسويق/);
+ assert.match(smoke,/^rollback;/m);
+ assert.match(smoke,/Marketing did not default to opt-out/);
+ assert.match(smoke,/Withdrawal failed/);
+ assert.match(smoke,/SECURITY stranger changed marketing permission/);
+});

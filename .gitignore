@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.env*
+!.env.example
+coverage/
+*.tsbuildinfo
+
+# Never commit database backups, customer data or restore secrets.
+backups/
+*.backup
+*.dump
+*.dump.sql
+roles.sql
+schema.sql
+data.sql
+history_data.sql
+history_schema.sql

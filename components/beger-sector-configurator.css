@@ -1,0 +1,29 @@
+.beger-sector-picker{font-family:system-ui,Arial,sans-serif;direction:rtl;border:1px solid #e0dfcf;border-radius:24px;background:#fffcf7;padding:clamp(16px,3vw,28px);color:#332f26;box-shadow:0 8px 28px #46391b12;max-width:100%;min-width:0}
+.beger-sector-picker *{box-sizing:border-box}
+.beger-sector-picker-head>span{font-size:10px;color:#a26f45;font-weight:800;letter-spacing:.11em}
+.beger-sector-picker h2{font-size:clamp(20px,3vw,27px);margin:8px 0;font-weight:850}
+.beger-sector-picker-head p{font-size:13px;color:#766e60;line-height:1.8;margin:0 0 18px}
+.beger-sector-picker>label{display:block;font-size:13px;font-weight:750;margin:0 0 8px}
+.beger-sector-picker>select{width:100%;max-width:410px;padding:12px 14px;min-height:46px;border-radius:12px;background:white;border:1px solid #d6dfc6;color:#364529;font:inherit}
+.beger-sector-explanation{font-size:12px;color:#6b765a;line-height:1.8;margin:8px 0 19px}
+.beger-sector-picker fieldset{border:0;padding:0;margin:0;min-width:0}
+.beger-sector-picker legend{font-size:15px;font-weight:850;margin-bottom:13px}
+.beger-sector-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.beger-sector-feature{display:flex;gap:10px;align-items:flex-start;padding:13px;border:1px solid #e8e1d5;border-radius:13px;background:#fff;min-width:0;cursor:pointer}
+.beger-sector-feature>input{margin:3px 0 0;width:18px;height:18px;accent-color:#667c44;flex-shrink:0}
+.beger-sector-feature>span{min-width:0;flex:1;display:grid;gap:4px}
+.beger-sector-feature strong{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.beger-sector-feature small{font-size:11px;line-height:1.5;color:#857b6e;overflow-wrap:anywhere}
+.beger-sector-feature em{font-style:normal;white-space:nowrap;font-size:10px;border-radius:99px;padding:4px 7px;background:#f1f0ea;color:#716b5c}
+.beger-sector-feature em.is-pilot{background:#eaf1e1;color:#566b3e}
+.beger-sector-summary{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px;padding:15px;border:1px solid #dce6cc;background:#f3f7ec;border-radius:14px}
+.beger-sector-summary strong{font-size:14px;color:#455e2d}
+.beger-sector-summary span{font-size:12px;color:#617345}
+.beger-sector-summary p{flex-basis:100%;font-size:11px;line-height:1.8;margin:0;color:#6b775a}
+.beger-sector-picker :is(input,select):focus-visible{outline:3px solid #b5c48e;outline-offset:2px}
+@media(max-width:700px){.beger-sector-feature-grid{grid-template-columns:1fr}.beger-sector-picker{border-radius:17px}.beger-sector-feature{padding:12px}}
+
+.beger-sector-save{margin-top:14px;background:#667d45;color:white;border:0;border-radius:12px;padding:12px 17px;min-height:44px;font:800 13px system-ui,Arial,sans-serif;cursor:pointer}
+.beger-sector-save:disabled{opacity:.55;cursor:wait}
+.beger-sector-notice{font-size:12px;color:#536c3d;background:#edf4e7;border:1px solid #d8e5c8;padding:12px;border-radius:11px;line-height:1.7;margin:12px 0 0}
+.beger-sector-readonly{font-size:12px;color:#857869;margin:10px 0}

@@ -1,0 +1,33 @@
+/* Beger G4: independent reports and cashier analytics without synthetic demo figures. */
+.beger-merchant-report{min-width:0;display:grid;gap:18px;font-size:13px;color:#42392e}
+.beger-report-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.beger-report-eyebrow{font-size:10px;font-weight:850;letter-spacing:.1em;color:#9f6d46}
+.beger-report-header h3{font-size:clamp(23px,3vw,30px);margin:6px 0 8px;color:#373126}
+.beger-report-header p{color:#827366;margin:0;line-height:1.65}
+.beger-report-header>button{padding:10px 15px;border-radius:11px;border:1px solid #d4dfc5;background:#edf3e5;color:#556d41;min-height:44px;font-weight:850;cursor:pointer}
+.beger-report-ranges{display:flex;flex-wrap:wrap;gap:8px}
+.beger-report-ranges button{border:1px solid #e4dacc;border-radius:12px;background:#fff;color:#776653;min-height:43px;padding:9px 16px;cursor:pointer;font:inherit;font-weight:750}
+.beger-report-ranges button[aria-pressed="true"]{background:#647e48;color:#fff;border-color:#647e48}
+.beger-report-ranges button:focus-visible,.beger-report-header button:focus-visible{outline:3px solid #90aa78;outline-offset:3px}
+.beger-report-ranges button:disabled,.beger-report-header button:disabled{opacity:.65}
+.beger-report-error,.beger-report-loading{border-radius:12px;padding:12px;font-size:12px;line-height:1.6}
+.beger-report-error{background:#fff0e9;color:#9b452c}.beger-report-loading{background:#f0f3e9;color:#526a3a}
+.beger-report-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.beger-report-metric{min-width:0;background:#fffdf9;border:1px solid #e6ddcf;border-radius:17px;display:grid;gap:15px;padding:19px;box-shadow:0 3px 17px #45311909}
+.beger-report-metric span{font-size:12px;color:#817469;line-height:1.6;font-weight:750}
+.beger-report-metric strong{font-size:31px;color:#516d39;font-weight:900;font-variant-numeric:tabular-nums}
+.beger-report-metric.is-primary{background:#eff3e6;border-color:#b8c9a2}
+.beger-report-finance{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.beger-report-panel{min-width:0;border:1px solid #e5dccc;border-radius:19px;padding:20px;background:#fffdf9}
+.beger-report-panel h4{font-size:19px;margin:0 0 8px;color:#40382c}
+.beger-report-panel>p{font-size:12px;color:#83796e;line-height:1.7;margin:0 0 15px}
+.beger-report-currency{margin-top:13px;padding:14px;background:#faf6f0;border-radius:12px;display:grid;gap:12px}
+.beger-report-currency>div{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.beger-report-currency span{font-size:12px;color:#766858;font-weight:750}
+.beger-report-currency strong{font-size:17px;color:#443c31;font-variant-numeric:tabular-nums}
+.beger-report-currency .beger-report-emphasis{padding-bottom:10px;border-bottom:1px solid #e6decd}
+.beger-report-currency .beger-report-emphasis strong{color:#536e37;font-size:21px}
+.beger-report-empty{padding:18px;text-align:center}
+.beger-report-footnote{border-top:1px solid #eae1d4;padding-top:16px;margin:0;color:#8b7966;font-size:12px;line-height:1.85}
+@media(max-width:920px){.beger-report-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.beger-report-finance{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:480px){.beger-report-metrics{gap:8px}.beger-report-metric{padding:13px;gap:9px}.beger-report-metric strong{font-size:26px}.beger-report-panel{padding:14px}.beger-report-header>button{width:100%}}

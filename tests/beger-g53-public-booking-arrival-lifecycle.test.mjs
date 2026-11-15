@@ -1,0 +1,83 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const g51=readFileSync("supabase/migrations/20261115000300_g51_public_salon_optin_booking.sql","utf8");
+const g52=readFileSync("supabase/migrations/20261115000400_g52_salon_booking_stage.sql","utf8");
+const g53=readFileSync("supabase/migrations/20261115000500_g53_salon_arrival_request.sql","utf8");
+const publicPage=readFileSync("app/salon/book/[slug]/public-salon-booking.tsx","utf8");
+const owner=readFileSync("app/salon/workspace/salon-public-link-setup.tsx","utf8");
+const verified=readFileSync("app/salon/workspace/salon-verified-workspace.tsx","utf8");
+const workspace=readFileSync("app/salon/workspace/page.tsx","utf8");
+const smoke=readFileSync("supabase/tests/beger-g53-onsite-qr-arrival-rollback.sql","utf8");
+test("G51 public salon opt-in defaults closed and is owned by business owner",()=>{
+ assert.match(g51,/published boolean not null default false/);
+ assert.match(g51,/public_booking_enabled boolean not null default false/);
+ assert.match(g51,/m\.role='owner'|role='owner'/);
+ assert.match(g51,/p_enable_bookings and not p_publish/);
+ assert.match(g51,/where slug=p_slug and published and public_booking_enabled/);
+ assert.match(g51,/revoke all on public\.salon_public_links,public\.salon_customer_access/);
+ assert.match(g51,/grant execute on function public\.beger_g51_public_book[^\n]* to anon,authenticated/);
+});
+test("G51 rejects colliding service resources, excessive names and unbounded booking demand",()=>{
+ assert.match(g51,/pg_advisory_xact_lock\(pg_catalog\.hashtextextended\(v_business::text,4818\)\)/);
+ assert.match(g51,/created_at>now\(\)-interval '1 hour'\)>=12/);
+ assert.match(g51,/created_at>now\(\)-interval '1 day'\)>=2/);
+ assert.match(g51,/p_start>now\(\)\+interval '30 days'/);
+ assert.match(g51,/sl\.staff_id|z\.staff_id=p_staff or z\.chair_id=p_chair/);
+ assert.match(g51,/z\.starts_at<v_finish and z\.ends_at>v_cursor/);
+ assert.match(g51,/v_schedule\.break_start is not null/);
+ assert.match(g51,/pg_catalog\.cardinality\(p_services\) not between 1 and 6/);
+ assert.match(g51,/insert into public\.salon_booking_events/);
+});
+test("G51 customer token and tracking never disclose customer name or business staffing",()=>{
+ assert.match(g51,/v_token:=replace\(pg_catalog\.gen_random_uuid/);
+ assert.match(g51,/access_hash\)\s+values\(v_business,v_booking,pg_catalog\.md5\(v_token\)\)/);
+ assert.match(g51,/p_token !~ '\^\[0-9a-f\]\{64\}\$'/);
+ assert.match(g51,/where t\.access_hash=pg_catalog\.md5\(p_token\)/);
+ const track=g51.slice(g51.indexOf("create or replace function public.beger_g51_public_track"));
+ assert.doesNotMatch(track,/customer_name|staff_id|access_token/);
+});
+test("G52 appointment lifecycle is explicit and checked by actual assigned staff",()=>{
+ assert.match(g52,/v_b\.status='confirmed' and p_next in \('arrived','cancelled','no_show'\)/);
+ assert.match(g52,/v_b\.status='arrived' and p_next in \('in_service','cancelled'\)/);
+ assert.match(g52,/v_b\.status='in_service' and p_next='completed'/);
+ assert.match(g52,/v_role='staff' and v_owned<>v_all/);
+ assert.match(g52,/insert into public\.salon_booking_events/);
+ assert.match(g52,/grant execute on function public\.beger_g52_salon_booking_stage\(uuid,uuid,text\) to authenticated/);
+});
+test("G53 QR arrival request does not automatically mark attendance",()=>{
+ assert.match(g53,/arrival_requested_at timestamptz/);
+ assert.match(g53,/v_row\.status<>'confirmed'/);
+ assert.match(g53,/starts_at-interval '90 minutes'/);
+ assert.match(g53,/ends_at\+interval '180 minutes'/);
+ assert.match(g53,/'physical_presence_verified',false/);
+ assert.match(g53,/update public\.salon_bookings set arrival_requested_at=now\(\)/);
+ assert.doesNotMatch(g53,/update public\.salon_bookings set status='arrived'/);
+ assert.match(g53,/'arrival_requested_at',e\.arrival_requested_at/);
+});
+test("G51-G53 owner, customer and worker experiences are separated and privacy warnings truthful",()=>{
+ assert.match(workspace,/SalonPublicLinkSetup/);
+ assert.match(workspace,/data\.role==="owner"/);
+ assert.match(owner,/beger_g52_owner_link_status/);
+ assert.match(owner,/beger_g51_owner_salon_link/);
+ assert.match(owner,/\?arrive=1/);
+ assert.match(owner,/تفعيل حجوزات Staging/);
+ assert.match(publicPage,/beger_g51_public_salon_catalog/);
+ assert.match(publicPage,/beger_g51_public_book/);
+ assert.match(publicPage,/beger_g51_public_track/);
+ assert.match(publicPage,/beger_g53_request_arrival/);
+ assert.match(publicPage,/localStorage\.setItem\("beger-salon-booking:"\+slug,t\)/);
+ assert.match(publicPage,/physical_presence_verified!==false/);
+ assert.match(verified,/beger_g52_salon_booking_stage/);
+ assert.match(verified,/arrival_requested_at/);
+ assert.match(verified,/beger_g47_salon_workspace/);
+});
+test("G51-G53 rollback acceptance checks an anonymous booking and authorized arrival lifecycle",()=>{
+ assert.match(smoke,/^begin;/m);assert.match(smoke,/^rollback;/m);
+ assert.match(smoke,/set local role anon;/);
+ assert.match(smoke,/beger_g51_public_book/);
+ assert.match(smoke,/beger_g47_approve_salon_booking/);
+ assert.match(smoke,/beger_g53_request_arrival/);
+ assert.match(smoke,/beger_g52_salon_booking_stage/);
+ assert.match(smoke,/SECURITY invalid arrival token/);
+});

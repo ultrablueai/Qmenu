@@ -1,0 +1,48 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const sql=readFileSync("supabase/migrations/20261115001200_g58_salon_price_visibility.sql","utf8");
+const market=readFileSync("supabase/migrations/20261115001300_g59_g60_membership_plans_campaign_banners.sql","utf8");
+const owner=readFileSync("app/salon/workspace/salon-price-manager.tsx","utf8");
+const marketing=readFileSync("app/salon/workspace/salon-marketing-center.tsx","utf8");
+const page=readFileSync("app/salon/book/[slug]/public-salon-booking.tsx","utf8");
+const panel=readFileSync("app/salon/workspace/page.tsx","utf8");
+const smoke=readFileSync("supabase/tests/beger-g58-price-visibility-rollback.sql","utf8");
+const smoke2=readFileSync("supabase/tests/beger-g59-g60-membership-banner-rollback.sql","utf8");
+test("G58 owner-only per-service pricing hides undisclosed totals",()=>{
+ assert.match(sql,/salon_price_policies enable row level security/);
+ assert.match(sql,/role='owner'/);
+ assert.match(sql,/price_mode',coalesce\(pp.mode,'exact_price'\)/);
+ assert.match(sql,/when pp.mode='starting_at' then pp.start_minor else null end/);
+ assert.match(sql,/requires a personalized quote before booking/);
+ assert.match(sql,/revoke all on public.salon_price_policies/);
+ assert.match(page,/requiresQuote=basket.some/);
+ assert.match(page,/!requiresQuote/);
+ assert.match(page,/price_mode==="quote_required"/);
+ assert.match(owner,/beger_g58_owner_set_price/);
+ assert.match(panel,/SalonPriceManager/);
+ assert.match(smoke,/^rollback;/m);
+ assert.match(smoke,/SECURITY actual private base price leaked/);
+});
+test("G59 owner plan publication no live checkout, no recurring charge",()=>{
+ assert.match(market,/salon_membership_plans enable row level security/);
+ assert.match(market,/grant execute on function public.beger_g59_upsert_membership_plan/);
+ assert.match(market,/role='owner'/);
+ assert.match(market,/'checkout_enabled',false/);
+ assert.match(market,/'auto_renewal_enabled',false/);
+ assert.match(market,/p.published/);
+ assert.match(marketing,/beger_g59_upsert_membership_plan/);
+ assert.match(marketing,/شراء الباقة وإرسال إعلانات مباشرة للهاتف غير مفعّلين/);
+ assert.match(page,/beger_g59_g60_public_promotions/);
+ assert.match(page,/شراء العضوية والتجديد الإلكتروني غير مفعّلين بعد/);
+});
+test("G60 banner only in active published window, no unsolicited marketing send",()=>{
+ assert.match(market,/salon_campaign_banners enable row level security/);
+ assert.match(market,/c.published and\s+c.starts_at<=now\(\) and c.ends_at>now\(\)/);
+ assert.match(market,/'marketing_push_enabled',false/);
+ assert.match(marketing,/beger_g60_upsert_banner/);
+ assert.match(page,/promotions.banners.map/);
+ assert.match(smoke2,/SECURITY worker created a banner/);
+ assert.match(smoke2,/SECURITY cross tenant plan inserted/);
+ assert.match(smoke2,/^rollback;/m);
+});
