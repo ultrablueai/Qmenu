@@ -64,6 +64,7 @@ export default function MerchantPrinterLeaseLab({branchId}:{branchId:string}){
  }
  async function release(){
   const actionScope=branchId;
+  const actionEpoch=scopeEpoch.current;
   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy||!lease?.jobId||!lease.leaseToken)return;
   setBusy(true);setError("");setNotice("");
   try{
