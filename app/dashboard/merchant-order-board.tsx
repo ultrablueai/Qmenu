@@ -63,16 +63,19 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
   setError("");
   setLoaded(true);
  }
- useEffect(()=>{let live=true;setLoaded(false);setOrders([]);setClosedOrders([]);setHistoryLoaded(false);setHistoryOpen(false);setActiveView("live");setEnabled(false);setPickupEnabled(false);setError("");setNotice("");const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
+ useEffect(()=>{let live=true;setLoaded(false);setOrders([]);setClosedOrders([]);setHistoryLoaded(false);setHistoryBusy(false);setHistoryOpen(false);setActiveView("live");setEnabled(false);setPickupEnabled(false);setError("");setNotice("");const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
  async function loadHistory(){
+  const historyScope=businessId+":"+branchId;
+  if(activeScope.current!==historyScope)return;
   setHistoryBusy(true);
   try{
    const {data,error}=await browserSupabase().rpc("g4_recent_closed_orders",{p_branch:branchId});
+   if(activeScope.current!==historyScope)return;
    if(error)throw error;
    setClosedOrders(Array.isArray(data)?data as Order[]:[]);
    setHistoryLoaded(true);
-  }catch{setError("تعذّر تحميل سجل الطلبات السابقة. تحقق من الاتصال والصلاحيات.")}
-  finally{setHistoryBusy(false)}
+  }catch{if(activeScope.current===historyScope)setError("تعذّر تحميل سجل الطلبات السابقة. تحقق من الاتصال والصلاحيات.")}
+  finally{if(activeScope.current===historyScope)setHistoryBusy(false)}
  }
  async function toggleHistory(){
   if(historyOpen){setHistoryOpen(false);setActiveView("live");return;}
@@ -99,34 +102,38 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
   finally{setBusy(false)}
  }
  async function recordPayment(order:Order){
-  if(busy||order.paymentStatus==="paid")return;
+  const actionScope=businessId+":"+branchId;
+  if(activeScope.current!==actionScope||busy||order.paymentStatus==="paid")return;
   const method=collectionMethods[order.id]??"cash";
   const methodLabel=method==="cash"?"نقداً":method==="external_card"?"بطاقة على جهاز التاجر":"تحويل خارجي";
   if(!confirm("تأكيد استلام كامل المبلغ "+formatOrderTotal(order.totalMinor,order.currency)+" عبر "+methodLabel+"؟ هذا لا يجري أي خصم إلكتروني."))return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().rpc("g3_record_external_payment",{p_order:order.id,p_method:method});
+   if(activeScope.current!==actionScope)return;
    if(error||data?.paymentStatus!=="paid")throw error??Error("Collection not confirmed");
    setOrders(current=>current.map(item=>item.id===order.id?{...item,paymentStatus:"paid",paymentMethod:method}:item));
    setClosedOrders(current=>current.map(item=>item.id===order.id?{...item,paymentStatus:"paid",paymentMethod:method}:item));
    setNotice("تم تسجيل تحصيل الطلب #"+orderReference(order.id)+" لدى التاجر. العملية ليست دفعاً إلكترونياً عبر Beger.");
    try{await refresh();if(historyOpen)await loadHistory()}catch{setError("تم تسجيل التحصيل لكن فشل تحديث القائمة. حدّث الطلبات للتحقق.");}
-  }catch{setError("تعذّر تأكيد تسجيل التحصيل. حدّث الطلبات أولاً قبل إعادة المحاولة.")}
-  finally{setBusy(false)}
+  }catch{if(activeScope.current===actionScope)setError("تعذّر تأكيد تسجيل التحصيل. حدّث الطلبات أولاً قبل إعادة المحاولة.")}
+  finally{if(activeScope.current===actionScope)setBusy(false)}
  }
  async function transition(order:Order,status:Status){
-  if(busy)return;
+  const actionScope=businessId+":"+branchId;
+  if(activeScope.current!==actionScope||busy)return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().rpc("g3_transition_order",{p_order:order.id,p_next:status});
+   if(activeScope.current!==actionScope)return;
    if(error||data?.status!==status)throw error??Error("Update not confirmed");
    // Server has confirmed the transition; a later refresh failure must never tell staff it was undone.
    setOrders(current=>current.map(item=>item.id===order.id?{...item,status}:item));
    setNotice("تم تحديث طلب #"+orderReference(order.id)+" من "+order.table+" إلى "+titles[status]);
    feedback.signal(status==="accepted"?"accepted":status==="preparing"?"preparing":status==="ready"?"ready":status==="fulfilled"?"fulfilled":"rejected","تم تحديث طلب #"+orderReference(order.id)+" إلى "+titles[status]);
    try{await refresh()}catch{setError("تم تغيير حالة الطلب بنجاح، لكن تعذّر تحديث القائمة. أعد تحميل الطلبات للتحقق من أحدث البيانات.");}
-  }catch{setError("تعذّر تأكيد تغيير حالة الطلب. حدّث القائمة قبل إعادة المحاولة لتجنّب إجراء مكرر.");}
-  finally{setBusy(false)}
+  }catch{if(activeScope.current===actionScope)setError("تعذّر تأكيد تغيير حالة الطلب. حدّث القائمة قبل إعادة المحاولة لتجنّب إجراء مكرر.");}
+  finally{if(activeScope.current===actionScope)setBusy(false)}
  }
  return <section id="beger-merchant-orders" className="beger-order-board" dir="rtl" aria-label="إدارة طلبات الطاولات">
   <header className="beger-order-board-header"><div><span>BEGER · ORDERS</span><h2>الطلبات المباشرة</h2><p>{branchName} · قبول واحد ← يصل الطلب للمطبخ تلقائياً ← تجهيز ← تسليم</p></div><details className="beger-order-reception-settings" style={{border:"1px solid #dce4d6",borderRadius:10,padding:"9px 12px",background:"#fff"}}><summary style={{cursor:"pointer",fontSize:12,fontWeight:750,color:"#537044"}}>⚙ استقبال الطلبات · الطاولات {enabled?"مفعّلة":"متوقفة"} / السفري {pickupEnabled?"مفعّل":"متوقف"}</summary><div style={{display:"grid",gap:8,marginTop:11}}><span className={enabled?"beger-order-enabled":"beger-order-disabled"}>{enabled?"● طلبات الطاولات مفعّلة":"○ طلبات الطاولات متوقفة"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void toggle()}>{enabled?"إيقاف طلبات الطاولات":"تفعيل طلبات الطاولات"}</button><span className={pickupEnabled?"beger-order-enabled":"beger-order-disabled"}>{pickupEnabled?"● طلبات السفري مفعّلة":"○ طلبات السفري متوقفة"}</span><button type="button" disabled={busy||!loaded} onClick={()=>void togglePickup()}>{pickupEnabled?"إيقاف استقبال السفري":"تفعيل استقبال السفري"}</button></div></details></header>
