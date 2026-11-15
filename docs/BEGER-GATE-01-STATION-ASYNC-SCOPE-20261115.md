@@ -40,3 +40,11 @@ Gate 02 independent JWT tenant/branch/RPC negative checks; Gate 03 full customer
 - Inspected `g9_kitchen_allowed` and `g10_cashier_allowed` function bodies: both require `auth.uid()` and a current business membership, with additional role-specific branch assignment for staff; owner/manager scoped by business membership.
 - `g10_cashier_order_action` delegates authorization to `g10_cashier_allowed` and locks the matching order row before accepted/fulfilled transitions. Absence of literal `auth.uid()` inside this wrapper is **not by itself an auth gap**.
 - **Not yet verified:** real signed-JWT two-merchant negative tests, revoked assignments, valid token least-data review, API abuse/rate limiting. No execution of privileged mutations, test data writes, or production changes.
+
+## 2026-11-15 Gate 01 validation follow-up
+- Root cause of feature branch Vercel `CANCELED`: Vercel's **Ignored Build Step** intentionally returns exit code 0 for every branch other than `feat/g1-foundation`, and for staging commits without `[beger-deploy]`. This is a deployment allowlist, NOT evidence of a failing build.
+- Opened **draft PR #6** from `fix/station-notification-scope-20261115` into `feat/g1-foundation`: https://github.com/ultrablueai/Qmenu/pull/6. No merge.
+- GitHub Actions PR run `43711995488` and later `43712144113` report `failure` for tests, typecheck and build. Job step detail lists were empty and job log download returned BlobNotFound 404. **Do not infer a code defect or a passing test from this**; CI remains RED/UNVERIFIED until a meaningful log and succeeding run exist.
+- Additional source-observed issue fixed: `merchant-order-board.tsx` had preserved branch-A order rows/history during branch-B loading. Branch change now immediately clears live orders, prior history, reception flags, errors and notices. Regression test added.
+- The request sequence guards are verified by source inspection only. A test still needs to force request A to resolve after request B and verify no cross-branch data appears in an actual rendered session.
+- Next action: address GitHub runner/log availability, run full Node 22 test/lint/build, then test actual two-branch mobile UI with distinct authenticated users. Until then **DO NOT MERGE OR DEPLOY**.
