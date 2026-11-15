@@ -14,7 +14,8 @@ for (const [name, file, endpoint] of sources) {
   const src=readFileSync(file,"utf8");
   assert.match(src,/requestSequence=useRef\(0\)/);
   assert.match(src,/requestId=\+\+requestSequence\.current/);
-  assert.match(src,/if\(requestId!==requestSequence\.current\)return/);
+  assert.match(src,/if\(requestId!==requestSequence\.current\|\|activeScope\.current!==/);
+  assert.match(src,/if\(activeScope\.current!==/);
   assert.match(src,/return\(\)=>\{(?:live|active)=false;requestSequence\.current\+\+;/);
   assert.ok(src.includes('rpc("'+endpoint+'"'));
  });
