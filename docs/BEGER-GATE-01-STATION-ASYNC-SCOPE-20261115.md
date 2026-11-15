@@ -48,3 +48,11 @@ Gate 02 independent JWT tenant/branch/RPC negative checks; Gate 03 full customer
 - Additional source-observed issue fixed: `merchant-order-board.tsx` had preserved branch-A order rows/history during branch-B loading. Branch change now immediately clears live orders, prior history, reception flags, errors and notices. Regression test added.
 - The request sequence guards are verified by source inspection only. A test still needs to force request A to resolve after request B and verify no cross-branch data appears in an actual rendered session.
 - Next action: address GitHub runner/log availability, run full Node 22 test/lint/build, then test actual two-branch mobile UI with distinct authenticated users. Until then **DO NOT MERGE OR DEPLOY**.
+
+## 2026-11-15 second-pass branch identity hardening
+- Fixed an additional race where a delayed handler from a previous branch might call `refresh()` **after** the new branch had mounted; pure monotonic request IDs cannot reject a newly initiated stale closure.
+- All five consumers now reject old-scope refresh before RPC and old-scope results after RPC with `activeScope.current` alongside the request sequence.
+- Merchant order board clears stale branch-A live orders, history and reception settings while branch-B loads.
+- Updated both regression source tests to assert active scope guards.
+- Independent remote-source consistency check returned **27/27 source pattern assertions** across all five components and two test files. This is not a full `npm test`, a TypeScript build, a browser functional test, or an adversarial security test.
+- PR #6 remains draft; Vercel ignored builds are expected for nonapproved branches; GitHub Actions jobs remain failing with missing job-step/log details at inspection. Commercial GO remains blocked.
