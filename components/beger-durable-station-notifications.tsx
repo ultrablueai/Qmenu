@@ -30,7 +30,7 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
   setEvents(data as ServerEvent[]);setError("");setLoading(false);
  },[branchId,station]);
  useEffect(()=>{
-  let active=true;setLoading(true);setError("");setEvents([]);setOpen(false);
+  let active=true;setLoading(true);setError("");setBusy("");setEvents([]);setOpen(false);
   const update=()=>{void refresh().catch(()=>{if(active){setError("تعذّر تحميل سجل تنبيهات الفرع.");setLoading(false)}})};
   update();
   const timer=window.setInterval(update,15000);
