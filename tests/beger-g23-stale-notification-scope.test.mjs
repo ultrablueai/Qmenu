@@ -9,7 +9,7 @@ test("G23 invalidates in-flight requests when branch/station changes or componen
   assert.match(source, /const requestId=\+\+requestSequence\.current/);
   assert.match(source, /if\(requestId!==requestSequence\.current\)return/);
   assert.match(source, /return\(\)=>\{active=false;requestSequence\.current\+\+;/);
-  assert.match(source, /\},\[branchId,station\]\)/);
+  assert.match(source, /\},\[refresh\]\)/);
 });
 
 test("G23 keeps the server-authorized feed and acknowledgement rather than exposing shared local notifications", () => {
