@@ -37,3 +37,25 @@ test("all station refreshes reject retired scope before advancing the request ep
   assert.ok(guard>=0 && increment>guard,file+" must guard stale scope before epoch increment");
  }
 });
+
+test("late station mutations cannot update a different branch UI",()=>{
+ const files=[...sources.map(([,file])=>file),"components/beger-durable-station-notifications.tsx"];
+ for(const file of files){
+  const src=readFileSync(file,"utf8");
+  assert.match(src,/if\(activeScope\.current!==actionScope\)return;/,file);
+  assert.match(src,/if\(activeScope\.current===actionScope\)setBusy\(/,file);
+ }
+});
+
+test("branch change releases busy state for every order station and print inbox",()=>{
+ for(const [,file] of sources){
+  const src=readFileSync(file,"utf8");
+  const effectStart=src.indexOf("useEffect(()=>{");
+  assert.ok(effectStart>=0,file);
+  const cleanup=src.indexOf("return()=>{",effectStart);
+  const effect=src.slice(effectStart,cleanup);
+  assert.match(effect,/setBusy\((?:false|"")\)/,file);
+ }
+ const inbox=readFileSync("components/beger-durable-station-notifications.tsx","utf8");
+ assert.match(inbox,/setLoading\(true\);setError\(""\);setBusy\(""\)/);
+});
