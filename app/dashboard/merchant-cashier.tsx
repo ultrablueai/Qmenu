@@ -44,29 +44,33 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
   return()=>{active=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
  },[refresh]);
  async function action(order:Order,next:"accepted"|"fulfilled"){
-  if(busy)return;setBusy(true);setError("");setNotice("");
+  const actionScope=branchId;
+  if(activeScope.current!==actionScope||busy)return;setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().rpc("g10_cashier_order_action",{p_order:order.id,p_next:next});
+   if(activeScope.current!==actionScope)return;
    if(error||data?.status!==next)throw Error("Action not confirmed");
    setOrders(old=>old.map(o=>o.id===order.id?{...o,status:next}:o));
    setNotice("تم تحديث الطلب "+order.reference+" إلى "+statuses[next]);
    try{await refresh()}catch{/* server transition confirmed */}
-  }catch{setError("لم يُحدّث الطلب. ربما تغيّرت الحالة من جهاز آخر. حدّث القائمة.");}
-  finally{setBusy(false)}
+  }catch{if(activeScope.current===actionScope)setError("لم يُحدّث الطلب. ربما تغيّرت الحالة من جهاز آخر. حدّث القائمة.");}
+  finally{if(activeScope.current===actionScope)setBusy(false)}
  }
  async function collect(order:Order){
-  if(busy||order.paymentStatus==="paid")return;
+  const actionScope=branchId;
+  if(activeScope.current!==actionScope||busy||order.paymentStatus==="paid")return;
   const method=methods[order.id]??"cash";
   if(!window.confirm("هل استلمت بالفعل "+money(order.totalMinor,order.currency)+" بواسطة "+paymentNames[method]+"؟ هذا تسجيل يدوي وليس تحصيلاً إلكترونياً."))return;
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().rpc("g10_cashier_mark_collected",{p_order:order.id,p_method:method});
+   if(activeScope.current!==actionScope)return;
    if(error||data?.method!==method)throw Error("Collection not confirmed");
    setOrders(old=>old.map(o=>o.id===order.id?{...o,paymentStatus:"paid",paymentMethod:method}:o));
    setNotice("تم تسجيل المبلغ المستلم بالفعل للطلب "+order.reference);
    try{await refresh()}catch{/* server collection confirmed */}
-  }catch{setError("تعذّر تسجيل التحصيل. تحقّق من سجل الطلب قبل إعادة المحاولة حتى لا يتكرر التسجيل.");}
-  finally{setBusy(false)}
+  }catch{if(activeScope.current===actionScope)setError("تعذّر تسجيل التحصيل. تحقّق من سجل الطلب قبل إعادة المحاولة حتى لا يتكرر التسجيل.");}
+  finally{if(activeScope.current===actionScope)setBusy(false)}
  }
  function announce(order:Order){
   const text="الطلب #"+order.reference+" جاهز للاستلام";
