@@ -6,6 +6,7 @@ const sources = [
  ["merchant order board", "app/dashboard/merchant-order-board.tsx", "g3_branch_orders"],
  ["kitchen", "app/dashboard/merchant-kitchen.tsx", "g9_kitchen_queue"],
  ["cashier", "app/dashboard/merchant-cashier.tsx", "g10_cashier_queue"],
+ ["print queue", "app/dashboard/merchant-print-queue.tsx", "g17_branch_print_jobs"],
 ];
 
 for (const [name, file, endpoint] of sources) {
