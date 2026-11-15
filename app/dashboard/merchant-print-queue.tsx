@@ -1,5 +1,5 @@
 "use client";
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import {browserSupabase} from "../../lib/supabase/browser";
 import {printOrderTicket,type PrintableOrder} from "../../lib/beger-print-ticket";
 import type {BranchPrintSettings} from "./merchant-print-settings";
@@ -16,15 +16,18 @@ const states:Record<State,string>={queued:"بانتظار فتح الطباعة"
 
 export default function MerchantPrintQueue({branchId,branchName,settings}:{branchId:string;branchName:string;settings:BranchPrintSettings}){
  const [jobs,setJobs]=useState<PrintJob[]>([]),[events,setEvents]=useState<PrintEvent[]>([]),[loaded,setLoaded]=useState(false);
+ const requestSequence=useRef(0);
  const [filter,setFilter]=useState<"pending"|"all">("pending");
  const [routes,setRoutes]=useState<PrintDestinations>({kitchen:"مطبخ الفرع",pickup:"بطاقات الاستلام",summary:"كاشير الفرع"});
  const [error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState("");
  const refresh=useCallback(async()=>{
+  const requestId=++requestSequence.current;
   const db=browserSupabase();
   const [queue,history]=await Promise.all([
    db.rpc("g17_branch_print_jobs",{p_branch:branchId}),
    db.rpc("g18_branch_print_events",{p_branch:branchId})
   ]);
+  if(requestId!==requestSequence.current)return;
   if(queue.error||!Array.isArray(queue.data)||history.error||!Array.isArray(history.data))throw Error("Print queue unavailable");
   setJobs(queue.data as PrintJob[]);setEvents(history.data as PrintEvent[]);setLoaded(true);setError("");
  },[branchId]);
@@ -32,7 +35,7 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
   let live=true;setLoaded(false);setJobs([]);setEvents([]);setFilter("pending");setError("");
   const update=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل سجل الطباعة؛ تأكد من صلاحيات مالك/مدير الفرع.")})};
   update();const timer=window.setInterval(update,8000);
-  return()=>{live=false;window.clearInterval(timer)};
+  return()=>{live=false;requestSequence.current++;window.clearInterval(timer)};
  },[refresh]);
  async function action(job:PrintJob,next:"preview"|"confirm"|"retry"|"fail"){
   if(busy)return;
