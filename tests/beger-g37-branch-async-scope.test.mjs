@@ -38,13 +38,26 @@ test("all station refreshes reject retired scope before advancing the request ep
  }
 });
 
-test("late station mutations cannot update a different branch UI",()=>{
- const files=[...sources.map(([,file])=>file),"components/beger-durable-station-notifications.tsx"];
+test("late station mutations cannot update a retired branch session, including A-to-B-to-A switches",()=>{
+ const files=[...sources.map(([,file])=>file),"app/dashboard/merchant-printer-lease-lab.tsx","components/beger-durable-station-notifications.tsx"];
  for(const file of files){
   const src=readFileSync(file,"utf8");
-  assert.match(src,/if\(activeScope\.current!==actionScope\)return;/,file);
-  assert.match(src,/if\(activeScope\.current===actionScope\)setBusy\(/,file);
+  assert.match(src,/const scopeEpoch=useRef\(0\)/,file);
+  assert.match(src,/scopeEpoch\.current\+\+/,file);
+  const actions=(src.match(/const actionScope=/g)||[]).length;
+  const epochs=(src.match(/const actionEpoch=scopeEpoch\.current;/g)||[]).length;
+  assert.equal(epochs,actions,file+" must capture an epoch for every async action");
+  assert.match(src,/if\(activeScope\.current!==actionScope\|\|scopeEpoch\.current!==actionEpoch\)return;/,file);
+  assert.match(src,/if\(activeScope\.current===actionScope&&scopeEpoch\.current===actionEpoch\)setBusy\(/,file);
  }
+});
+
+test("merchant order history requests are invalidated when the branch scope changes",()=>{
+ const src=readFileSync("app/dashboard/merchant-order-board.tsx","utf8");
+ assert.match(src,/const historySequence=useRef\(0\)/);
+ assert.match(src,/const historyRequest=\+\+historySequence\.current/);
+ assert.match(src,/historyRequest!==historySequence\.current/);
+ assert.match(src,/historySequence\.current\+\+/);
 });
 
 test("branch change releases busy state for every order station and print inbox",()=>{
