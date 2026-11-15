@@ -60,6 +60,7 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
  }
  async function collect(order:Order){
   const actionScope=branchId;
+  const actionEpoch=scopeEpoch.current;
   if(activeScope.current!==actionScope||busy||order.paymentStatus==="paid")return;
   const method=methods[order.id]??"cash";
   if(!window.confirm("هل استلمت بالفعل "+money(order.totalMinor,order.currency)+" بواسطة "+paymentNames[method]+"؟ هذا تسجيل يدوي وليس تحصيلاً إلكترونياً."))return;
