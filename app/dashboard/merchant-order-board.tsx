@@ -46,8 +46,8 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
  const filteredLive=orders.filter(filterOrder);
  const filteredHistory=closedOrders.filter(filterOrder).sort((a,b)=>archiveSort==="newest"?Date.parse(b.createdAt)-Date.parse(a.createdAt):Date.parse(a.createdAt)-Date.parse(b.createdAt));
  async function refresh(){
-  const requestId=++requestSequence.current;
   if(activeScope.current!==(businessId+":"+branchId))return;
+  const requestId=++requestSequence.current;
   const db=browserSupabase();
   const [cap,list]=await Promise.all([
    db.from("g3_branch_order_settings").select("enabled,pickup_enabled").eq("branch_id",branchId).eq("business_id",businessId).maybeSingle(),
