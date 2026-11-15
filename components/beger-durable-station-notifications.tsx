@@ -20,8 +20,8 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
  const activeScope=useRef(branchId+":"+station);
  activeScope.current=branchId+":"+station;
  const refresh=useCallback(async()=>{
-  const requestId=++requestSequence.current;
   if(activeScope.current!==(branchId+":"+station))return;
+  const requestId=++requestSequence.current;
   const {data,error:rpcError}=await browserSupabase().rpc("g23_branch_notifications",{
    p_branch:branchId,p_station:station
   });
