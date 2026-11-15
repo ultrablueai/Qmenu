@@ -35,7 +35,7 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
   setOrders(fresh);setLoaded(true);setError("");
  },[branchId,stationAlerts.observe]);
  useEffect(()=>{
-  let active=true;setAnnouncement("");setOrders([]);setLoaded(false);setError("");setNotice("");setMethods({});
+  let active=true;setAnnouncement("");setOrders([]);setLoaded(false);setBusy(false);setError("");setNotice("");setMethods({});
   const update=()=>{void refresh().catch(()=>{if(active)setError("تعذّر تحميل طلبات الكاشير. تحقق من صلاحية الفرع.")})};
   update();const timer=window.setInterval(update,8000);
   const onVisible=()=>{if(document.visibilityState==="visible")update()};
