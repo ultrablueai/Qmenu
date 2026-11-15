@@ -17,6 +17,7 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
  const [announcement,setAnnouncement]=useState("");
  const [orders,setOrders]=useState<Order[]>([]);
  const requestSequence=useRef(0);
+ const scopeEpoch=useRef(0);
  const activeScope=useRef(branchId);
  activeScope.current=branchId;
  const [methods,setMethods]=useState<Record<string,Payment>>({});
@@ -41,20 +42,21 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
   const onVisible=()=>{if(document.visibilityState==="visible")update()};
   const onFocus=()=>update();
   document.addEventListener("visibilitychange",onVisible);window.addEventListener("focus",onFocus);
-  return()=>{active=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
+  return()=>{active=false;scopeEpoch.current++;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
  },[refresh]);
  async function action(order:Order,next:"accepted"|"fulfilled"){
   const actionScope=branchId;
-  if(activeScope.current!==actionScope||busy)return;setBusy(true);setError("");setNotice("");
+  const actionEpoch=scopeEpoch.current;
+  if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch||busy)return;setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().rpc("g10_cashier_order_action",{p_order:order.id,p_next:next});
-   if(activeScope.current!==actionScope)return;
+   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
    if(error||data?.status!==next)throw Error("Action not confirmed");
    setOrders(old=>old.map(o=>o.id===order.id?{...o,status:next}:o));
    setNotice("تم تحديث الطلب "+order.reference+" إلى "+statuses[next]);
    try{await refresh()}catch{/* server transition confirmed */}
-  }catch{if(activeScope.current===actionScope)setError("لم يُحدّث الطلب. ربما تغيّرت الحالة من جهاز آخر. حدّث القائمة.");}
-  finally{if(activeScope.current===actionScope)setBusy(false)}
+  }catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("لم يُحدّث الطلب. ربما تغيّرت الحالة من جهاز آخر. حدّث القائمة.");}
+  finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy(false)}
  }
  async function collect(order:Order){
   const actionScope=branchId;
@@ -64,13 +66,13 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
   setBusy(true);setError("");setNotice("");
   try{
    const {data,error}=await browserSupabase().rpc("g10_cashier_mark_collected",{p_order:order.id,p_method:method});
-   if(activeScope.current!==actionScope)return;
+   if(activeScope.current!==actionScope||scopeEpoch.current!==actionEpoch)return;
    if(error||data?.method!==method)throw Error("Collection not confirmed");
    setOrders(old=>old.map(o=>o.id===order.id?{...o,paymentStatus:"paid",paymentMethod:method}:o));
    setNotice("تم تسجيل المبلغ المستلم بالفعل للطلب "+order.reference);
    try{await refresh()}catch{/* server collection confirmed */}
-  }catch{if(activeScope.current===actionScope)setError("تعذّر تسجيل التحصيل. تحقّق من سجل الطلب قبل إعادة المحاولة حتى لا يتكرر التسجيل.");}
-  finally{if(activeScope.current===actionScope)setBusy(false)}
+  }catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("تعذّر تسجيل التحصيل. تحقّق من سجل الطلب قبل إعادة المحاولة حتى لا يتكرر التسجيل.");}
+  finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy(false)}
  }
  function announce(order:Order){
   const text="الطلب #"+order.reference+" جاهز للاستلام";
