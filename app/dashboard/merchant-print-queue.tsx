@@ -35,7 +35,7 @@ export default function MerchantPrintQueue({branchId,branchName,settings}:{branc
   setJobs(queue.data as PrintJob[]);setEvents(history.data as PrintEvent[]);setLoaded(true);setError("");
  },[branchId]);
  useEffect(()=>{
-  let live=true;setLoaded(false);setJobs([]);setEvents([]);setFilter("pending");setError("");
+  let live=true;setLoaded(false);setJobs([]);setEvents([]);setBusy("");setFilter("pending");setError("");
   const update=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل سجل الطباعة؛ تأكد من صلاحيات مالك/مدير الفرع.")})};
   update();const timer=window.setInterval(update,8000);
   return()=>{live=false;requestSequence.current++;window.clearInterval(timer)};
