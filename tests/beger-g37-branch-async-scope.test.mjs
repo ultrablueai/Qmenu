@@ -16,7 +16,7 @@ for (const [name, file, endpoint] of sources) {
   assert.match(src,/requestId=\+\+requestSequence\.current/);
   assert.match(src,/if\(requestId!==requestSequence\.current\|\|activeScope\.current!==/);
   assert.match(src,/if\(activeScope\.current!==/);
-  assert.match(src,/return\(\)=>\{(?:live|active)=false;scopeEpoch\.current\+\+;requestSequence\.current\+\+;/);
+  assert.match(src,/return\(\)=>\{(?:live|active)=false;scopeEpoch\.current\+\+;(?:historySequence\.current\+\+;)?requestSequence\.current\+\+;/);
   assert.ok(src.includes('rpc("'+endpoint+'"'));
  });
 }
