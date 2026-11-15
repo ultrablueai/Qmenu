@@ -60,7 +60,7 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
   setError("");
   setLoaded(true);
  }
- useEffect(()=>{let live=true;setLoaded(false);const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
+ useEffect(()=>{let live=true;setLoaded(false);setOrders([]);setClosedOrders([]);setHistoryLoaded(false);setHistoryOpen(false);setActiveView("live");setEnabled(false);setPickupEnabled(false);setError("");setNotice("");const reload=()=>{void refresh().catch(()=>{if(live)setError("تعذّر تحميل الطلبات؛ تأكد من تسجيل الدخول وصلاحية الإدارة.")})};reload();const timer=window.setInterval(reload,7000);const onVisible=()=>{if(document.visibilityState==="visible")reload();};document.addEventListener("visibilitychange",onVisible);return()=>{live=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[branchId,businessId]);
  async function loadHistory(){
   setHistoryBusy(true);
   try{
