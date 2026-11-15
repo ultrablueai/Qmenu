@@ -7,7 +7,8 @@ const source = readFileSync("components/beger-durable-station-notifications.tsx"
 test("G23 invalidates in-flight requests when branch/station changes or component unmounts", () => {
   assert.match(source, /const requestSequence=useRef\(0\)/);
   assert.match(source, /const requestId=\+\+requestSequence\.current/);
-  assert.match(source, /if\(requestId!==requestSequence\.current\)return/);
+  assert.match(source, /if\(requestId!==requestSequence\.current\|\|activeScope\.current!==/);
+  assert.match(source, /if\(activeScope\.current!==/);
   assert.match(source, /return\(\)=>\{active=false;requestSequence\.current\+\+;/);
   assert.match(source, /\},\[refresh\]\)/);
 });
