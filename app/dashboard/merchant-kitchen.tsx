@@ -29,7 +29,7 @@ export default function MerchantKitchen({branchId,branchName}:{branchId:string;b
   setOrders(data as Order[]);setLoaded(true);setError("");
  },[branchId,stationAlerts.observe]);
  useEffect(()=>{
-  let active=true;setOrders([]);setLoaded(false);setError("");setNotice("");
+  let active=true;setOrders([]);setLoaded(false);setBusy(false);setError("");setNotice("");
   const update=()=>{void refresh().catch(()=>{if(active)setError("تعذّر تحميل طلبات المطبخ. تأكد من صلاحية الفرع.")})};
   update();
   const id=window.setInterval(update,7000);
