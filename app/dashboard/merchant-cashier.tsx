@@ -24,8 +24,8 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
  const [filter,setFilter]=useState<"active"|"complete">("active");
  const refresh=useCallback(async()=>{
-  const requestId=++requestSequence.current;
   if(activeScope.current!==(branchId))return;
+  const requestId=++requestSequence.current;
   const {data,error}=await browserSupabase().rpc("g10_cashier_queue",{p_branch:branchId});
   if(requestId!==requestSequence.current||activeScope.current!==(branchId))return;
   if(error||!Array.isArray(data))throw Error("Queue unavailable");
