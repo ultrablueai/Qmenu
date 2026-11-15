@@ -17,12 +17,15 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
  const [busy,setBusy]=useState(""),[open,setOpen]=useState(false);
  // Invalidate in-flight requests on scope changes, refreshes and unmount.
  const requestSequence=useRef(0);
+ const activeScope=useRef(branchId+":"+station);
+ activeScope.current=branchId+":"+station;
  const refresh=useCallback(async()=>{
   const requestId=++requestSequence.current;
+  if(activeScope.current!==(branchId+":"+station))return;
   const {data,error:rpcError}=await browserSupabase().rpc("g23_branch_notifications",{
    p_branch:branchId,p_station:station
   });
-  if(requestId!==requestSequence.current)return;
+  if(requestId!==requestSequence.current||activeScope.current!==(branchId+":"+station))return;
   if(rpcError||!Array.isArray(data))throw Error("Notifications unavailable");
   setEvents(data as ServerEvent[]);setError("");setLoading(false);
  },[branchId,station]);
