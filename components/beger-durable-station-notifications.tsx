@@ -50,7 +50,7 @@ export function DurableStationNotifications({branchId,station}:{branchId:string;
    if(rpcError||data!==true)throw Error("Ack failed");
    setEvents(old=>old.map(e=>e.id===item.id?{...e,read:true}:e));
   }catch{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setError("تعذّر تسجيل قراءة التنبيه. أعد المحاولة.")}
-  finally{if(activeScope.current===actionScope)setBusy("")}
+  finally{if(activeScope.current===actionScope&&scopeEpoch.current===actionEpoch)setBusy("")}
  }
  const unread=events.filter(e=>!e.read).length;
  return <section dir="rtl" aria-label="سجل تنبيهات الطلبات الدائم" style={{background:"#fff",border:"1px solid #dfe5dc",borderRadius:12,padding:"12px 14px",margin:"10px 0"}}>
