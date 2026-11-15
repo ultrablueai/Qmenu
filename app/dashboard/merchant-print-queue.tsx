@@ -17,17 +17,20 @@ const states:Record<State,string>={queued:"بانتظار فتح الطباعة"
 export default function MerchantPrintQueue({branchId,branchName,settings}:{branchId:string;branchName:string;settings:BranchPrintSettings}){
  const [jobs,setJobs]=useState<PrintJob[]>([]),[events,setEvents]=useState<PrintEvent[]>([]),[loaded,setLoaded]=useState(false);
  const requestSequence=useRef(0);
+ const activeScope=useRef(branchId);
+ activeScope.current=branchId;
  const [filter,setFilter]=useState<"pending"|"all">("pending");
  const [routes,setRoutes]=useState<PrintDestinations>({kitchen:"مطبخ الفرع",pickup:"بطاقات الاستلام",summary:"كاشير الفرع"});
  const [error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState("");
  const refresh=useCallback(async()=>{
   const requestId=++requestSequence.current;
+  if(activeScope.current!==(branchId))return;
   const db=browserSupabase();
   const [queue,history]=await Promise.all([
    db.rpc("g17_branch_print_jobs",{p_branch:branchId}),
    db.rpc("g18_branch_print_events",{p_branch:branchId})
   ]);
-  if(requestId!==requestSequence.current)return;
+  if(requestId!==requestSequence.current||activeScope.current!==(branchId))return;
   if(queue.error||!Array.isArray(queue.data)||history.error||!Array.isArray(history.data))throw Error("Print queue unavailable");
   setJobs(queue.data as PrintJob[]);setEvents(history.data as PrintEvent[]);setLoaded(true);setError("");
  },[branchId]);
