@@ -3,7 +3,7 @@ import {useEffect,useMemo,useRef,useState} from "react";
 import {browserSupabase} from "../../../../lib/supabase/browser";
 type Catalog={salon_name:string;slug:string;public_booking_enabled:boolean;timezone:string;
  branches:{id:string;name:string}[];staff:{id:string;name:string;branch_id:string}[];
- chairs:{id:string;label:string;branch_id:string}[];services:{id:string;name:string;duration_minutes:number;price_minor:number;currency:string}[];
+ chairs:{id:string;label:string;branch_id:string}[];services:{id:string;name:string;duration_minutes:number;price_minor:number|null;currency:string;price_mode:"exact_price"|"starting_at"|"quote_required";price_is_final:boolean}[];
  offers:{staff_id:string;service_id:string}[]};
 type Track={id:string;status:string;starts_at:string;ends_at:string;total_minor:number;currency:string;last_update:string};
 type EarlyOffer={offer_id?:string;status:string;proposed_start?:string;original_start?:string;expires_at?:string;requires_response?:boolean};
@@ -62,7 +62,8 @@ export default function PublicSalonBooking({slug}:{slug:string}){
  const offered=new Set((catalog?.offers??[]).filter(o=>o.staff_id===worker).map(o=>o.service_id));
  const available=(catalog?.services??[]).filter(s=>offered.has(s.id));
  const basket=useMemo(()=>available.filter(s=>services.includes(s.id)),[available,services]);
- const subtotal=basket.reduce((n,s)=>n+s.price_minor,0);
+ const subtotal=basket.reduce((n,s)=>n+(s.price_mode==="exact_price"?(s.price_minor??0):0),0);
+ const requiresQuote=basket.some(s=>s.price_mode!=="exact_price");
  useEffect(()=>{setWorker(workers[0]?.id??"");setChair(chairs[0]?.id??"");setServices([]);},[branch,catalog]); 
  useEffect(()=>{setServices([])},[worker]);
  useEffect(()=>{
@@ -80,7 +81,7 @@ export default function PublicSalonBooking({slug}:{slug:string}){
   return()=>{alive=false;window.clearInterval(timer)};
  },[token]);
  async function submit(){
-  if(busy||!catalog?.public_booking_enabled||!branch||!worker||!chair||!services.length||name.trim().length<2||!when)return;
+  if(busy||!catalog?.public_booking_enabled||!branch||!worker||!chair||!services.length||requiresQuote||name.trim().length<2||!when)return;
   if(!window.confirm("إرسال طلب الحجز إلى الصالون؟ سيتم حفظ اسمك وخدماتك وموعدك على Staging لأغراض الاختبار."))return;
   setBusy(true);setError("");setNotice("");
   try{
@@ -197,7 +198,7 @@ export default function PublicSalonBooking({slug}:{slug:string}){
   }catch{setArrivalNotice("لم نتمكن من إرسال طلب الوصول. يلزم موعد مؤكد وقريب من وقت الحجز.");}
   finally{setArrivalBusy(false);}
  }
- const valid=Boolean(catalog?.public_booking_enabled&&branch&&worker&&chair&&services.length&&services.length<=6&&name.trim().length>=2&&when&&!busy);
+ const valid=Boolean(catalog?.public_booking_enabled&&branch&&worker&&chair&&services.length&&services.length<=6&&!requiresQuote&&name.trim().length>=2&&when&&!busy);
  return <main lang="ar" dir="rtl" style={{minHeight:"100vh",background:"#f6faf7",padding:"clamp(14px,4vw,30px)",fontFamily:"system-ui,Tahoma,sans-serif",color:"#204330"}}>
   <div style={{maxWidth:900,margin:"auto",display:"grid",gap:18}}>
    <header style={{borderRadius:22,background:"#1c6548",color:"#fff",padding:"27px 24px"}}>
@@ -252,7 +253,7 @@ export default function PublicSalonBooking({slug}:{slug:string}){
     </div>
     <div><strong>الخدمات (اختر خدمة أو أكثر)</strong><div style={{display:"grid",gap:9,marginTop:12}}>
       {available.map(s=><label key={s.id} style={{padding:12,border:"1px solid #dfe9e2",borderRadius:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12}}>
-       <span style={{display:"flex",gap:10,alignItems:"center"}}><input type="checkbox" checked={services.includes(s.id)} disabled={!services.includes(s.id)&&services.length>=6} onChange={e=>setServices(v=>e.target.checked?[...v,s.id]:v.filter(x=>x!==s.id))}/><span>{s.name} · {s.duration_minutes} دقيقة</span></span><b>{money(s.price_minor)}</b>
+       <span style={{display:"flex",gap:10,alignItems:"center"}}><input type="checkbox" checked={services.includes(s.id)} disabled={!services.includes(s.id)&&services.length>=6} onChange={e=>setServices(v=>e.target.checked?[...v,s.id]:v.filter(x=>x!==s.id))}/><span>{s.name} · {s.duration_minutes} دقيقة</span></span><b>{s.price_mode==="quote_required"?"حسب التسعيرة":s.price_mode==="starting_at"?"تبدأ من "+money(s.price_minor??0):money(s.price_minor??0)}</b>
       </label>)}
       {!available.length?<small>هذا المعلم لا يقدم خدمات منشورة حالياً.</small>:null}
     </div></div>
@@ -260,9 +261,10 @@ export default function PublicSalonBooking({slug}:{slug:string}){
      <label style={{fontSize:13,display:"grid",gap:7}}>اسم الزبون<input style={cStyle} maxLength={70} autoComplete="name" value={name} onChange={e=>setName(e.target.value)} placeholder="اسم للحجز التجريبي"/></label>
      <label style={{fontSize:13,display:"grid",gap:7}}>تاريخ ووقت الحجز (بتوقيت هاتفك)<input style={cStyle} type="datetime-local" value={when} onChange={e=>setWhen(e.target.value)}/></label>
     </div>
-    <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"center",flexWrap:"wrap"}}><strong>المجموع {money(subtotal)} · {basket.reduce((n,s)=>n+s.duration_minutes,0)} دقيقة قبل الفواصل</strong>
+    <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"center",flexWrap:"wrap"}}><strong>{requiresQuote?"يجب الاتفاق على التسعيرة أولاً — المجموع غير نهائي":"المجموع "+money(subtotal)} · {basket.reduce((n,s)=>n+s.duration_minutes,0)} دقيقة قبل الفواصل</strong>
      <button type="button" disabled={!valid} onClick={()=>void submit()} style={{border:0,borderRadius:11,padding:"13px 18px",background:"#1e7352",color:"#fff",fontWeight:900,opacity:valid?1:.5}}> {busy?"جارٍ إرسال الحجز…":"إرسال طلب الحجز"} </button>
     </div>
+    {requiresQuote?<p role="status" style={{background:"#fff7ea",borderRadius:9,padding:12,color:"#895f2e",fontSize:13}}>الخدمة المختارة تحتاج تحديد السعر النهائي قبل تأكيد الحجز. الحجز المباشر غير متاح لها حالياً حتى تكتمل موافقة الزبون على عرض السعر.</p>:null}
     {notice?<p role="status" style={{color:"#246f4d"}}>{notice}</p>:null}
     <small style={{color:"#77877c"}}>هذه تجربة Staging. اختيار الوقت مبدئي ويُراجَع الخادم لمنع تداخل المواعيد. لا تستخدم معلومات أشخاص حقيقيين في الاختبار.</small>
    </section>:null}
