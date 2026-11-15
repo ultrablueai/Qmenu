@@ -1,5 +1,5 @@
 "use client";
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import {BegerFeedbackControls,useBegerFeedback} from "../../components/beger-feedback";
 import {StationAlertBell,useStationAlerts} from "../../components/beger-station-alerts";
 import {DurableStationNotifications} from "../../components/beger-durable-station-notifications";
@@ -16,12 +16,15 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
  const stationAlerts=useStationAlerts("cashier",branchId,feedback.signal);
  const [announcement,setAnnouncement]=useState("");
  const [orders,setOrders]=useState<Order[]>([]);
+ const requestSequence=useRef(0);
  const [methods,setMethods]=useState<Record<string,Payment>>({});
  const [busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  const [error,setError]=useState(""),[notice,setNotice]=useState("");
  const [filter,setFilter]=useState<"active"|"complete">("active");
  const refresh=useCallback(async()=>{
+  const requestId=++requestSequence.current;
   const {data,error}=await browserSupabase().rpc("g10_cashier_queue",{p_branch:branchId});
+  if(requestId!==requestSequence.current)return;
   if(error||!Array.isArray(data))throw Error("Queue unavailable");
   const fresh=data as Order[];
   stationAlerts.observe(fresh);
@@ -35,7 +38,7 @@ export default function MerchantCashier({branchId,branchName}:{branchId:string;b
   const onVisible=()=>{if(document.visibilityState==="visible")update()};
   const onFocus=()=>update();
   document.addEventListener("visibilitychange",onVisible);window.addEventListener("focus",onFocus);
-  return()=>{active=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
+  return()=>{active=false;requestSequence.current++;window.clearInterval(timer);document.removeEventListener("visibilitychange",onVisible);window.removeEventListener("focus",onFocus)};
  },[refresh]);
  async function action(order:Order,next:"accepted"|"fulfilled"){
   if(busy)return;setBusy(true);setError("");setNotice("");
