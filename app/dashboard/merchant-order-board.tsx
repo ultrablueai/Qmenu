@@ -21,6 +21,8 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
  const feedback=useBegerFeedback();
  const stationAlerts=useStationAlerts("merchant",branchId,feedback.signal);
  const requestSequence=useRef(0);
+ const activeScope=useRef(businessId+":"+branchId);
+ activeScope.current=businessId+":"+branchId;
  const [historyOpen,setHistoryOpen]=useState(false),[historyBusy,setHistoryBusy]=useState(false),[closedOrders,setClosedOrders]=useState<Order[]>([]),[historyLoaded,setHistoryLoaded]=useState(false);
  const [enabled,setEnabled]=useState(false),[pickupEnabled,setPickupEnabled]=useState(false),[orders,setOrders]=useState<Order[]>([]),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false);
  const [collectionMethods,setCollectionMethods]=useState<Record<string,string>>({});
@@ -45,12 +47,13 @@ export default function MerchantOrderBoard({businessId,branchId,branchName,onOpe
  const filteredHistory=closedOrders.filter(filterOrder).sort((a,b)=>archiveSort==="newest"?Date.parse(b.createdAt)-Date.parse(a.createdAt):Date.parse(a.createdAt)-Date.parse(b.createdAt));
  async function refresh(){
   const requestId=++requestSequence.current;
+  if(activeScope.current!==(businessId+":"+branchId))return;
   const db=browserSupabase();
   const [cap,list]=await Promise.all([
    db.from("g3_branch_order_settings").select("enabled,pickup_enabled").eq("branch_id",branchId).eq("business_id",businessId).maybeSingle(),
    db.rpc("g3_branch_orders",{p_branch:branchId})
   ]);
-  if(requestId!==requestSequence.current)return;
+  if(requestId!==requestSequence.current||activeScope.current!==(businessId+":"+branchId))return;
   if(cap.error)throw cap.error;
   if(list.error)throw list.error;
   setEnabled(cap.data?.enabled===true);setPickupEnabled(cap.data?.pickup_enabled===true);
