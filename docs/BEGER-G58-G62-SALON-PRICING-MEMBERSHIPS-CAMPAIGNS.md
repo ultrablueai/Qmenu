@@ -3,6 +3,21 @@ Status: APPROVED PRODUCT DESIGN PROPOSAL ONLY — not implemented or released.
 Project: ultrablueai/Qmenu, feat/g1-foundation. Applies only to Salon vertical. Keep cafes/restaurants isolated.
 Baseline: G57 early-slot alerts and staged salon booking. No production writes or payment provider changes.
 
+## Implementation log — 2026-11-15 (staging branch only)
+
+- G58 implemented: `salon_price_policies` and owner-only RPCs, price modes exact/starting_at/quote_required; public catalog masks internal exact price for negotiable services; direct booking rejects negotiable services until a separate quote acceptance flow exists. Owner pricing controls shipped under `/salon/workspace`. SQL transaction rollback verified.
+- G59 partially implemented: owner can create/publish/hide membership plan templates; public booking page displays available plans. **No purchase, enrollment, renewal, entitlement ledger or automatic benefits**. These remain deliberately disabled until verified.
+- G60 partially implemented: owner can create/publish/hide time-limited **onsite banners**; public booking only displays published active campaigns. No coupon redemption, segment delivery, discount calculation or outbound marketing yet.
+- G61 partially implemented: separately token-scoped promotional Push consent record, opt-in default false and revocation history; public UI controlled by customer. No outbound marketing campaigns, IYS provider integration, SMS or email yet. Booking notifications remain independent.
+- G62 not implemented: still requires quote workflow, membership purchase/redemption, coupon ledger, compliant outbound marketing and full device/commercial review.
+- Migrations:
+  - `20261115001200_g58_salon_price_visibility.sql`
+  - `20261115001300_g59_g60_membership_plans_campaign_banners.sql`
+  - `20261115001400_g61_marketing_consent_event_ledger.sql`
+- Security: default no public table grants, RLS enabled, business ownership checked by signed-in identity, anonymous public APIs expose only published items or token-owned consent and bookings. All changes are for staging branch, not production.
+- Tests: `supabase/tests/beger-g58-price-visibility-rollback.sql`, `beger-g59-g60-membership-banner-rollback.sql`, `beger-g61-marketing-consent-rollback.sql`, plus Node regression tests.
+- Legal gate: in Türkiye, hiding a price in the app cannot be treated as avoiding statutory service-price tariff disclosure at the physical premises. No customer checkout until a clearly accepted final amount.
+
 ## Product decisions
 1. Owner chooses consumer price display mode PER SERVICE: exact_price, from_price, quote_required. "Hidden" means absent from public booking UI only; it does not bypass legal price-tariff posting rules in the operating jurisdiction. All additional charges and final prices are disclosed to customer before accepting service. Private negotiated prices are visible in quote / confirmed purchase receipt, not public.
 2. Customer may book at displayed service price, request quote for flexible service, accept negotiated estimate, redeem eligible membership entitlements, or claim campaign discount. Customer may opt out of marketing. Owner may enable marketing after consent workflow.
